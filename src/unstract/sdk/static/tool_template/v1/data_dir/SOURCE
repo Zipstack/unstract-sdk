@@ -1,0 +1,2 @@
+This is an example SOURCE file which can be of any file type. This file is practically the input to a workflow and should never be
+modified by a tool, however it can be read by a tool to carry out its functionality.

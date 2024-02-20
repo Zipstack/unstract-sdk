@@ -1,0 +1,15 @@
+{
+    "title": "Runtime Variables",
+    "description": "Runtime Variables for mock tool",
+    "type": "object",
+    "required": [
+      "MOCK_KEY"
+    ],
+    "properties": {
+      "MOCK_KEY": {
+        "type": "string",
+        "title": "Mock API Key",
+        "description": "Your mock API key"
+      }
+    }
+  }

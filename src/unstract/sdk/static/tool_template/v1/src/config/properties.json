@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "0.0.1",
+  "displayName": "<TODO: Enter the display name of the tool>",
+  "functionName": "<TODO: Enter the unique function name of the tool>",
+  "toolVersion": "0.0.1",
+  "description": "<TODO: Enter the tool's description, which will be fed into an LLM for workflow generation>",
+  "input": {
+    "description": "<TODO: Description of the input file to a tool>"
+  },
+  "output": {
+    "description": "<TODO: Description of what the tool outputs and requires to be copied to a destination>"
+  },
+  "result": {
+    "type": "<TODO: The result type returned from a tool, can be one of JSON/TXT>",
+    "description": "<TODO: Description of what the tool returns>",
+    "schema": {}
+  },
+  "adapter": {
+    "languageModels": [
+      {
+        "isEnabled": false,
+        "adapterId": "<TODO: The expected key for adapter id in tool settings <Optional: Default: llmAdapterId>>",
+        "title": "<TODO: The title to be expected in tool settings>",
+        "isRequired": false,
+        "description": "<TODO: The description for adapter>"
+      }
+    ],
+    "embeddingServices": [
+      {
+        "adapterId": "<TODO: The expected key for adapter id in tool settings <Optional: Default: embeddingAdapterId>>",
+        "isEnabled": false
+      }
+    ],
+    "vectorStores": [
+      {
+        "adapterId": "<TODO: The expected key for adapter id in tool settings <Optional: Default: vectorDbAdapterId>>",
+        "isEnabled": false
+      }
+    ]
+  },
+  "ioCompatibility": {
+    "api": {
+      "sourceSupport": true,
+      "destinationSupport": true,
+      "additionalArgs": {
+        "sync": true
+      }
+    },
+    "file": {
+      "sourceSupport": true,
+      "destinationSupport": true,
+      "additionalArgs": {}
+    },
+    "db": {
+      "destinationSupport": true,
+      "additionalArgs": {}
+    }
+  },
+  "restrictions": {
+    "maxFileSize": "<TODO: Allowed input file size it can process in B, KB, MB or GB. For eg: 10MB>",
+    "allowedFileTypes": [
+      "<TODO: List of allowed input file types it can process, * represents all types. For eg: pdf, txt.etc.>"
+    ]
+  }
+}

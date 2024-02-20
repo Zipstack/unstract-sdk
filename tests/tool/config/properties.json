@@ -1,0 +1,33 @@
+{
+  "display_name": "File Operations",
+  "function_name": "fileops",
+  "description": "This is a tool which can open a folder and list all the files in a given folder. Operation can be \"list files\", \"get file\",\"put file\".",
+  "parameters": [
+    {
+      "name": "operation",
+      "type": "string",
+      "description": "The file operation which needs to be performed"
+    },
+    {
+      "name": "file",
+      "type": "string",
+      "description": "The file or folder on which the operation is to be performed"
+    }
+  ],
+  "versions": [
+    "1.0.0"
+  ],
+  "is_cacheable": false,
+  "input_type": "string",
+  "output_type": "string",
+  "requires": {
+    "files": {
+      "input": true,
+      "output": true
+    },
+    "databases": {
+      "input": false,
+      "output": false
+    }
+  }
+}

@@ -1,0 +1,64 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "unstract-sdk"
+dynamic = ["version"]
+description = "A framework for writing Unstract Tools/Apps"
+authors = [
+    {name = "Zipstack Inc", email = "devsupport@zipstack.com"},
+]
+dependencies = [
+    # Deprecated dependency
+    "unstract-connectors~=0.0.2",
+    # Specs and validation
+    "jsonschema~=4.18.2",
+    "python-magic~=0.4.27",
+    "python-dotenv==1.0.0",
+    # LLM Triad
+    "unstract-adapters~=0.1.1",
+    "llama-index==0.9.28",
+    "tiktoken~=0.4.0",
+    "transformers==4.37.0",
+    # LLM Whisperer dependencies
+    "filetype==1.2.0",
+    "pdfplumber==0.10.3",
+    "pytesseract==0.3.10",
+]
+requires-python = ">=3.9,<3.11.1"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["unstract tools-development-kit apps -development-kit sdk"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+urls = { Homepage = "https://unstract.com/sdk" }
+scripts = { unstract-tool-gen = "unstract.sdk.scripts.tool_gen:main" }
+
+[tool.pdm.dev-dependencies]
+docs = [ "lazydocs~=0.4.8" ]
+test = [ "parameterized==0.9.0" ]
+lint = [
+    "autopep8~=2.0.2",
+    "black~=23.3.0",
+    "docutils~=0.20.1",
+    "flake8~=6.0.0",
+    "flake8-pyproject~=1.2.2",
+    "isort~=5.12.0",
+    "pre-commit~=3.3.1",
+    "yamllint>=1.35.1",
+]
+
+[tool.pdm.build]
+includes = ["src"]
+package-dir = "src"
+
+[tool.pdm.version]
+source = "file"
+path = "src/unstract/sdk/__init__.py"

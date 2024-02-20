@@ -1,0 +1,3 @@
+This is an example INFILE that can be of any type. This file serves as an input to the tool that can be used to carry out its functionality.
+At the end of tool execution, the tool result gets written back to the INFILE. In the context of workflow execution, this helps the
+next tool in the workflow carry out its desired task.
