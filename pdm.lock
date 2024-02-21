@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:6df51b68debdf631717c65271c302ece244036b4d0d7958a5064871fd7237254"
+content_hash = "sha256:d73434b391ae5528713a513550983ee23db7a34084cac3cc5accd6f9dafb9607"
 
 [[package]]
 name = "aiohttp"
@@ -1666,6 +1666,9 @@ files = [
 name = "llama-index"
 version = "0.9.28"
 requires_python = ">=3.8.1,<4.0"
+git = "https://github.com/Zipstack/llama-index.git"
+ref = "v0.9.28-unstract.1"
+revision = "ce8b60d096463cf629460e8d6472e8bbcfe91104"
 summary = "Interface between LLMs and your data"
 groups = ["default"]
 dependencies = [
@@ -1684,14 +1687,9 @@ dependencies = [
     "pandas",
     "requests>=2.31.0",
     "tenacity<9.0.0,>=8.2.0",
-    "tensorrt-llm<0.8.0,>=0.7.1; python_version == \"3.10\"",
     "tiktoken>=0.3.3",
     "typing-extensions>=4.5.0",
     "typing-inspect>=0.8.0",
-]
-files = [
-    {file = "llama_index-0.9.28-py3-none-any.whl", hash = "sha256:fe68d102e9796eac54e7b6e4bc470fa63e0f4b8df6570f9ca7e0b2a644ffd49a"},
-    {file = "llama_index-0.9.28.tar.gz", hash = "sha256:32504aac009c9c5addee36a5368cf4c308a898738bb2135bfcd032874f4dba26"},
 ]
 
 [[package]]
@@ -3456,17 +3454,6 @@ groups = ["default"]
 files = [
     {file = "tenacity-8.2.3-py3-none-any.whl", hash = "sha256:ce510e327a630c9e1beaf17d42e6ffacc88185044ad85cf74c0a8887c6a0f88c"},
     {file = "tenacity-8.2.3.tar.gz", hash = "sha256:5398ef0d78e63f40007c1fb4c0bff96e1911394d2fa8d194f77619c05ff6cc8a"},
-]
-
-[[package]]
-name = "tensorrt-llm"
-version = "0.7.1"
-requires_python = ">=3.7, <4"
-summary = ""
-groups = ["default"]
-marker = "python_version == \"3.10\""
-files = [
-    {file = "tensorrt-llm-0.7.1.tar.gz", hash = "sha256:10275e2585484f138b43576acddba42ebee073fbb1665fe0954032e421e26e08"},
 ]
 
 [[package]]
