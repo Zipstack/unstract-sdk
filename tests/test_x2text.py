@@ -34,7 +34,7 @@ class ToolX2TextTest(unittest.TestCase):
             settings: dict[str, Any] = {},
             workflow_id: str = "",
         ) -> None:
-            # self.stream_log("Mock tool running")
+            # Dummify method for dummy tool
             pass
 
     @classmethod
