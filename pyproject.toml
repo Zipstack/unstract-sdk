@@ -10,8 +10,6 @@ authors = [
     {name = "Zipstack Inc", email = "devsupport@zipstack.com"},
 ]
 dependencies = [
-    # Deprecated dependency
-    "unstract-connectors~=0.0.2",
     # Specs and validation
     "jsonschema~=4.18.2",
     "python-magic~=0.4.27",

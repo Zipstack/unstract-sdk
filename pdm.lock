@@ -5,40 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:7e11a0af1f50a32e22fc083bb3d626cc7c6af46099eb29ff0fa1ddf6095f48da"
-
-[[package]]
-name = "aiobotocore"
-version = "2.5.4"
-requires_python = ">=3.7"
-summary = "Async client for aws services using botocore and aiohttp"
-groups = ["default"]
-dependencies = [
-    "aiohttp<4.0.0,>=3.3.1",
-    "aioitertools<1.0.0,>=0.5.1",
-    "botocore<1.31.18,>=1.31.17",
-    "wrapt<2.0.0,>=1.10.10",
-]
-files = [
-    {file = "aiobotocore-2.5.4-py3-none-any.whl", hash = "sha256:4b32218728ca3d0be83835b604603a0cd6c329066e884bb78149334267f92440"},
-    {file = "aiobotocore-2.5.4.tar.gz", hash = "sha256:60341f19eda77e41e1ab11eef171b5a98b5dbdb90804f5334b6f90e560e31fae"},
-]
-
-[[package]]
-name = "aiobotocore"
-version = "2.5.4"
-extras = ["boto3"]
-requires_python = ">=3.7"
-summary = "Async client for aws services using botocore and aiohttp"
-groups = ["default"]
-dependencies = [
-    "aiobotocore==2.5.4",
-    "boto3<1.28.18,>=1.28.17",
-]
-files = [
-    {file = "aiobotocore-2.5.4-py3-none-any.whl", hash = "sha256:4b32218728ca3d0be83835b604603a0cd6c329066e884bb78149334267f92440"},
-    {file = "aiobotocore-2.5.4.tar.gz", hash = "sha256:60341f19eda77e41e1ab11eef171b5a98b5dbdb90804f5334b6f90e560e31fae"},
-]
+content_hash = "sha256:6df51b68debdf631717c65271c302ece244036b4d0d7958a5064871fd7237254"
 
 [[package]]
 name = "aiohttp"
@@ -101,20 +68,6 @@ files = [
     {file = "aiohttp-3.9.3-cp39-cp39-win32.whl", hash = "sha256:f7217af2e14da0856e082e96ff637f14ae45c10a5714b63c77f26d8884cf1051"},
     {file = "aiohttp-3.9.3-cp39-cp39-win_amd64.whl", hash = "sha256:27468897f628c627230dba07ec65dc8d0db566923c48f29e084ce382119802bc"},
     {file = "aiohttp-3.9.3.tar.gz", hash = "sha256:90842933e5d1ff760fae6caca4b2b3edba53ba8f4b71e95dacf2818a2aca06f7"},
-]
-
-[[package]]
-name = "aioitertools"
-version = "0.11.0"
-requires_python = ">=3.6"
-summary = "itertools and builtins for AsyncIO and mixed iterables"
-groups = ["default"]
-dependencies = [
-    "typing-extensions>=4.0; python_version < \"3.10\"",
-]
-files = [
-    {file = "aioitertools-0.11.0-py3-none-any.whl", hash = "sha256:04b95e3dab25b449def24d7df809411c10e62aab0cbe31a50ca4e68748c43394"},
-    {file = "aioitertools-0.11.0.tar.gz", hash = "sha256:42c68b8dd3a69c2bf7f2233bf7df4bb58b557bca5252ac02ed5187bbc67d6831"},
 ]
 
 [[package]]
@@ -219,16 +172,6 @@ files = [
 ]
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-summary = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-groups = ["default"]
-files = [
-    {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
-    {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
-]
-
-[[package]]
 name = "argon2-cffi"
 version = "23.1.0"
 requires_python = ">=3.7"
@@ -273,16 +216,6 @@ files = [
     {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:20ef543a89dee4db46a1a6e206cd015360e5a75822f76df533845c3cbaf72670"},
     {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ed2937d286e2ad0cc79a7087d3c272832865f779430e0cc2b4f3718d3159b0cb"},
     {file = "argon2_cffi_bindings-21.2.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:5e00316dabdaea0b2dd82d141cc66889ced0cdcbfa599e8b471cf22c620c329a"},
-]
-
-[[package]]
-name = "asn1crypto"
-version = "1.5.1"
-summary = "Fast ASN.1 parser and serializer with definitions for private keys, public keys, certificates, CRL, OCSP, CMS, PKCS#3, PKCS#7, PKCS#8, PKCS#12, PKCS#5, X.509 and TSP"
-groups = ["default"]
-files = [
-    {file = "asn1crypto-1.5.1-py2.py3-none-any.whl", hash = "sha256:db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67"},
-    {file = "asn1crypto-1.5.1.tar.gz", hash = "sha256:13ae38502be632115abf8a24cbe5f4da52e3b5231990aff31123c805306ccb9c"},
 ]
 
 [[package]]
@@ -464,54 +397,6 @@ dependencies = [
 files = [
     {file = "botocore-1.31.17-py3-none-any.whl", hash = "sha256:6ac34a1d34aa3750e78b77b8596617e2bab938964694d651939dba2cbde2c12b"},
     {file = "botocore-1.31.17.tar.gz", hash = "sha256:396459065dba4339eb4da4ec8b4e6599728eb89b7caaceea199e26f7d824a41c"},
-]
-
-[[package]]
-name = "boxfs"
-version = "0.2.1"
-requires_python = ">=3.8,<4.0"
-summary = "Implementation of fsspec for Box file storage"
-groups = ["default"]
-dependencies = [
-    "boxsdk[jwt]<4.0,>=3.7",
-    "fsspec>=2023.4",
-]
-files = [
-    {file = "boxfs-0.2.1-py3-none-any.whl", hash = "sha256:ae796c30309bd5a02654fff9eddf1ed320356225568fad0e109e1942beaef72a"},
-    {file = "boxfs-0.2.1.tar.gz", hash = "sha256:c1889e12f53be3216b44f088237ac0f367a7a759a53b01b0c0edf2b3d694e50f"},
-]
-
-[[package]]
-name = "boxsdk"
-version = "3.9.2"
-summary = "Official Box Python SDK"
-groups = ["default"]
-dependencies = [
-    "attrs>=17.3.0",
-    "python-dateutil",
-    "requests-toolbelt>=0.4.0",
-    "requests<3,>=2.4.3",
-    "urllib3",
-]
-files = [
-    {file = "boxsdk-3.9.2-py2.py3-none-any.whl", hash = "sha256:44087bc208d3082e0a791f98e491c2eccc61cd5123cedc96e52d089e12c5f410"},
-    {file = "boxsdk-3.9.2.tar.gz", hash = "sha256:10e23e2f82e9cff2b2e501b7ca7ffe7bac0e280d1cd4b2983dea95f826e3008b"},
-]
-
-[[package]]
-name = "boxsdk"
-version = "3.9.2"
-extras = ["jwt"]
-summary = "Official Box Python SDK"
-groups = ["default"]
-dependencies = [
-    "boxsdk==3.9.2",
-    "cryptography>=3",
-    "pyjwt>=1.7.0",
-]
-files = [
-    {file = "boxsdk-3.9.2-py2.py3-none-any.whl", hash = "sha256:44087bc208d3082e0a791f98e491c2eccc61cd5123cedc96e52d089e12c5f410"},
-    {file = "boxsdk-3.9.2.tar.gz", hash = "sha256:10e23e2f82e9cff2b2e501b7ca7ffe7bac0e280d1cd4b2983dea95f826e3008b"},
 ]
 
 [[package]]
@@ -809,36 +694,6 @@ files = [
 ]
 
 [[package]]
-name = "dropbox"
-version = "11.36.2"
-summary = "Official Dropbox API Client"
-groups = ["default"]
-dependencies = [
-    "requests>=2.16.2",
-    "six>=1.12.0",
-    "stone>=2",
-]
-files = [
-    {file = "dropbox-11.36.2-py3-none-any.whl", hash = "sha256:a21e4d2bcbeb1d8067ff87969aea48792c9a8266182491153feff2be9c1b9c8f"},
-    {file = "dropbox-11.36.2.tar.gz", hash = "sha256:d48d3d16d486c78b11c14a1c4a28a2611fbf5a0d0a358b861bfd9482e603c500"},
-]
-
-[[package]]
-name = "dropboxdrivefs"
-version = "1.3.1"
-requires_python = ">=3.5"
-summary = "Dropbox implementation for fsspec module"
-groups = ["default"]
-dependencies = [
-    "dropbox",
-    "fsspec",
-    "requests",
-]
-files = [
-    {file = "dropboxdrivefs-1.3.1.tar.gz", hash = "sha256:892ee9017c59648736d79c3989cadb9e129b469fcec0c68d12e42bd6826a962d"},
-]
-
-[[package]]
 name = "environs"
 version = "9.5.0"
 requires_python = ">=3.6"
@@ -1025,16 +880,6 @@ files = [
 ]
 
 [[package]]
-name = "funcy"
-version = "2.0"
-summary = "A fancy and practical functional tools"
-groups = ["default"]
-files = [
-    {file = "funcy-2.0-py2.py3-none-any.whl", hash = "sha256:53df23c8bb1651b12f095df764bfb057935d49537a56de211b098f4c79614bb0"},
-    {file = "funcy-2.0.tar.gz", hash = "sha256:3963315d59d41c6f30c04bc910e10ab50a3ac4a225868bfa96feed133df075cb"},
-]
-
-[[package]]
 name = "gitdb"
 version = "4.0.11"
 requires_python = ">=3.7"
@@ -1115,24 +960,6 @@ files = [
 ]
 
 [[package]]
-name = "google-api-python-client"
-version = "2.118.0"
-requires_python = ">=3.7"
-summary = "Google API Client Library for Python"
-groups = ["default"]
-dependencies = [
-    "google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0.dev0,>=1.31.5",
-    "google-auth-httplib2>=0.1.0",
-    "google-auth<3.0.0.dev0,>=1.19.0",
-    "httplib2<1.dev0,>=0.15.0",
-    "uritemplate<5,>=3.0.1",
-]
-files = [
-    {file = "google-api-python-client-2.118.0.tar.gz", hash = "sha256:ebf4927a3f5184096647be8f705d090e7f06d48ad82b0fa431a2fe80c2cbe182"},
-    {file = "google_api_python_client-2.118.0-py2.py3-none-any.whl", hash = "sha256:9d83b178496b180e058fd206ebfb70ea1afab49f235dd326f557513f56f496d5"},
-]
-
-[[package]]
 name = "google-auth"
 version = "2.20.0"
 requires_python = ">=3.6"
@@ -1148,20 +975,6 @@ dependencies = [
 files = [
     {file = "google-auth-2.20.0.tar.gz", hash = "sha256:030af34138909ccde0fbce611afc178f1d65d32fbff281f25738b1fe1c6f3eaa"},
     {file = "google_auth-2.20.0-py2.py3-none-any.whl", hash = "sha256:23b7b0950fcda519bfb6692bf0d5289d2ea49fc143717cc7188458ec620e63fa"},
-]
-
-[[package]]
-name = "google-auth-httplib2"
-version = "0.2.0"
-summary = "Google Authentication Library: httplib2 transport"
-groups = ["default"]
-dependencies = [
-    "google-auth",
-    "httplib2>=0.19.0",
-]
-files = [
-    {file = "google-auth-httplib2-0.2.0.tar.gz", hash = "sha256:38aa7badf48f974f1eb9861794e9c0cb2a0511a4ec0679b1f886d108f5640e05"},
-    {file = "google_auth_httplib2-0.2.0-py2.py3-none-any.whl", hash = "sha256:b65a0a2123300dd71281a7bf6e64d65a0759287df52729bdd1ae2e47dc311a3d"},
 ]
 
 [[package]]
@@ -1239,24 +1052,6 @@ dependencies = [
 files = [
     {file = "google-cloud-resource-manager-1.12.1.tar.gz", hash = "sha256:25b3112c984ef6a2569ca7047160b2341c528c70e1d2e72deb99686aa2e167dd"},
     {file = "google_cloud_resource_manager-1.12.1-py2.py3-none-any.whl", hash = "sha256:6a0b97886998fb076a71a7e9679a1187f6bed97519e0dff13352e7946513d458"},
-]
-
-[[package]]
-name = "google-cloud-secret-manager"
-version = "2.16.1"
-requires_python = ">=3.7"
-summary = "Google Cloud Secret Manager API client library"
-groups = ["default"]
-dependencies = [
-    "google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0",
-    "grpc-google-iam-v1<1.0.0dev,>=0.12.4",
-    "proto-plus<2.0.0dev,>=1.22.0",
-    "proto-plus<2.0.0dev,>=1.22.2; python_version >= \"3.11\"",
-    "protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5",
-]
-files = [
-    {file = "google-cloud-secret-manager-2.16.1.tar.gz", hash = "sha256:149d11ce9be7ea81d4ac3544d3fcd4c716a9edb2cb775d9c075231570b079fbb"},
-    {file = "google_cloud_secret_manager-2.16.1-py2.py3-none-any.whl", hash = "sha256:dad28c24921fb62961aafe808be0e7935a99096f03ac29eeeefa04b85534c1f3"},
 ]
 
 [[package]]
@@ -2514,20 +2309,10 @@ name = "platformdirs"
 version = "3.11.0"
 requires_python = ">=3.7"
 summary = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-groups = ["default", "lint"]
+groups = ["lint"]
 files = [
     {file = "platformdirs-3.11.0-py3-none-any.whl", hash = "sha256:e9d171d00af68be50e9202731309c4e658fd8bc76f55c11c7dd760d023bda68e"},
     {file = "platformdirs-3.11.0.tar.gz", hash = "sha256:cf8ee52a3afdb965072dcc652433e0c7e3e40cf5ea1477cd4b3b1d2eb75495b3"},
-]
-
-[[package]]
-name = "ply"
-version = "3.11"
-summary = "Python Lex & Yacc"
-groups = ["default"]
-files = [
-    {file = "ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
-    {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
 ]
 
 [[package]]
@@ -2851,42 +2636,6 @@ files = [
 ]
 
 [[package]]
-name = "pydrive2"
-version = "1.15.4"
-requires_python = ">=3.7"
-summary = "Google Drive API made easy. Maintained fork of PyDrive."
-groups = ["default"]
-dependencies = [
-    "PyYAML>=3.0",
-    "google-api-python-client>=1.12.5",
-    "oauth2client>=4.0.0",
-    "pyOpenSSL>=19.1.0",
-]
-files = [
-    {file = "PyDrive2-1.15.4-py3-none-any.whl", hash = "sha256:91fe28e5f094a6dfff834495c4aee0041cbef979467ad27cd0d4b1f91afa8869"},
-    {file = "PyDrive2-1.15.4.tar.gz", hash = "sha256:0c011b74ebc24f3c6ca72820626b77f1dfe0ae88f5740c5a5cf96e83dd79ba99"},
-]
-
-[[package]]
-name = "pydrive2"
-version = "1.15.4"
-extras = ["fsspec"]
-requires_python = ">=3.7"
-summary = "Google Drive API made easy. Maintained fork of PyDrive."
-groups = ["default"]
-dependencies = [
-    "PyDrive2==1.15.4",
-    "appdirs>=1.4.3",
-    "fsspec>=2021.07.0",
-    "funcy>=1.14",
-    "tqdm>=4.0.0",
-]
-files = [
-    {file = "PyDrive2-1.15.4-py3-none-any.whl", hash = "sha256:91fe28e5f094a6dfff834495c4aee0041cbef979467ad27cd0d4b1f91afa8869"},
-    {file = "PyDrive2-1.15.4.tar.gz", hash = "sha256:0c011b74ebc24f3c6ca72820626b77f1dfe0ae88f5740c5a5cf96e83dd79ba99"},
-]
-
-[[package]]
 name = "pyflakes"
 version = "3.0.1"
 requires_python = ">=3.6"
@@ -2909,17 +2658,6 @@ files = [
 ]
 
 [[package]]
-name = "pyjwt"
-version = "2.8.0"
-requires_python = ">=3.7"
-summary = "JSON Web Token implementation in Python"
-groups = ["default"]
-files = [
-    {file = "PyJWT-2.8.0-py3-none-any.whl", hash = "sha256:59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320"},
-    {file = "PyJWT-2.8.0.tar.gz", hash = "sha256:57e28d156e3d5c10088e0c68abb90bfac3df82b40a71bd0daa20c65ccd5c23de"},
-]
-
-[[package]]
 name = "pymilvus"
 version = "2.3.4"
 requires_python = ">=3.7"
@@ -2938,55 +2676,6 @@ dependencies = [
 files = [
     {file = "pymilvus-2.3.4-py3-none-any.whl", hash = "sha256:3f56a61aaafe1f255c32b92c76cf98fc6de254d15e4d1127757b4a426622f140"},
     {file = "pymilvus-2.3.4.tar.gz", hash = "sha256:4b5fdabb15901b63a6afbccb6af9ded5c0a05ccd657189e1658710ac73f09f80"},
-]
-
-[[package]]
-name = "pymssql"
-version = "2.2.8"
-summary = "DB-API interface to Microsoft SQL Server for Python. (new Cython-based version)"
-groups = ["default"]
-files = [
-    {file = "pymssql-2.2.8-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:30bfd7b8edef78097ccd3f52ac3f3a5c3cf0019f8a280f306cacbbb165caaf63"},
-    {file = "pymssql-2.2.8-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:049f2e3de919e8e02504780a21ebbf235e21ca8ed5c7538c5b6e705aa6c43d8c"},
-    {file = "pymssql-2.2.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0dd86d8e3e346e34f3f03d12e333747b53a1daa74374a727f4714d5b82ee0dd5"},
-    {file = "pymssql-2.2.8-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:508226a0df7cb6faeda9f8e84e85743690ca427d7b27af9a73d75fcf0c1eef6e"},
-    {file = "pymssql-2.2.8-cp310-cp310-win_amd64.whl", hash = "sha256:47859887adeaf184766b5e0bc845dd23611f3808f9521552063bb36eabc10092"},
-    {file = "pymssql-2.2.8-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:d873e553374d5b1c57fe1c43bb75e3bcc2920678db1ef26f6bfed396c7d21b30"},
-    {file = "pymssql-2.2.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bf31b8b76634c826a91f9999e15b7bfb0c051a0f53b319fd56481a67e5b903bb"},
-    {file = "pymssql-2.2.8-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:821945c2214fe666fd456c61e09a29a00e7719c9e136c801bffb3a254e9c579b"},
-    {file = "pymssql-2.2.8-cp311-cp311-win_amd64.whl", hash = "sha256:cc85b609b4e60eac25fa38bbac1ff854fd2c2a276e0ca4a3614c6f97efb644bb"},
-    {file = "pymssql-2.2.8-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:895041edd002a2e91d8a4faf0906b6fbfef29d9164bc6beb398421f5927fa40e"},
-    {file = "pymssql-2.2.8-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6b2d9c6d38a416c6f2db36ff1cd8e69f9a5387a46f9f4f612623192e0c9404b1"},
-    {file = "pymssql-2.2.8-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d63d6f25cf40fe6a03c49be2d4d337858362b8ab944d6684c268e4990807cf0c"},
-    {file = "pymssql-2.2.8-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:c83ad3ad20951f3a94894b354fa5fa9666dcd5ebb4a635dad507c7d1dd545833"},
-    {file = "pymssql-2.2.8-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:3933f7f082be74698eea835df51798dab9bc727d94d3d280bffc75ab9265f890"},
-    {file = "pymssql-2.2.8-cp39-cp39-win_amd64.whl", hash = "sha256:de313375b90b0f554058992f35c4a4beb3f6ec2f5912d8cd6afb649f95b03a9f"},
-    {file = "pymssql-2.2.8.tar.gz", hash = "sha256:9baefbfbd07d0142756e2dfcaa804154361ac5806ab9381350aad4e780c3033e"},
-]
-
-[[package]]
-name = "pymysql"
-version = "1.1.0"
-requires_python = ">=3.7"
-summary = "Pure Python MySQL Driver"
-groups = ["default"]
-files = [
-    {file = "PyMySQL-1.1.0-py3-none-any.whl", hash = "sha256:8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7"},
-    {file = "PyMySQL-1.1.0.tar.gz", hash = "sha256:4f13a7df8bf36a51e81dd9f3605fede45a4878fe02f9236349fd82a3f0612f96"},
-]
-
-[[package]]
-name = "pyopenssl"
-version = "23.3.0"
-requires_python = ">=3.7"
-summary = "Python wrapper module around the OpenSSL library"
-groups = ["default"]
-dependencies = [
-    "cryptography<42,>=41.0.5",
-]
-files = [
-    {file = "pyOpenSSL-23.3.0-py3-none-any.whl", hash = "sha256:6756834481d9ed5470f4a9393455154bc92fe7a64b7bc6ee2c804e78c52099b2"},
-    {file = "pyOpenSSL-23.3.0.tar.gz", hash = "sha256:6b2cba5cc46e822750ec3e5a81ee12819850b11303630d575e98108a079c2b12"},
 ]
 
 [[package]]
@@ -3288,20 +2977,6 @@ files = [
 ]
 
 [[package]]
-name = "requests-toolbelt"
-version = "1.0.0"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-summary = "A utility belt for advanced users of python-requests"
-groups = ["default"]
-dependencies = [
-    "requests<3.0.0,>=2.0.1",
-]
-files = [
-    {file = "requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6"},
-    {file = "requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06"},
-]
-
-[[package]]
 name = "rich"
 version = "13.7.0"
 requires_python = ">=3.7.0"
@@ -3410,38 +3085,6 @@ dependencies = [
 files = [
     {file = "rsa-4.9-py3-none-any.whl", hash = "sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7"},
     {file = "rsa-4.9.tar.gz", hash = "sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21"},
-]
-
-[[package]]
-name = "s3fs"
-version = "2023.6.0"
-requires_python = ">= 3.8"
-summary = "Convenient Filesystem interface over S3"
-groups = ["default"]
-dependencies = [
-    "aiobotocore~=2.5.0",
-    "aiohttp!=4.0.0a0,!=4.0.0a1",
-    "fsspec==2023.6.0",
-]
-files = [
-    {file = "s3fs-2023.6.0-py3-none-any.whl", hash = "sha256:d1a0a423d0d2e17fb2a193d9531935dc3f45ba742693448a461b6b34f6a92a24"},
-    {file = "s3fs-2023.6.0.tar.gz", hash = "sha256:63fd8ddf05eb722de784b7b503196107f2a518061298cf005a8a4715b4d49117"},
-]
-
-[[package]]
-name = "s3fs"
-version = "2023.6.0"
-extras = ["boto3"]
-requires_python = ">= 3.8"
-summary = "Convenient Filesystem interface over S3"
-groups = ["default"]
-dependencies = [
-    "aiobotocore[boto3]~=2.5.0",
-    "s3fs==2023.6.0",
-]
-files = [
-    {file = "s3fs-2023.6.0-py3-none-any.whl", hash = "sha256:d1a0a423d0d2e17fb2a193d9531935dc3f45ba742693448a461b6b34f6a92a24"},
-    {file = "s3fs-2023.6.0.tar.gz", hash = "sha256:63fd8ddf05eb722de784b7b503196107f2a518061298cf005a8a4715b4d49117"},
 ]
 
 [[package]]
@@ -3621,91 +3264,6 @@ files = [
 ]
 
 [[package]]
-name = "snowflake-connector-python"
-version = "3.6.0"
-requires_python = ">=3.8"
-summary = "Snowflake Connector for Python"
-groups = ["default"]
-dependencies = [
-    "asn1crypto<2.0.0,>0.24.0",
-    "certifi>=2017.4.17",
-    "cffi<2.0.0,>=1.9",
-    "charset-normalizer<4,>=2",
-    "cryptography<42.0.0,>=3.1.0",
-    "filelock<4,>=3.5",
-    "idna<4,>=2.5",
-    "packaging",
-    "platformdirs<4.0.0,>=2.6.0",
-    "pyOpenSSL<24.0.0,>=16.2.0",
-    "pyjwt<3.0.0",
-    "pytz",
-    "requests<3.0.0",
-    "sortedcontainers>=2.4.0",
-    "tomlkit",
-    "typing-extensions<5,>=4.3",
-    "urllib3<2.0.0,>=1.21.1; python_version < \"3.10\"",
-]
-files = [
-    {file = "snowflake-connector-python-3.6.0.tar.gz", hash = "sha256:15667a918780d79da755e6a60bbf6918051854951e8f56ccdf5692283e9a8479"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:4093b38cf9abf95c38119f0b23b07e23dc7a8689b956cd5d34975e1875741f20"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:cf5a964fe01b177063f8c44d14df3a72715580bcd195788ec2822090f37330a5"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:55a6418cec585b050e6f05404f25e62b075a3bbea587dc1f903de15640565c58"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7c76aea92b87f6ecd604e9c934aac8a779f2e20f3be1d990d53bb5b6d87b009"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:9dfcf178271e892e64e4092b9e011239a066ce5de848afd2efe3f13197a9f8b3"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4916f9b4a0efd7c96d1fa50a157e05907b6935f91492cca7f200b43cc178a25e"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:f15024c66db5e87d359216ec733a2974d7562aa38f3f18c8b6e65489839e00d7"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bcbd3102f807ebbbae52b1b5683d45cd7b3dcb0eaec131233ba6b156e8d70fa4"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7662e2de25b885abe08ab866cf7c7b026ad1af9faa39c25e2c25015ef807abe3"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:d1fa102f55ee166cc766aeee3f9333b17b4bede6fb088eee1e1f022df15b6d81"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:bf8c1ad5aab5304fefa2a4178061a24c96da45e3e3db9d901621e9953e005402"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:1058ab5c98cc62fde8b3f021f0a5076cb7865b5cdab8a9bccde0df88b9e91334"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2b93f55989f80d69278e0f40a7a1c0e737806b7c0ddb0351513a752b837243e8"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:50dd954ea5918d3242ded69225b72f701963cd9c043ee7d9ab35dc22211611c8"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:4ad42613b87f31441d07a8ea242f4c28ed5eb7b6e05986f9e94a7e44b96d3d1e"},
-]
-
-[[package]]
-name = "snowflake-connector-python"
-version = "3.6.0"
-extras = ["pandas"]
-requires_python = ">=3.8"
-summary = "Snowflake Connector for Python"
-groups = ["default"]
-dependencies = [
-    "pandas<2.2.0,>=1.0.0",
-    "pyarrow",
-    "snowflake-connector-python==3.6.0",
-]
-files = [
-    {file = "snowflake-connector-python-3.6.0.tar.gz", hash = "sha256:15667a918780d79da755e6a60bbf6918051854951e8f56ccdf5692283e9a8479"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:4093b38cf9abf95c38119f0b23b07e23dc7a8689b956cd5d34975e1875741f20"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:cf5a964fe01b177063f8c44d14df3a72715580bcd195788ec2822090f37330a5"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:55a6418cec585b050e6f05404f25e62b075a3bbea587dc1f903de15640565c58"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7c76aea92b87f6ecd604e9c934aac8a779f2e20f3be1d990d53bb5b6d87b009"},
-    {file = "snowflake_connector_python-3.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:9dfcf178271e892e64e4092b9e011239a066ce5de848afd2efe3f13197a9f8b3"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4916f9b4a0efd7c96d1fa50a157e05907b6935f91492cca7f200b43cc178a25e"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:f15024c66db5e87d359216ec733a2974d7562aa38f3f18c8b6e65489839e00d7"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bcbd3102f807ebbbae52b1b5683d45cd7b3dcb0eaec131233ba6b156e8d70fa4"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7662e2de25b885abe08ab866cf7c7b026ad1af9faa39c25e2c25015ef807abe3"},
-    {file = "snowflake_connector_python-3.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:d1fa102f55ee166cc766aeee3f9333b17b4bede6fb088eee1e1f022df15b6d81"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:bf8c1ad5aab5304fefa2a4178061a24c96da45e3e3db9d901621e9953e005402"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:1058ab5c98cc62fde8b3f021f0a5076cb7865b5cdab8a9bccde0df88b9e91334"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2b93f55989f80d69278e0f40a7a1c0e737806b7c0ddb0351513a752b837243e8"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:50dd954ea5918d3242ded69225b72f701963cd9c043ee7d9ab35dc22211611c8"},
-    {file = "snowflake_connector_python-3.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:4ad42613b87f31441d07a8ea242f4c28ed5eb7b6e05986f9e94a7e44b96d3d1e"},
-]
-
-[[package]]
-name = "sortedcontainers"
-version = "2.4.0"
-summary = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
-groups = ["default"]
-files = [
-    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
-    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
-]
-
-[[package]]
 name = "soupsieve"
 version = "2.5"
 requires_python = ">=3.8"
@@ -3803,20 +3361,6 @@ files = [
     {file = "SQLAlchemy-2.0.26-cp39-cp39-win_amd64.whl", hash = "sha256:fb97a9b93b953084692a52a7877957b7a88dfcedc0c5652124f5aebf5999f7fe"},
     {file = "SQLAlchemy-2.0.26-py3-none-any.whl", hash = "sha256:1128b2cdf49107659f6d1f452695f43a20694cc9305a86e97b70793a1c74eeb4"},
     {file = "SQLAlchemy-2.0.26.tar.gz", hash = "sha256:e1bcd8fcb30305e27355d553608c2c229d3e589fb7ff406da7d7e5d50fa14d0d"},
-]
-
-[[package]]
-name = "stone"
-version = "3.3.1"
-summary = "Stone is an interface description language (IDL) for APIs."
-groups = ["default"]
-dependencies = [
-    "ply>=3.4",
-    "six>=1.12.0",
-]
-files = [
-    {file = "stone-3.3.1-py3-none-any.whl", hash = "sha256:e15866fad249c11a963cce3bdbed37758f2e88c8ff4898616bc0caeb1e216047"},
-    {file = "stone-3.3.1.tar.gz", hash = "sha256:4ef0397512f609757975f7ec09b35639d72ba7e3e17ce4ddf399578346b4cb50"},
 ]
 
 [[package]]
@@ -4060,17 +3604,6 @@ files = [
 ]
 
 [[package]]
-name = "tomlkit"
-version = "0.12.3"
-requires_python = ">=3.7"
-summary = "Style preserving TOML library"
-groups = ["default"]
-files = [
-    {file = "tomlkit-0.12.3-py3-none-any.whl", hash = "sha256:b0a645a9156dc7cb5d3a1f0d4bab66db287fcb8e0430bdd4664a095ea16414ba"},
-    {file = "tomlkit-0.12.3.tar.gz", hash = "sha256:75baf5012d06501f07bee5bf8e801b9f343e7aac5a92581f20f80ce632e6b5a4"},
-]
-
-[[package]]
 name = "tqdm"
 version = "4.66.2"
 requires_python = ">=3.7"
@@ -4258,43 +3791,6 @@ dependencies = [
 files = [
     {file = "unstract_adapters-0.1.1-py3-none-any.whl", hash = "sha256:121b2d8cd78a985a262be7d2e0ad20de4ddc290ce249e94c195a4f7f403df008"},
     {file = "unstract_adapters-0.1.1.tar.gz", hash = "sha256:d2bb682469dbef7155cdca828bb6884bbe16cf2b644bda86207db5d75aee68da"},
-]
-
-[[package]]
-name = "unstract-connectors"
-version = "0.0.3"
-requires_python = ">=3.9"
-summary = "All connectors that are part of the Unstract platform"
-groups = ["default"]
-dependencies = [
-    "PyDrive2[fsspec]==1.15.4",
-    "PyMySQL==1.1.0",
-    "boxfs==0.2.1",
-    "dropboxdrivefs==1.3.1",
-    "google-auth==2.20.0",
-    "google-cloud-bigquery==3.11.4",
-    "google-cloud-secret-manager==2.16.1",
-    "google-cloud-storage==2.9.0",
-    "oauth2client==4.1.3",
-    "psycopg2-binary==2.9.9",
-    "pymssql==2.2.8",
-    "s3fs[boto3]==2023.6.0",
-    "snowflake-connector-python[pandas]~=3.6.0",
-]
-files = [
-    {file = "unstract_connectors-0.0.3-py3-none-any.whl", hash = "sha256:91f49837580faf2241e22086661a8ea32dd0484d61fdf6e08176c371e8d01d8c"},
-    {file = "unstract_connectors-0.0.3.tar.gz", hash = "sha256:9a974a87449cd5df60f9bfacb5d6c41abe97e18b4b18a1a5d0220c85bb564527"},
-]
-
-[[package]]
-name = "uritemplate"
-version = "4.1.1"
-requires_python = ">=3.6"
-summary = "Implementation of RFC 6570 URI Templates"
-groups = ["default"]
-files = [
-    {file = "uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
-    {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
 ]
 
 [[package]]
