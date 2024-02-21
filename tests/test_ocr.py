@@ -49,7 +49,14 @@ class ToolOCRTest(unittest.TestCase):
         output_file = get_env_value("OUTPUT_FILE_PATH")
         if os.path.isfile(output_file):
             os.remove(output_file)
-        ocr.process(input_file, output_file)
+        output = ocr.process(input_file, output_file)
+        file_size = os.path.getsize(output_file)
+        self.assertGreater(file_size, 0)
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(output)
+            f.close()
         file_size = os.path.getsize(output_file)
         self.assertGreater(file_size, 0)
 
