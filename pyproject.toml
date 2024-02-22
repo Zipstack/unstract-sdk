@@ -15,7 +15,7 @@ dependencies = [
     "python-magic~=0.4.27",
     "python-dotenv==1.0.0",
     # LLM Triad
-    "unstract-adapters~=0.1.1",
+    "unstract-adapters~=0.2.0",
     "llama-index @ git+https://github.com/Zipstack/llama-index.git@v0.9.28-unstract.1",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
