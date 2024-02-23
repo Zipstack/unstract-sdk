@@ -1,6 +1,9 @@
 import json
 from hashlib import md5, sha256
+from pathlib import Path
 from typing import Any
+
+import magic
 
 from unstract.sdk.constants import FileReaderSettings
 
@@ -75,3 +78,20 @@ class ToolUtils:
         """
         compact_json = json.dumps(json_to_dump, separators=(",", ":"))
         return compact_json
+
+    @staticmethod
+    def get_file_mime_type(self, input_file: Path) -> str:
+        """Gets the file MIME type for an input file. Uses libmagic to perform
+        the same.
+
+        Args:
+            input_file (Path): Path object of the input file
+
+        Returns:
+            str: MIME type of the file
+        """
+        input_file_mime = ""
+        with open(input_file, mode="rb") as input_file_obj:
+            sample_contents = input_file_obj.read(100)
+            input_file_mime = magic.from_buffer(sample_contents, mime=True)
+        return input_file_mime

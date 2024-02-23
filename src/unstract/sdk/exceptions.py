@@ -11,6 +11,3 @@ class SdkException(Exception):
     @property
     def user_message(self) -> Optional[str]:
         return self._user_message
-
-    def __str__(self) -> str:
-        return f"{self.message}"
