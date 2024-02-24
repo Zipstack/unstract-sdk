@@ -80,7 +80,7 @@ class ToolUtils:
         return compact_json
 
     @staticmethod
-    def get_file_mime_type(self, input_file: Path) -> str:
+    def get_file_mime_type(input_file: Path) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
 

@@ -112,10 +112,10 @@ class ToolIndex:
         self.tool.stream_log("Extracting text from input file")
         full_text = []
         x2text = X2Text(tool=self.tool)
-        x2text_adapter: X2TextAdapter = x2text.get_x2text(
+        x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
             adapter_instance_id=x2text_adapter
         )
-        extracted_text = x2text_adapter.process(input_file_path=file_path)
+        extracted_text = x2text_adapter_inst.process(input_file_path=file_path)
         full_text.append(
             {
                 "section": "full",
