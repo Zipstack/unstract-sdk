@@ -3,11 +3,12 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
-import magic
 from jsonschema import Draft202012Validator, ValidationError, validators
+
 from unstract.sdk.constants import MetadataKey, PropKey
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.mime_types import EXT_MIME_MAP
+from unstract.sdk.utils import ToolUtils
 
 
 def extend_with_default(validator_class: Any) -> Any:
@@ -211,26 +212,10 @@ class ToolValidator:
                 )
             allowed_mimes.append(EXT_MIME_MAP[ext])
 
-        input_file_mime = self._get_file_mime(input_file=input_file)
+        input_file_mime = ToolUtils.get_file_mime_type(input_file=input_file)
+        self.tool.stream_log(f"Input file MIME: {input_file_mime}")
         if input_file_mime not in allowed_mimes:
             self.tool.stream_error_and_exit(
                 f"File type of {input_file_mime} is not supported by"
                 " the tool, check its PROPERTIES for a list of supported types"
             )
-
-    def _get_file_mime(self, input_file: Path) -> str:
-        """Gets the file MIME type for an input file. Uses libmagic to perform
-        the same.
-
-        Args:
-            input_file (Path): Path object of the input file
-
-        Returns:
-            str: MIME type of the file
-        """
-        input_file_mime = ""
-        with open(input_file, mode="rb") as input_file_obj:
-            sample_contents = input_file_obj.read(100)
-            input_file_mime = magic.from_buffer(sample_contents, mime=True)
-        self.tool.stream_log(f"Input file MIME: {input_file_mime}")
-        return input_file_mime

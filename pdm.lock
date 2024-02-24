@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:a8125f72370ebdf9f5dc8b24aa1dbe72dad9dc31f4346be953476ebc9de23df6"
+content_hash = "sha256:26b7a0ea88fc5cac1d0b896c20041b3d0fc9c257f1c12a0e318fc2f0a494b5ec"
 
 [[package]]
 name = "aiohttp"
@@ -3761,7 +3761,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.2.0"
+version = "0.2.1"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract Adapters"
 groups = ["default"]
@@ -3789,8 +3789,8 @@ dependencies = [
     "weaviate-client==3.25.3",
 ]
 files = [
-    {file = "unstract_adapters-0.2.0-py3-none-any.whl", hash = "sha256:7a794ff1410de655f9ae42e473ef4eba48a2536458bda54e738d61a1ef8a0f7c"},
-    {file = "unstract_adapters-0.2.0.tar.gz", hash = "sha256:6617878780b2bbd3036b315d39d6f3e72b455728ce8a6b1cced666d4d34859b3"},
+    {file = "unstract_adapters-0.2.1-py3-none-any.whl", hash = "sha256:7b48707bc5c634f07d4ea2926f1b2925bcd5c6869e057839ba69c2d62d19941b"},
+    {file = "unstract_adapters-0.2.1.tar.gz", hash = "sha256:08646a232185185390a193ad12b16715d1fccc69195d2d28e4f291b5c55f8117"},
 ]
 
 [[package]]
