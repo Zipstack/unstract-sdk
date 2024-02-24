@@ -94,4 +94,5 @@ class ToolUtils:
         with open(input_file, mode="rb") as input_file_obj:
             sample_contents = input_file_obj.read(100)
             input_file_mime = magic.from_buffer(sample_contents, mime=True)
+            input_file_obj.seek(0)
         return input_file_mime
