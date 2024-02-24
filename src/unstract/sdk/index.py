@@ -112,10 +112,10 @@ class ToolIndex:
         self.tool.stream_log("Extracting text from input file")
         full_text = []
         x2text = X2Text(tool=self.tool)
-        x2text_adapter: X2TextAdapter = x2text.get_x2text(
+        x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
             adapter_instance_id=x2text_adapter
         )
-        extracted_text = x2text_adapter.process(input_file_path=file_path)
+        extracted_text = x2text_adapter_inst.process(input_file_path=file_path)
         full_text.append(
             {
                 "section": "full",
@@ -128,6 +128,7 @@ class ToolIndex:
             file_hash=file_hash,
             vector_db=vector_db,
             embedding=embedding_type,
+            x2text=x2text_adapter,
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
         )
@@ -257,6 +258,7 @@ class ToolIndex:
         file_hash: str,
         vector_db: str,
         embedding: str,
+        x2text: str,
         chunk_size: str,
         chunk_overlap: str,
     ) -> str:
@@ -267,6 +269,7 @@ class ToolIndex:
             file_hash (str): Hash of the file contents
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
+            x2text (str): UUID of the X2Text adapter
             chunk_size (str): Chunk size for indexing
             chunk_overlap (str): Chunk overlap for indexing
 
@@ -274,6 +277,6 @@ class ToolIndex:
             str: Key representing unique ID for a file
         """
         return (
-            f"{tool_id}|{vector_db}|{embedding}|"
+            f"{tool_id}|{vector_db}|{embedding}|{x2text}|"
             f"{chunk_size}|{chunk_overlap}|{file_hash}"
         )

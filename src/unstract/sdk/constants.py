@@ -139,11 +139,13 @@ class ToolSettingsKey:
         LLM_ADAPTER_ID (str): The key for the LLM adapter ID.
         EMBEDDING_ADAPTER_ID (str): The key for the embedding adapter ID.
         VECTOR_DB_ADAPTER_ID (str): The key for the vector DB adapter ID.
+        X2TEXT_ADAPTER_ID (str): The key for the X2Text adapter ID.
     """
 
     LLM_ADAPTER_ID = "llmAdapterId"
     EMBEDDING_ADAPTER_ID = "embeddingAdapterId"
     VECTOR_DB_ADAPTER_ID = "vectorDbAdapterId"
+    X2TEXT_ADAPTER_ID = "x2TextAdapterId"
 
 
 class FileReaderSettings:
