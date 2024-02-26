@@ -15,10 +15,6 @@ class OCR(metaclass=ABCMeta):
         self.tool = tool
         self.ocr_adapters = adapters
 
-    # @abstractmethod
-    # def convert_to_text(self, input_file: str, basic_convert: bool = False):
-    #     pass
-
     def get_ocr(self, adapter_instance_id: str) -> Optional[OCRAdapter]:
         try:
             ocr_config = ToolAdapter.get_adapter_config(
