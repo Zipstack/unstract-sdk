@@ -1,12 +1,9 @@
-import os
-import shutil
-import zipfile
 from typing import Optional
 
-import filetype
 from llama_index import Document, StorageContext, VectorStoreIndex
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.vector_stores import VectorStoreQuery, VectorStoreQueryResult
+from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import ToolEmbedding
@@ -15,12 +12,7 @@ from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
 from unstract.sdk.utils.service_context import ServiceContext
 from unstract.sdk.vector_db import ToolVectorDB
-
-allowed_pdf_to_text_converters = [
-    "default",
-    "unstract_llm_whisperer",
-    "unstract_camelot",
-]
+from unstract.sdk.x2txt import X2Text
 
 
 class ToolIndex:
@@ -106,99 +98,37 @@ class ToolIndex:
         tool_id: str,
         embedding_type: str,
         vector_db: str,
+        x2text_adapter: str,
         file_path: str,
         chunk_size: int,
         chunk_overlap: int,
         reindex: bool = False,
-        converter: str = "default",
         file_hash: Optional[str] = None,
     ):
-        if converter not in allowed_pdf_to_text_converters:
-            self.tool.stream_log(
-                "pdf-to-text-converters must be one of "
-                f"{allowed_pdf_to_text_converters}",
-                level=LogLevel.ERROR,
-            )
-            raise SdkException(
-                "pdf-to-text-converters must be one of "
-                f"{allowed_pdf_to_text_converters}"
-            )
-
-        input_file_type = None
-        input_file_type_mime = None
-
         # Make file content hash if not available
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
-        with open(file_path, mode="rb") as input_file_obj:
-            sample_contents = input_file_obj.read(100)
-            input_file_type = filetype.guess(sample_contents)
 
-        if input_file_type is None:
-            input_file_type_mime = "text/plain"
-        else:
-            input_file_type_mime = input_file_type.MIME
-
-        self.tool.stream_log(f"Input file type: {input_file_type_mime}")
-
+        self.tool.stream_log("Extracting text from input file")
         full_text = []
-
-        if input_file_type_mime == "text/plain":
-            with open(file_path) as input_file_obj:
-                full_text.append(
-                    {
-                        "section": "full",
-                        "text_contents": self._cleanup_text(
-                            input_file_obj.read()
-                        ),
-                    }
-                )
-
-        elif input_file_type_mime == "application/pdf":
-            raise SdkException(
-                "Indexing of PDF files is not supported currently"
-            )
-            # TODO: Make use of adapters to convert X2Text
-            # self.tool.stream_log(f"PDF to text converter: {converter}")
-            # if converter == "unstract_llm_whisperer" or converter == "default":  # noqa
-            #     full_text.append(
-            #         {
-            #             "section": "full",
-            #             "text_contents": self._cleanup_text(
-            #                 x2txt.generate_whisper(
-            #                     input_file=file_path,
-            #                     mode="text",
-            #                     dump_text=True,
-            #                 )
-            #             ),
-            #         }
-            #     )
-            # else:
-            #     # TODO : Support for Camelot
-            #     x2txt = X2Text(tool=self.tool)
-
-        elif input_file_type_mime == "application/zip":
-            self.tool.stream_log("Zip file extraction required")
-            with zipfile.ZipFile(file_path, "r") as zip_ref:
-                file_name_from_path = os.path.basename(file_path)
-                temp_directory = f"/tmp/unstract_zip/{file_name_from_path}"
-                # If temp_directory exists, delete it and create it again
-                if os.path.exists(temp_directory):
-                    shutil.rmtree(temp_directory)
-                os.makedirs(temp_directory)
-                zip_ref.extractall(temp_directory)
-        else:
-            self.tool.stream_log(
-                f"Unsupported file type: {input_file_type_mime}",
-                level=LogLevel.ERROR,
-            )
-            raise SdkException(f"Unsupported file type: {input_file_type_mime}")
+        x2text = X2Text(tool=self.tool)
+        x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
+            adapter_instance_id=x2text_adapter
+        )
+        extracted_text = x2text_adapter_inst.process(input_file_path=file_path)
+        full_text.append(
+            {
+                "section": "full",
+                "text_contents": self._cleanup_text(extracted_text),
+            }
+        )
 
         doc_id = ToolIndex.generate_file_id(
             tool_id=tool_id,
             file_hash=file_hash,
             vector_db=vector_db,
             embedding=embedding_type,
+            x2text=x2text_adapter,
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
         )
@@ -328,6 +258,7 @@ class ToolIndex:
         file_hash: str,
         vector_db: str,
         embedding: str,
+        x2text: str,
         chunk_size: str,
         chunk_overlap: str,
     ) -> str:
@@ -338,6 +269,7 @@ class ToolIndex:
             file_hash (str): Hash of the file contents
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
+            x2text (str): UUID of the X2Text adapter
             chunk_size (str): Chunk size for indexing
             chunk_overlap (str): Chunk overlap for indexing
 
@@ -345,6 +277,6 @@ class ToolIndex:
             str: Key representing unique ID for a file
         """
         return (
-            f"{tool_id}|{vector_db}|{embedding}|"
+            f"{tool_id}|{vector_db}|{embedding}|{x2text}|"
             f"{chunk_size}|{chunk_overlap}|{file_hash}"
         )

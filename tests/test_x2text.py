@@ -6,6 +6,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 from parameterized import parameterized
+from unstract.adapters.x2text.constants import LLMWhispererSupportedModes
 
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.x2txt import X2Text
@@ -33,7 +34,7 @@ class ToolX2TextTest(unittest.TestCase):
             settings: dict[str, Any] = {},
             workflow_id: str = "",
         ) -> None:
-            # self.stream_log("Mock tool running")
+            # Dummify method for dummy tool
             pass
 
     @classmethod
@@ -49,9 +50,20 @@ class ToolX2TextTest(unittest.TestCase):
 
         input_file = get_env_value("INPUT_FILE_PATH")
         output_file = get_env_value("OUTPUT_FILE_PATH")
+
         if os.path.isfile(output_file):
             os.remove(output_file)
-        x2text.process(input_file, output_file)
+        file_content = x2text.process(
+            input_file, output_file, mode=LLMWhispererSupportedModes.OCR.value
+        )
+        file_size = os.path.getsize(output_file)
+        self.assertGreater(file_size, 0)
+
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(file_content)
+            f.close()
         file_size = os.path.getsize(output_file)
         self.assertGreater(file_size, 0)
 
