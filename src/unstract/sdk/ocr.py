@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from typing import Optional
 
 from unstract.adapters.constants import Common
 from unstract.adapters.ocr import adapters
@@ -18,7 +19,7 @@ class OCR(metaclass=ABCMeta):
     # def convert_to_text(self, input_file: str, basic_convert: bool = False):
     #     pass
 
-    def get_ocr(self, adapter_instance_id: str) -> OCRAdapter:
+    def get_ocr(self, adapter_instance_id: str) -> Optional[OCRAdapter]:
         try:
             ocr_config = ToolAdapter.get_adapter_config(
                 self.tool, adapter_instance_id
@@ -35,7 +36,7 @@ class OCR(metaclass=ABCMeta):
 
         except Exception as e:
             self.tool.stream_log(
-                log=f"Unable to get x2text adapter {adapter_instance_id}: {e}",
+                log=f"Unable to get OCR adapter {adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
             return None
