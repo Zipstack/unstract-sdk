@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from typing import Optional
 
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
@@ -15,7 +16,7 @@ class X2Text(metaclass=ABCMeta):
         self.tool = tool
         self.x2text_adapters = adapters
 
-    def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
+    def get_x2text(self, adapter_instance_id: str) -> Optional[X2TextAdapter]:
         try:
             x2text_config = ToolAdapter.get_adapter_config(
                 self.tool, adapter_instance_id
