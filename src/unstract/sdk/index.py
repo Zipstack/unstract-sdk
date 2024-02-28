@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 
 from llama_index import Document, StorageContext, VectorStoreIndex
 from llama_index.node_parser import SimpleNodeParser
@@ -104,6 +105,7 @@ class ToolIndex:
         chunk_overlap: int,
         reindex: bool = False,
         file_hash: Optional[str] = None,
+        is_summary: bool = False,
     ):
         # Make file content hash if not available
         if not file_hash:
@@ -115,7 +117,13 @@ class ToolIndex:
         x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
             adapter_instance_id=x2text_adapter
         )
-        extracted_text = x2text_adapter_inst.process(input_file_path=file_path)
+        extract_file_path = None
+        if not is_summary:
+            directory, filename = os.path.split(file_path)
+            extract_file_path: str = os.path.join(
+                directory, "extract", os.path.splitext(filename)[0] + ".txt"
+            )
+        extracted_text = x2text_adapter_inst.process(input_file_path=file_path, output_file_path=extract_file_path)
         full_text.append(
             {
                 "section": "full",
