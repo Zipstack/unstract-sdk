@@ -1,5 +1,4 @@
 from typing import Optional
-import os
 
 from llama_index import Document, StorageContext, VectorStoreIndex
 from llama_index.node_parser import SimpleNodeParser
@@ -106,7 +105,29 @@ class ToolIndex:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
-    ):
+    ) -> str:
+        """Indexes an individual file using the passed arguments.
+
+        Args:
+            tool_id (str): UUID of the tool (workflow_id in case its called
+                from workflow)
+            embedding_type (str): UUID of the embedding service configured
+            vector_db (str): UUID of the vector DB configured
+            x2text_adapter (str): UUID of the x2text adapter configured.
+                This is to extract text from documents.
+            file_path (str): Path to the file that needs to be indexed.
+            chunk_size (int): Chunk size to be used for indexing
+            chunk_overlap (int): Overlap in chunks to be used for indexing
+            reindex (bool, optional): Flag to denote if document should be
+                re-indexed if its already indexed. Defaults to False.
+            file_hash (Optional[str], optional): SHA256 hash of the file.
+                Defaults to None. If None, the hash is generated.
+            output_file_path (Optional[str], optional): File path to write
+                the extracted contents into. Defaults to None.
+
+        Returns:
+            str: A unique ID for the file and indexing arguments combination
+        """
         # Make file content hash if not available
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
@@ -117,7 +138,9 @@ class ToolIndex:
         x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
             adapter_instance_id=x2text_adapter
         )
-        extracted_text = x2text_adapter_inst.process(input_file_path=file_path, output_file_path=output_file_path)
+        extracted_text = x2text_adapter_inst.process(
+            input_file_path=file_path, output_file_path=output_file_path
+        )
         full_text.append(
             {
                 "section": "full",
