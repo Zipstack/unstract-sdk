@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:80a23596dda5cc100f214dca47d136cc92e40e19fa34567c467caeff39d5e9ac"
+content_hash = "sha256:9f6e7db5ef796871022d62a1def86f37b18961d4397f0b64e7ec473093d73b63"
 
 [[package]]
 name = "aiohttp"
@@ -3575,7 +3575,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.3.0"
+version = "0.4.0"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract Adapters"
 dependencies = [
@@ -3584,26 +3584,24 @@ dependencies = [
     "anyscale==0.5.165",
     "asyncpg==0.29.0",
     "fastembed==0.1.3",
-    "flupy==1.2.0",
     "google-cloud-aiplatform==1.40.0",
     "google-generativeai==0.3.1",
     "huggingface==0.0.1",
     "llama-index==0.9.28",
     "mistralai==0.0.8",
     "openai==1.3.9",
-    "pgvector==0.1.*",
     "pinecone-client==2.2.4",
     "psycopg2-binary==2.9.9",
     "pymilvus==2.3.4",
     "qdrant-client==1.7.0",
     "replicate==0.22.0",
     "supabase==2.2.1",
-    "vecs==0.1.0",
+    "vecs==0.4.3",
     "weaviate-client==3.25.3",
 ]
 files = [
-    {file = "unstract_adapters-0.3.0-py3-none-any.whl", hash = "sha256:ac2e6d6902bb54c0ef4d223b68365d4f044fb92b83c05bcd92208155e548253c"},
-    {file = "unstract_adapters-0.3.0.tar.gz", hash = "sha256:3c4662a73dfaa0b9c0b947da8e3e351221b876c6dd505d054c70a3067fe8d9dc"},
+    {file = "unstract_adapters-0.4.0-py3-none-any.whl", hash = "sha256:6a7fd6fa376f883242c290a862c4d1b024c357b003cb9d86b494c350edfc58a4"},
+    {file = "unstract_adapters-0.4.0.tar.gz", hash = "sha256:78c56813c626af61d1d7b64f3cc603ce7b276a11c96d634d154fce5bc55cd7e6"},
 ]
 
 [[package]]
@@ -3628,14 +3626,17 @@ files = [
 
 [[package]]
 name = "vecs"
-version = "0.1.0"
+version = "0.4.3"
 summary = "pgvector client"
 dependencies = [
+    "deprecated==1.2.*",
+    "flupy==1.*",
     "pgvector==0.1.*",
+    "psycopg2-binary==2.9.*",
     "sqlalchemy==2.*",
 ]
 files = [
-    {file = "vecs-0.1.0.tar.gz", hash = "sha256:a651c349b7bbbdcaf8f19cd3319fc438308617fdf6e664db09fdaa4752985e42"},
+    {file = "vecs-0.4.3.tar.gz", hash = "sha256:0a60294143aec43bd0344bb9235b6e57f8f919d102538f6b989d7b85095a31ce"},
 ]
 
 [[package]]
