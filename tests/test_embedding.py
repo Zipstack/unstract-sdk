@@ -3,8 +3,9 @@ import os
 import unittest
 
 from dotenv import load_dotenv
-from llama_index.core.embeddings.base import BaseEmbedding
+from llama_index.core.embeddings import BaseEmbedding
 from parameterized import parameterized
+
 from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.tool.base import BaseTool
 

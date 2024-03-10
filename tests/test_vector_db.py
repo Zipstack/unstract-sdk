@@ -4,10 +4,14 @@ import os
 import unittest
 
 from dotenv import load_dotenv
-from llama_index import MockEmbedding
-from llama_index.vector_stores.types import BasePydanticVectorStore, VectorStore
+from llama_index.core import MockEmbedding
+from llama_index.core.vector_stores.types import (
+    BasePydanticVectorStore,
+    VectorStore,
+)
 from parameterized import parameterized
 from unstract.adapters.vectordb.helper import VectorDBHelper
+
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.vector_db import ToolVectorDB
 

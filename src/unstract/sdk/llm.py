@@ -2,11 +2,11 @@ import logging
 import time
 from typing import Any, Optional
 
-from llama_index.llms import LLM
-from llama_index.llms.base import CompletionResponse
+from llama_index.core.llms import LLM, CompletionResponse
 from unstract.adapters.constants import Common
 from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
+
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolSettingsKey
 from unstract.sdk.tool.base import BaseTool

@@ -1,8 +1,13 @@
 from typing import Optional
 
-from llama_index import Document, StorageContext, VectorStoreIndex
-from llama_index.node_parser import SimpleNodeParser
-from llama_index.vector_stores import VectorStoreQuery, VectorStoreQueryResult
+from llama_index.core import Document
+from llama_index.core.indices.vector_store import VectorStoreIndex
+from llama_index.core.node_parser import SimpleNodeParser
+from llama_index.core.storage import StorageContext
+from llama_index.core.vector_stores import (
+    VectorStoreQuery,
+    VectorStoreQueryResult,
+)
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.constants import LogLevel, ToolEnv
