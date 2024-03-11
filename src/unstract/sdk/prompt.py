@@ -1,6 +1,8 @@
 from typing import Any, Optional
 
 import requests
+from requests import RequestException, Response
+
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
@@ -28,7 +30,15 @@ class PromptTool:
         )
         self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
-    def answer_prompt(self, payload: dict) -> dict:
+    def answer_prompt(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post_call("answer-prompt", payload)
+
+    def single_pass_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post_call("single-pass-extraction", payload)
+
+    def _post_call(
+        self, url_path: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
 
@@ -46,36 +56,30 @@ class PromptTool:
                 structure_output : {}
             }
         """
-        result = {
+        result: dict[str, Any] = {
             "status": "ERROR",
             "error": "",
             "cost": 0,
             "structure_output": "",
         }
-        # TODO : Implement authorization for prompt service
-        # headers = {"Authorization": f"Bearer {self.bearer_token}"}
-        # Upload file to platform
-        url = f"{self.base_url}/answer-prompt"
-        headers = {"Authorization": f"Bearer {self.bearer_token}"}
+        url: str = f"{self.base_url}/{url_path}"
+        headers: dict[str, str] = {
+            "Authorization": f"Bearer {self.bearer_token}"
+        }
         try:
-            response = requests.post(url, json=payload, headers=headers)
-            if response.status_code != 200:
-                self.tool.stream_log(
-                    f"Error while fetching response: {response.text}",
-                    level=LogLevel.ERROR,
-                )
-                result["error"] = response.text
-                return result
-            else:
-                result["status"] = "OK"
-                result["structure_output"] = response.text
-        except Exception as e:
+            # TODO: Review timeout value
+            response: Response = requests.post(
+                url, json=payload, headers=headers, timeout=600
+            )
+            response.raise_for_status()
+            result["status"] = "OK"
+            result["structure_output"] = response.text
+        except RequestException as e:
+            result["error"] = f"Error occurred: {e}"
             self.tool.stream_log(
-                f"Error while fetching response for prompt: {e}",
+                f"Error while fetching response for prompt: {result['error']}",
                 level=LogLevel.ERROR,
             )
-            result["error"] = str(e)
-            return result
         return result
 
     @staticmethod
