@@ -18,6 +18,7 @@ from unstract.sdk.x2txt import X2Text
 
 class ToolIndex:
     def __init__(self, tool: BaseTool):
+        # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
     def get_text_from_index(
@@ -133,27 +134,6 @@ class ToolIndex:
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
 
-        self.tool.stream_log("Extracting text from input file")
-        full_text = []
-        extracted_text = ""
-        try:
-            x2text = X2Text(tool=self.tool)
-            x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
-                adapter_instance_id=x2text_adapter
-            )
-            extracted_text = x2text_adapter_inst.process(
-                input_file_path=file_path, output_file_path=output_file_path
-            )
-        except AdapterError as e:
-            # Wrapping AdapterErrors with SdkError
-            raise SdkError(str(e)) from e
-        full_text.append(
-            {
-                "section": "full",
-                "text_contents": self._cleanup_text(extracted_text),
-            }
-        )
-
         doc_id = ToolIndex.generate_file_id(
             tool_id=tool_id,
             file_hash=file_hash,
@@ -224,6 +204,27 @@ class ToolIndex:
             doc_id_not_found = True
 
         if doc_id_not_found:
+            self.tool.stream_log("Extracting text from input file")
+            full_text = []
+            extracted_text = ""
+            try:
+                x2text = X2Text(tool=self.tool)
+                x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
+                    adapter_instance_id=x2text_adapter
+                )
+                extracted_text = x2text_adapter_inst.process(
+                    input_file_path=file_path, output_file_path=output_file_path
+                )
+            except AdapterError as e:
+                # Wrapping AdapterErrors with SdkError
+                raise SdkError(str(e)) from e
+            full_text.append(
+                {
+                    "section": "full",
+                    "text_contents": self._cleanup_text(extracted_text),
+                }
+            )
+
             # Check if chunking is required
             documents = []
             for item in full_text:
