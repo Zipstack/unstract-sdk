@@ -11,7 +11,7 @@ from unstract.adapters.vectordb.constants import VectorDbConstants
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv, ToolSettingsKey
-from unstract.sdk.exceptions import SdkException
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
 
@@ -38,7 +38,7 @@ class ToolVectorDB:
         platform_details = platform_helper.get_platform_details()
         if not platform_details:
             # Errors are logged by the SDK itself
-            raise SdkException("Error getting platform details")
+            raise SdkError("Error getting platform details")
         account_id = platform_details.get("organization_id")
         return account_id
 

@@ -8,11 +8,12 @@ from llama_index.core.vector_stores import (
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
+from unstract.adapters.exceptions import AdapterError
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import ToolEmbedding
-from unstract.sdk.exceptions import SdkException
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
 from unstract.sdk.utils.service_context import ServiceContext
@@ -22,6 +23,7 @@ from unstract.sdk.x2txt import X2Text
 
 class ToolIndex:
     def __init__(self, tool: BaseTool):
+        # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
     def get_text_from_index(
@@ -35,7 +37,7 @@ class ToolIndex:
             self.tool.stream_log(
                 f"Error loading {embedding_type}", level=LogLevel.ERROR
             )
-            raise SdkException(f"Error loading {embedding_type}")
+            raise SdkError(f"Error loading {embedding_type}")
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
 
         vdb_helper = ToolVectorDB(
@@ -50,7 +52,7 @@ class ToolIndex:
             self.tool.stream_log(
                 f"Error loading {vector_db}", level=LogLevel.ERROR
             )
-            raise SdkException(f"Error loading {vector_db}")
+            raise SdkError(f"Error loading {vector_db}")
 
         try:
             self.tool.stream_log(f">>> Querying {vector_db}...")
@@ -64,7 +66,7 @@ class ToolIndex:
             self.tool.stream_log(
                 f"Error querying {vector_db}: {e}", level=LogLevel.ERROR
             )
-            raise SdkException(f"Error querying {vector_db}: {e}")
+            raise SdkError(f"Error querying {vector_db}: {e}")
 
         n: VectorStoreQueryResult = vector_db_li.query(query=q)
         if len(n.nodes) > 0:
@@ -137,22 +139,6 @@ class ToolIndex:
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
 
-        self.tool.stream_log("Extracting text from input file")
-        full_text = []
-        x2text = X2Text(tool=self.tool)
-        x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
-            adapter_instance_id=x2text_adapter
-        )
-        extracted_text = x2text_adapter_inst.process(
-            input_file_path=file_path, output_file_path=output_file_path
-        )
-        full_text.append(
-            {
-                "section": "full",
-                "text_contents": self._cleanup_text(extracted_text),
-            }
-        )
-
         doc_id = ToolIndex.generate_file_id(
             tool_id=tool_id,
             file_hash=file_hash,
@@ -178,7 +164,7 @@ class ToolIndex:
             self.tool.stream_log(
                 f"Error loading {embedding_type}", level=LogLevel.ERROR
             )
-            raise SdkException(f"Error loading {embedding_type}")
+            raise SdkError(f"Error loading {embedding_type}")
 
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
         vector_db_li = vdb_helper.get_vector_db(
@@ -189,7 +175,7 @@ class ToolIndex:
             self.tool.stream_log(
                 f"Error loading {vector_db}", level=LogLevel.ERROR
             )
-            raise SdkException(f"Error loading {vector_db}")
+            raise SdkError(f"Error loading {vector_db}")
 
         q = VectorStoreQuery(
             query_embedding=embedding_li.get_query_embedding(" "),
@@ -219,10 +205,31 @@ class ToolIndex:
                     f"Error deleting nodes for {doc_id}: {e}",
                     level=LogLevel.ERROR,
                 )
-                raise SdkException(f"Error deleting nodes for {doc_id}: {e}")
+                raise SdkError(f"Error deleting nodes for {doc_id}: {e}")
             doc_id_not_found = True
 
         if doc_id_not_found:
+            self.tool.stream_log("Extracting text from input file")
+            full_text = []
+            extracted_text = ""
+            try:
+                x2text = X2Text(tool=self.tool)
+                x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
+                    adapter_instance_id=x2text_adapter
+                )
+                extracted_text = x2text_adapter_inst.process(
+                    input_file_path=file_path, output_file_path=output_file_path
+                )
+            except AdapterError as e:
+                # Wrapping AdapterErrors with SdkError
+                raise SdkError(str(e)) from e
+            full_text.append(
+                {
+                    "section": "full",
+                    "text_contents": self._cleanup_text(extracted_text),
+                }
+            )
+
             # Check if chunking is required
             documents = []
             for item in full_text:
@@ -276,7 +283,7 @@ class ToolIndex:
                         f"Error adding nodes to vector db: {e}",
                         level=LogLevel.ERROR,
                     )
-                    raise SdkException(f"Error adding nodes to vector db: {e}")
+                    raise SdkError(f"Error adding nodes to vector db: {e}")
                 self.tool.stream_log("Added nodes to vector db")
 
         self.tool.stream_log("Done indexing file")
