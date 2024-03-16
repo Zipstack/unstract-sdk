@@ -10,7 +10,9 @@ from unstract.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolSettingsKey
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.utils.service_context import ServiceContext
+from unstract.sdk.utils.callback_manager import (
+    CallbackManager as UNCallbackManager,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,8 @@ class ToolLLM:
         retries: int = 3,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
-        ServiceContext.get_service_context(
+        # Setup callback manager to collect Usage stats
+        UNCallbackManager.set_callback_manager(
             platform_api_key=platform_api_key, llm=llm
         )
         for i in range(retries):

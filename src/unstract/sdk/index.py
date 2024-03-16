@@ -16,7 +16,9 @@ from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.service_context import ServiceContext
+from unstract.sdk.utils.callback_manager import (
+    CallbackManager as UNCallbackManager,
+)
 from unstract.sdk.vector_db import ToolVectorDB
 from unstract.sdk.x2txt import X2Text
 
@@ -261,13 +263,12 @@ class ToolIndex:
                 parser = SimpleNodeParser.from_defaults(
                     chunk_size=chunk_size, chunk_overlap=chunk_overlap
                 )
-
-                service_context = ServiceContext.get_service_context(
+                # Set callback_manager to collect Usage stats
+                callback_manager = UNCallbackManager.get_callback_manager(
                     platform_api_key=self.tool.get_env_or_die(
                         ToolEnv.PLATFORM_API_KEY
                     ),
                     embed_model=embedding_li,
-                    node_parser=parser,
                 )
 
                 self.tool.stream_log("Adding nodes to vector db...")
@@ -276,7 +277,9 @@ class ToolIndex:
                         documents,
                         storage_context=storage_context,
                         show_progress=True,
-                        service_context=service_context,
+                        embed_model=embedding_li,
+                        node_parser=parser,
+                        callback_manager=callback_manager,
                     )
                 except Exception as e:
                     self.tool.stream_log(
