@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
-lock_version = "4.4.1"
-content_hash = "sha256:d5e7dad00a897370028201ef7eb74ebb89b9f21da2bf261fe406ff3fe4f81cac"
+lock_version = "4.4"
+content_hash = "sha256:55618147d6980ea76b551d6d158a0c6fa9b7dacc5cf5b18886b0e347c93b585f"
 
 [[package]]
 name = "aiohttp"
@@ -3000,7 +3000,7 @@ version = "2.0.26"
 requires_python = ">=3.7"
 summary = "Database Abstraction Library"
 dependencies = [
-    "greenlet!=0.4.17; platform_machine == \"win32\" or platform_machine == \"WIN32\" or platform_machine == \"AMD64\" or platform_machine == \"amd64\" or platform_machine == \"x86_64\" or platform_machine == \"ppc64le\" or platform_machine == \"aarch64\"",
+    "greenlet!=0.4.17; platform_machine == \"aarch64\" or (platform_machine == \"ppc64le\" or (platform_machine == \"x86_64\" or (platform_machine == \"amd64\" or (platform_machine == \"AMD64\" or (platform_machine == \"win32\" or platform_machine == \"WIN32\")))))",
     "typing-extensions>=4.6.0",
 ]
 files = [
@@ -3447,7 +3447,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.4.1"
+version = "0.5.0"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract Adapters"
 dependencies = [
@@ -3472,8 +3472,8 @@ dependencies = [
     "weaviate-client==3.25.3",
 ]
 files = [
-    {file = "unstract_adapters-0.4.1-py3-none-any.whl", hash = "sha256:d8be73fe96f37f347274b62360e2a99b69e83b93e4be4c93797e383e0a0cafbb"},
-    {file = "unstract_adapters-0.4.1.tar.gz", hash = "sha256:1f0ceaa8a26af51dd46713ec73b029a115c2a9f43a00e10ae73e8dedee7e1069"},
+    {file = "unstract_adapters-0.5.0-py3-none-any.whl", hash = "sha256:991e0ac5ba27bb2a1f8885c029543b3926171e7f6c7a98eb98efa553a02b0654"},
+    {file = "unstract_adapters-0.5.0.tar.gz", hash = "sha256:83754413af26c2668056b63590e8b2feccd95c540ad573557f70a321421a0db2"},
 ]
 
 [[package]]
