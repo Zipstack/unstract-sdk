@@ -56,8 +56,3 @@ package-dir = "src"
 [tool.pdm.version]
 source = "file"
 path = "src/unstract/sdk/__init__.py"
-
-[[tool.pdm.source]]
-name = "private"
-url = "http://localhost:8080/simple"
-include_packages = ["unstract-adapters"]
