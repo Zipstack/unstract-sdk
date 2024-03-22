@@ -172,9 +172,11 @@ class ToolIndex:
             )
             raise SdkError(f"Error loading {vector_db}")
 
+        filter = [{"field_name": "doc_id", "operator": "=", "value": doc_id}]
         q = VectorStoreQuery(
             query_embedding=embedding_li.get_query_embedding(" "),
             doc_ids=[doc_id],
+            filters=filter,
         )
 
         doc_id_not_found = True
