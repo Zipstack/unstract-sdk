@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from typing import Any, Optional
 
@@ -7,6 +8,7 @@ from llama_index.llms.base import CompletionResponse
 from unstract.adapters.constants import Common
 from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
+
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolSettingsKey
 from unstract.sdk.tool.base import BaseTool
@@ -51,9 +53,14 @@ class ToolLLM:
         ServiceContext.get_service_context(
             platform_api_key=platform_api_key, llm=llm
         )
+        code_block_pattern = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
         for i in range(retries):
             try:
                 response: CompletionResponse = llm.complete(prompt, **kwargs)
+                match = code_block_pattern.search(response.text)
+                if match:
+                    # Remove code block from response text
+                    response.text = match.group(1)
                 result = {
                     "response": response,
                 }
