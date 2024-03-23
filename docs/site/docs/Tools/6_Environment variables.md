@@ -9,4 +9,3 @@
 | `PLATFORM_HOST`    | The host in which the platform service is running |
 | `PLATFORM_PORT`    | The port in which the service is listening        |
 | `PLATFORM_API_KEY` | The API key for the platform                      |
-

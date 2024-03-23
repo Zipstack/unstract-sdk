@@ -36,4 +36,3 @@ Typical steps to create a new tool:
 2. Implement the business logic of the tool
 3. Test the tool locally
 4. Deploy the tool to the platform
-
