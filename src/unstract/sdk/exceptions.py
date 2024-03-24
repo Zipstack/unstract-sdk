@@ -8,3 +8,9 @@ class SdkError(Exception):
 
     def __str__(self) -> str:
         return self.message
+
+
+class IndexingError(SdkError):
+    def __init__(self, message: str = ""):
+        prefix = "Error with indexing. "
+        super().__init__(prefix + message)
