@@ -77,7 +77,7 @@ class ToolLLM:
                     ] = llm_token_count.completion_token_count
                     usage[
                         "total_token_count"
-                    ] = llm_token_count.completion_token_count
+                    ] = llm_token_count.total_token_count
 
                 return {"response": response, "usage": usage}
 
