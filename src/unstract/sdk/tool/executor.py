@@ -4,6 +4,8 @@ from json import loads
 from pathlib import Path
 from typing import Any
 
+from unstract.adapters import get_adapter_version
+
 from unstract.sdk import get_sdk_version
 from unstract.sdk.constants import Command
 from unstract.sdk.tool.base import BaseTool
@@ -55,9 +57,10 @@ class ToolExecutor:
 
         self.tool.stream_log(
             f"Running tool for "
-            f"Workflow ID: {self.tool.workflow_id} "
-            f"Execution ID: {self.tool.execution_id} "
-            f"SDK Version: {get_sdk_version()}"
+            f"Workflow ID: {self.tool.workflow_id}, "
+            f"Execution ID: {self.tool.execution_id}, "
+            f"SDK Version: {get_sdk_version()}, "
+            f"adapter Version: {get_adapter_version()}"
         )
         self.tool.run(
             settings=settings,

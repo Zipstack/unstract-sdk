@@ -8,6 +8,7 @@ from llama_index.core.embeddings.base import BaseEmbedding
 from llama_index.llms import LLM
 from llama_index.llms.utils import LLMType
 from transformers import AutoTokenizer
+
 from unstract.sdk.utils.usage_handler import UsageHandler
 
 logger = logging.getLogger(__name__)
