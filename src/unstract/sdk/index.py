@@ -283,7 +283,7 @@ class ToolIndex:
                     raise SdkError(f"Error adding nodes to vector db: {e}")
                 self.tool.stream_log("Added nodes to vector db")
 
-        self.tool.stream_log("Done indexing file")
+            self.tool.stream_log("File has been indexed successfully")
         return doc_id
 
     @staticmethod
