@@ -21,5 +21,3 @@ Please note that:
 - **LLM based document processing** These tools can be used to perform IDP, NLP, Table extraction, Information extraction, Classification tasks using LLMs. 
 - **Unstructured to Unstructured** For example, a tool that can take a PDF and extract PII information from it and also generate a redacted PDF.
 - **Unstructured to Structured** For example, a tool that can take a PDF and extract financial information and store it in a database. Another simple use case would be extracting candidate information from a resume and store it in a database or spreadsheet.
-
-

@@ -49,6 +49,3 @@ The tool will be created with the following structure:
 - `README.md` is the readme file for the tool. This is where the documentation for the tool will be specified.
 
 >The docker related files need not be modified unless you are using a different base image or you need to install additional dependencies. The docker image will be built automatically when the tool is deployed to the platform.
-
-
-

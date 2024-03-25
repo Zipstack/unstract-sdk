@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 class ToolLLM:
     """Class to handle LLMs for Unstract Tools."""
 
+    code_block_regex = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
+
     def __init__(
         self,
         tool: BaseTool,
@@ -42,8 +44,9 @@ class ToolLLM:
             ToolSettingsKey.LLM_ADAPTER_ID
         )
 
-    @staticmethod
+    @classmethod
     def run_completion(
+        cls,
         llm: LLM,
         platform_api_key: str,
         prompt: str,
@@ -53,19 +56,31 @@ class ToolLLM:
         ServiceContext.get_service_context(
             platform_api_key=platform_api_key, llm=llm
         )
-        code_block_pattern = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
         for i in range(retries):
             try:
                 response: CompletionResponse = llm.complete(prompt, **kwargs)
-                match = code_block_pattern.search(response.text)
+                match = cls.code_block_regex.search(response.text)
                 if match:
-                    # Remove code block from response text
                     response.text = match.group(1)
-                result = {
-                    "response": response,
-                }
 
-                return result
+                usage = {}
+                llm_token_counts = llm.callback_manager.handlers[
+                    0
+                ].llm_token_counts
+                if llm_token_counts:
+                    llm_token_count = llm_token_counts[0]
+                    usage[
+                        "prompt_token_count"
+                    ] = llm_token_count.prompt_token_count
+                    usage[
+                        "completion_token_count"
+                    ] = llm_token_count.completion_token_count
+                    usage[
+                        "total_token_count"
+                    ] = llm_token_count.total_token_count
+
+                return {"response": response, "usage": usage}
+
             except Exception as e:
                 if i == retries - 1:
                     raise e
