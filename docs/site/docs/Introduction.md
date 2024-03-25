@@ -28,4 +28,3 @@ While Unstract ships with a variety of tools to parse various document types and
 The Unstract platform allows users to create and use their own custom tools in no-code Workflows. The Unstract SDK provides a convenient interface to the platform to create your own tools. These tools can be invoked as part of Workflows created in the platform.
 
 The platform uses Large Language Models (LLMs) extensively to manage many of the comprehension and reasoning task involved in these worflows and applications. The platform and the SDK hides the complexities involved in these operations to both the end user and most tool creators to achieve complex transformations and processing of unstructured data.
-
