@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:de918525bebaac49a0f16703fd4119426e0c92d69cdf8cf647989a388579cdcf"
+content_hash = "sha256:5580d796a9de8b64ea4b406f7ba7363f8bd6b5f3262ed3d366b6adc86686883b"
 
 [[package]]
 name = "aiohttp"
@@ -2571,8 +2571,8 @@ files = [
 
 [[package]]
 name = "qdrant-client"
-version = "1.7.0"
-requires_python = ">=3.8,<3.13"
+version = "1.8.0"
+requires_python = ">=3.8"
 summary = "Client library for the Qdrant vector search engine"
 dependencies = [
     "grpcio-tools>=1.41.0",
@@ -2581,11 +2581,11 @@ dependencies = [
     "numpy>=1.21; python_version >= \"3.8\" and python_version < \"3.12\"",
     "portalocker<3.0.0,>=2.7.0",
     "pydantic>=1.10.8",
-    "urllib3<2.0.0,>=1.26.14",
+    "urllib3<3,>=1.26.14",
 ]
 files = [
-    {file = "qdrant_client-1.7.0-py3-none-any.whl", hash = "sha256:ab5779cf3f008da2a801c943413423f1ff434128dfaeda031f037453e1fa8306"},
-    {file = "qdrant_client-1.7.0.tar.gz", hash = "sha256:bbe0656020c2f11061d7836b87e99ba6b50a028f5318459cc1fddf4ef73d9a8b"},
+    {file = "qdrant_client-1.8.0-py3-none-any.whl", hash = "sha256:fa28d3eb64c0c57ec029c7c85c71f6c72c197f92502022655741f3632c518e29"},
+    {file = "qdrant_client-1.8.0.tar.gz", hash = "sha256:2a1a3f2cbacc7adba85644cf6cfdee20401cf25764b32da479c81fb63e178d15"},
 ]
 
 [[package]]
@@ -3456,7 +3456,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.7.0"
+version = "0.7.1"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract Adapters"
 dependencies = [
@@ -3475,15 +3475,15 @@ dependencies = [
     "pinecone-client==2.2.4",
     "psycopg2-binary==2.9.9",
     "pymilvus==2.3.4",
-    "qdrant-client==1.7.0",
+    "qdrant-client~=1.8.0",
     "replicate==0.22.0",
     "supabase==2.2.1",
     "vecs==0.4.3",
     "weaviate-client==3.25.3",
 ]
 files = [
-    {file = "unstract_adapters-0.7.0-py3-none-any.whl", hash = "sha256:d0da2881b57787508a2821a02b575ed2e0eb1953bf2dc3462455214a3b1eb9a6"},
-    {file = "unstract_adapters-0.7.0.tar.gz", hash = "sha256:bc7b12fe3e5f9d58a1b7bd6a902b3a545116901590c0c8a4e98dd05081bdab1a"},
+    {file = "unstract_adapters-0.7.1-py3-none-any.whl", hash = "sha256:f9ff79b3af13aeeed026f21c2e023ed071761a695da15ee00f029a15f31722b1"},
+    {file = "unstract_adapters-0.7.1.tar.gz", hash = "sha256:c0016dd6c88e661ce02fc1b03a3f83733005450be5a4b9cf9716b02ae3f81d1a"},
 ]
 
 [[package]]
