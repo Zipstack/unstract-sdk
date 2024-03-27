@@ -1,6 +1,6 @@
 from typing import Optional
 
-from llama_index.embeddings.base import BaseEmbedding
+from llama_index.core.embeddings import BaseEmbedding
 from unstract.adapters.constants import Common
 from unstract.adapters.embedding import adapters
 

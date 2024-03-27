@@ -2,11 +2,13 @@ import logging
 from typing import Any, Callable, Optional, Union
 
 import tiktoken
-from llama_index import ServiceContext as LlamaIndexServiceContext
-from llama_index.callbacks import CallbackManager, TokenCountingHandler
-from llama_index.core.embeddings.base import BaseEmbedding
-from llama_index.llms import LLM
-from llama_index.llms.utils import LLMType
+from llama_index.core.callbacks import (
+    CallbackManager as LlamaIndexCallbackManager,
+)
+from llama_index.core.callbacks import TokenCountingHandler
+from llama_index.core.embeddings import BaseEmbedding
+from llama_index.core.llms import LLM
+from llama_index.core.llms.utils import LLMType
 from transformers import AutoTokenizer
 
 from unstract.sdk.utils.usage_handler import UsageHandler
@@ -14,62 +16,56 @@ from unstract.sdk.utils.usage_handler import UsageHandler
 logger = logging.getLogger(__name__)
 
 
-class ServiceContext:
-    """Class representing the UNServiceContext.
+class CallbackManager:
+    """Class representing the CallbackManager to manage callbacks.
 
     Use this over the default service context of llama index
 
-    This class provides a static method to get the service context for
-    UNstract Tools. The service context includes a tokenizer, token counter,
+    This class supports a tokenizer, token counter,
     usage handler, and  callback manager.
 
     Attributes:
         None
 
     Methods:
-        get_service_context: Returns the service context for UNstract Tools.
+        get_callback_manager: Returns a standard callback manager
 
     Example:
-        service_context = UNServiceContext.
-                            get_service_context(
-                                workflow_id="123",
-                                execution_id="456",
+        callback_manager = CallbackManager.
+                            get_callback_manager(
                                 llm="default",
                                 embed_model="default")
     """
 
     @staticmethod
-    def get_service_context(
+    def get_callback_manager(
         platform_api_key: str,
         workflow_id: str = "",
         execution_id: str = "",
         llm: Optional[LLMType] = None,
         embed_model: Optional[Any] = None,
         **kwargs: Any,
-    ) -> LlamaIndexServiceContext:
+    ) -> LlamaIndexCallbackManager:
         """Returns the service context for UNstract Tools.
 
         Parameters:
-            workflow_id (str): The workflow ID. Default is an empty string.
-            execution_id (str): The execution ID. Default is an empty string.
             llm (Optional[LLMType]): The LLM type. Default is None.
             embed_model (Optional[Any]): The embedding model. Default is None.
 
         Returns:
-            ServiceContext: The service context for UNstract Tools.
+            CallbackManager: The callback manager
 
         Example:
-            service_context = UNServiceContext.get_service_context(
-                workflow_id="123",
-                execution_id="456",
+            callback_manager = UNCallbackManager.get_callback_manager(
+                platform_api_key= "abc",
                 llm="default",
                 embed_model="default"
             )
         """
         if llm:
-            tokenizer = ServiceContext.get_tokenizer(llm)
+            tokenizer = CallbackManager.get_tokenizer(llm)
         elif embed_model:
-            tokenizer = ServiceContext.get_tokenizer(embed_model)
+            tokenizer = CallbackManager.get_tokenizer(embed_model)
 
         token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
         usage_handler = UsageHandler(
@@ -81,15 +77,45 @@ class ServiceContext:
             execution_id=execution_id,
         )
 
-        callback_manager = CallbackManager(
+        callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(
             handlers=[token_counter, usage_handler]
         )
-        return LlamaIndexServiceContext.from_defaults(
+        return callback_manager
+
+    @staticmethod
+    def set_callback_manager(
+        platform_api_key: str,
+        llm: Optional[LLM] = None,
+        embedding: Optional[BaseEmbedding] = None,
+        workflow_id: str = "",
+        execution_id: str = "",
+    ):
+        """Sets the standard callback manager for the llm.
+
+        Parameters:
+            llm (LLM): The LLM type
+
+        Returns:
+            Nothing
+
+        Example:
+            UNCallbackManager.set_callback_manager(
+                platform_api_key: "abc",
+                llm=llm,
+                embedding=embedding
+            )
+        """
+        callback_manager = CallbackManager.get_callback_manager(
+            platform_api_key=platform_api_key,
             llm=llm,
-            embed_model=embed_model,
-            callback_manager=callback_manager,
-            **kwargs,
+            embed_model=embedding,
+            workflow_id=workflow_id,
+            execution_id=execution_id,
         )
+        if llm is not None:
+            llm.callback_manager = callback_manager
+        if embedding is not None:
+            embedding.callback_manager = callback_manager
 
     @staticmethod
     def get_tokenizer(

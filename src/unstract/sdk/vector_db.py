@@ -1,7 +1,10 @@
 import logging
 from typing import Union
 
-from llama_index.vector_stores.types import BasePydanticVectorStore, VectorStore
+from llama_index.core.vector_stores.types import (
+    BasePydanticVectorStore,
+    VectorStore,
+)
 from unstract.adapters.constants import Common
 from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
