@@ -1,7 +1,7 @@
 import datetime
 import json
 from abc import ABC, abstractmethod
-from json import loads
+from json import JSONDecodeError, loads
 from pathlib import Path
 from typing import Any, Union
 
@@ -170,6 +170,10 @@ class BaseTool(ABC, StreamMixin):
         try:
             with open(metadata_path, encoding="utf-8") as f:
                 metadata_json = loads(f.read())
+        except JSONDecodeError as e:
+            self.stream_error_and_exit(
+                f"JSON decode error for {metadata_path}: {e}"
+            )
         except FileNotFoundError:
             self.stream_error_and_exit(
                 f"Metadata file not found at {metadata_path}"

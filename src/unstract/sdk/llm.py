@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from typing import Any, Optional
 
@@ -19,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 class ToolLLM:
     """Class to handle LLMs for Unstract Tools."""
+
+    code_block_regex = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
 
     def __init__(
         self,
@@ -42,8 +45,9 @@ class ToolLLM:
             ToolSettingsKey.LLM_ADAPTER_ID
         )
 
-    @staticmethod
+    @classmethod
     def run_completion(
+        cls,
         llm: LLM,
         platform_api_key: str,
         prompt: str,
@@ -57,11 +61,28 @@ class ToolLLM:
         for i in range(retries):
             try:
                 response: CompletionResponse = llm.complete(prompt, **kwargs)
-                result = {
-                    "response": response,
-                }
+                match = cls.code_block_regex.search(response.text)
+                if match:
+                    response.text = match.group(1)
 
-                return result
+                usage = {}
+                llm_token_counts = llm.callback_manager.handlers[
+                    0
+                ].llm_token_counts
+                if llm_token_counts:
+                    llm_token_count = llm_token_counts[0]
+                    usage[
+                        "prompt_token_count"
+                    ] = llm_token_count.prompt_token_count
+                    usage[
+                        "completion_token_count"
+                    ] = llm_token_count.completion_token_count
+                    usage[
+                        "total_token_count"
+                    ] = llm_token_count.total_token_count
+
+                return {"response": response, "usage": usage}
+
             except Exception as e:
                 if i == retries - 1:
                     raise e

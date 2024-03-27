@@ -1,3 +1,12 @@
+<div align="center">
+<img src="docs/assets/unstract_u_logo.png" style="height: 120px">
+
+# Unstract
+
+## No-code LLM Platform to launch APIs and ETL Pipelines to structure unstructured documents
+
+</div>
+
 # Unstract SDK
 
 The `unstract-sdk` package helps with developing tools that are meant to be run on the Unstract platform. This includes
