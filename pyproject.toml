@@ -13,7 +13,7 @@ dependencies = [
     "python-dotenv==1.0.0",
     # LLM Triad
     "unstract-adapters~=0.7.1",
-    "llama-index==0.9.28",
+    "llama-index==0.10.23",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
 ]

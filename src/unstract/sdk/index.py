@@ -277,12 +277,11 @@ class ToolIndex:
             )
 
             # Set callback_manager to collect Usage stats
-            callback_manager = UNCallbackManager.get_callback_manager(
+            callback_manager = UNCallbackManager.set_callback_manager(
                 platform_api_key=self.tool.get_env_or_die(
                     ToolEnv.PLATFORM_API_KEY
                 ),
-                embed_model=embedding_li,
-                node_parser=parser,
+                embedding=embedding_li,
             )
 
             self.tool.stream_log("Adding nodes to vector db...")

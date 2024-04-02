@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Optional, Union
+from typing import Callable, Optional, Union
 
 import tiktoken
 from llama_index.core.callbacks import (
@@ -8,7 +8,6 @@ from llama_index.core.callbacks import (
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
-from llama_index.core.llms.utils import LLMType
 from transformers import AutoTokenizer
 
 from unstract.sdk.utils.usage_handler import UsageHandler
@@ -28,59 +27,14 @@ class CallbackManager:
         None
 
     Methods:
-        get_callback_manager: Returns a standard callback manager
+        set_callback_manager: Returns a standard callback manager
 
     Example:
         callback_manager = CallbackManager.
-                            get_callback_manager(
+                            set_callback_manager(
                                 llm="default",
-                                embed_model="default")
+                                embedding="default")
     """
-
-    @staticmethod
-    def get_callback_manager(
-        platform_api_key: str,
-        workflow_id: str = "",
-        execution_id: str = "",
-        llm: Optional[LLMType] = None,
-        embed_model: Optional[Any] = None,
-        **kwargs: Any,
-    ) -> LlamaIndexCallbackManager:
-        """Returns the service context for UNstract Tools.
-
-        Parameters:
-            llm (Optional[LLMType]): The LLM type. Default is None.
-            embed_model (Optional[Any]): The embedding model. Default is None.
-
-        Returns:
-            CallbackManager: The callback manager
-
-        Example:
-            callback_manager = UNCallbackManager.get_callback_manager(
-                platform_api_key= "abc",
-                llm="default",
-                embed_model="default"
-            )
-        """
-        if llm:
-            tokenizer = CallbackManager.get_tokenizer(llm)
-        elif embed_model:
-            tokenizer = CallbackManager.get_tokenizer(embed_model)
-
-        token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
-        usage_handler = UsageHandler(
-            token_counter=token_counter,
-            platform_api_key=platform_api_key,
-            llm_model=llm,
-            embed_model=embed_model,
-            workflow_id=workflow_id,
-            execution_id=execution_id,
-        )
-
-        callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(
-            handlers=[token_counter, usage_handler]
-        )
-        return callback_manager
 
     @staticmethod
     def set_callback_manager(
@@ -89,7 +43,7 @@ class CallbackManager:
         embedding: Optional[BaseEmbedding] = None,
         workflow_id: str = "",
         execution_id: str = "",
-    ):
+    ) -> LlamaIndexCallbackManager:
         """Sets the standard callback manager for the llm.
 
         Parameters:
@@ -105,17 +59,32 @@ class CallbackManager:
                 embedding=embedding
             )
         """
-        callback_manager = CallbackManager.get_callback_manager(
+
+        if llm:
+            tokenizer = CallbackManager.get_tokenizer(llm)
+        elif embedding:
+            tokenizer = CallbackManager.get_tokenizer(embedding)
+
+        token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
+        usage_handler = UsageHandler(
+            token_counter=token_counter,
             platform_api_key=platform_api_key,
-            llm=llm,
+            llm_model=llm,
             embed_model=embedding,
             workflow_id=workflow_id,
             execution_id=execution_id,
         )
+
+        callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(
+            handlers=[token_counter, usage_handler]
+        )
+
         if llm is not None:
             llm.callback_manager = callback_manager
         if embedding is not None:
             embedding.callback_manager = callback_manager
+
+        return callback_manager
 
     @staticmethod
     def get_tokenizer(
