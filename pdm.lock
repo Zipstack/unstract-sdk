@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:5580d796a9de8b64ea4b406f7ba7363f8bd6b5f3262ed3d366b6adc86686883b"
+content_hash = "sha256:9fef976c84eacdb66972cd8e1f4b96f58678b35e1343d2bdc1989e8db170b8bb"
 
 [[package]]
 name = "aiohttp"
@@ -3456,9 +3456,9 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.7.1"
+version = "0.8.0"
 requires_python = "<3.12,>=3.9"
-summary = "Unstract Adapters"
+summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
     "SQLAlchemy==2.0.26",
     "anthropic==0.7.8",
@@ -3477,13 +3477,14 @@ dependencies = [
     "pymilvus==2.3.4",
     "qdrant-client~=1.8.0",
     "replicate==0.22.0",
+    "requests>=2.31.0",
     "supabase==2.2.1",
     "vecs==0.4.3",
     "weaviate-client==3.25.3",
 ]
 files = [
-    {file = "unstract_adapters-0.7.1-py3-none-any.whl", hash = "sha256:f9ff79b3af13aeeed026f21c2e023ed071761a695da15ee00f029a15f31722b1"},
-    {file = "unstract_adapters-0.7.1.tar.gz", hash = "sha256:c0016dd6c88e661ce02fc1b03a3f83733005450be5a4b9cf9716b02ae3f81d1a"},
+    {file = "unstract_adapters-0.8.0-py3-none-any.whl", hash = "sha256:5ca04f993782be587b99b4221893260982bff1f26236aa3ea3d6e71279152ad8"},
+    {file = "unstract_adapters-0.8.0.tar.gz", hash = "sha256:d6282762e52263bd59b64d70bdb30c596ed6a4dbaf296b12a39617c9e4a2d4b4"},
 ]
 
 [[package]]
