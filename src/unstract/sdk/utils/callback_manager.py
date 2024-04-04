@@ -44,13 +44,15 @@ class CallbackManager:
         workflow_id: str = "",
         execution_id: str = "",
     ) -> LlamaIndexCallbackManager:
-        """Sets the standard callback manager for the llm.
+        """Sets the standard callback manager for the llm. This is to be called
+        explicitly whenever there is a need for the callback handling defined
+        here as handlers is to be invoked.
 
         Parameters:
             llm (LLM): The LLM type
 
         Returns:
-            Nothing
+            CallbackManager tyoe of llama index
 
         Example:
             UNCallbackManager.set_callback_manager(
