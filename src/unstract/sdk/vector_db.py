@@ -76,10 +76,18 @@ class ToolVectorDB:
                     )
                     return vector_db_adapter_class.get_vector_db_instance()
                 else:
-                    return None
+                    raise SdkError(
+                        f"VectorDB adapter not supported : "
+                        f"{vector_db_adapter_id}"
+                    )
             except Exception as e:
                 self.tool.stream_log(
                     log=f"Unable to get vector_db {adapter_instance_id}: {e}",
                     level=LogLevel.ERROR,
                 )
-                return None
+                raise SdkError(f"Error getting vectorDB instance: {e}")
+        else:
+            raise SdkError(
+                f"Adapter_instance_id does not have "
+                f"a valid value: {adapter_instance_id}"
+            )
