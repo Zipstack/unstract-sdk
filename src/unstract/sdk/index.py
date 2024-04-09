@@ -302,7 +302,7 @@ class ToolIndex:
                     f"Error adding nodes to vector db: {e}",
                     level=LogLevel.ERROR,
                 )
-                raise SdkError(f"Error adding nodes to vector db: {e}")
+                raise IndexingError(str(e)) from e
             self.tool.stream_log("Added nodes to vector db")
 
         self.tool.stream_log("File has been indexed successfully")
