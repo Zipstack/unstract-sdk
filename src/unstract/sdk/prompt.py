@@ -75,7 +75,16 @@ class PromptTool:
             result["status"] = "OK"
             result["structure_output"] = response.text
         except RequestException as e:
-            result["error"] = f"Error occurred: {e}"
+            # Extract error information from the response if available
+            error_message = str(e)
+            content_type = response.headers.get("Content-Type", "").lower()
+            if "application/json" in content_type:
+                response_json = response.json()
+                if "error" in response_json:
+                    error_message = response_json["error"]
+            elif response.text:
+                error_message = response.text
+            result["error"] = error_message
             self.tool.stream_log(
                 f"Error while fetching response for prompt: {result['error']}",
                 level=LogLevel.ERROR,
