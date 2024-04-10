@@ -12,5 +12,6 @@ class SdkError(Exception):
 
 class IndexingError(SdkError):
     def __init__(self, message: str = ""):
-        prefix = "Error with indexing. "
-        super().__init__(prefix + message)
+        if "404" in message:
+            message = "Index not found. Please check vector db adapter settings."
+        super().__init__(message)

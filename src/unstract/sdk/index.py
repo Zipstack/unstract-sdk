@@ -62,9 +62,18 @@ class ToolIndex:
         try:
             self.tool.stream_log(f">>> Querying {vector_db}...")
             self.tool.stream_log(f">>> {doc_id}")
+            doc_id_eq_filter = MetadataFilter.from_dict(
+                {
+                    "key": "doc_id",
+                    "operator": FilterOperator.EQ,
+                    "value": doc_id,
+                }
+            )
+            filters = MetadataFilters(filters=[doc_id_eq_filter])
             q = VectorStoreQuery(
                 query_embedding=embedding_li.get_query_embedding(" "),
                 doc_ids=[doc_id],
+                filters=filters,
                 similarity_top_k=10000,
             )
         except Exception as e:
@@ -299,7 +308,7 @@ class ToolIndex:
                     f"Error adding nodes to vector db: {e}",
                     level=LogLevel.ERROR,
                 )
-                raise SdkError(f"Error adding nodes to vector db: {e}")
+                raise IndexingError(str(e)) from e
             self.tool.stream_log("Added nodes to vector db")
 
         self.tool.stream_log("File has been indexed successfully")
