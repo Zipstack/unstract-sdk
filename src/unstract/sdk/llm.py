@@ -72,15 +72,15 @@ class ToolLLM:
                 ].llm_token_counts
                 if llm_token_counts:
                     llm_token_count = llm_token_counts[0]
-                    usage["prompt_token_count"] = (
-                        llm_token_count.prompt_token_count
-                    )
-                    usage["completion_token_count"] = (
-                        llm_token_count.completion_token_count
-                    )
-                    usage["total_token_count"] = (
-                        llm_token_count.total_token_count
-                    )
+                    usage[
+                        "prompt_token_count"
+                    ] = llm_token_count.prompt_token_count
+                    usage[
+                        "completion_token_count"
+                    ] = llm_token_count.completion_token_count
+                    usage[
+                        "total_token_count"
+                    ] = llm_token_count.total_token_count
 
                 return {"response": response, "usage": usage}
 
@@ -90,13 +90,11 @@ class ToolLLM:
                 time.sleep(5)
         return None
 
-    def get_llm(
-        self, adapter_instance_id: Optional[str] = None
-    ) -> Optional[LLM]:
+    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LLM:
         """Returns the LLM object for the tool.
 
         Returns:
-            Optional[LLM]: The LLM object for the tool.
+            LLM: The LLM object for the tool.
             (llama_index.llms.base.LLM)
         """
         adapter_instance_id = (
@@ -117,9 +115,7 @@ class ToolLLM:
                     ][Common.ADAPTER]
                     llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
                     llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
-                    llm_instance: Optional[LLM] = (
-                        llm_adapter_class.get_llm_instance()
-                    )
+                    llm_instance: LLM = llm_adapter_class.get_llm_instance()
                     return llm_instance
                 else:
                     raise SdkError(

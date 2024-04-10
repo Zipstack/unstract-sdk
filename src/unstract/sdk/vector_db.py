@@ -44,7 +44,7 @@ class ToolVectorDB:
 
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
-    ) -> Union[BasePydanticVectorStore, VectorStore, None]:
+    ) -> Union[BasePydanticVectorStore, VectorStore]:
         adapter_instance_id = (
             adapter_instance_id
             if adapter_instance_id
