@@ -30,41 +30,36 @@ class ToolEmbedding:
             if adapter_instance_id
             else self.embedding_adapter_instance_id
         )
-        if adapter_instance_id:
-            try:
-                embedding_config_data = ToolAdapter.get_adapter_config(
-                    self.tool, adapter_instance_id
-                )
-                embedding_adapter_id = embedding_config_data.get(
-                    Common.ADAPTER_ID
-                )
-                self.embedding_adapter_id = embedding_adapter_id
-                if embedding_adapter_id in self.embedding_adapters:
-                    embedding_adapter = self.embedding_adapters[
-                        embedding_adapter_id
-                    ][Common.METADATA][Common.ADAPTER]
-                    embedding_metadata = embedding_config_data.get(
-                        Common.ADAPTER_METADATA
-                    )
-                    embedding_adapter_class = embedding_adapter(
-                        embedding_metadata
-                    )
-                    return embedding_adapter_class.get_embedding_instance()
-                else:
-                    raise SdkError(
-                        f"Embedding adapter not supported : "
-                        f"{embedding_adapter_id}"
-                    )
-            except Exception as e:
-                self.tool.stream_log(
-                    log=f"Error getting embedding: {e}", level=LogLevel.ERROR
-                )
-                raise SdkError(f"Error getting embedding instance: {e}")
-        else:
+        if not adapter_instance_id:
             raise SdkError(
                 f"Adapter_instance_id does not have "
                 f"a valid value: {adapter_instance_id}"
             )
+        try:
+            embedding_config_data = ToolAdapter.get_adapter_config(
+                self.tool, adapter_instance_id
+            )
+            embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
+            self.embedding_adapter_id = embedding_adapter_id
+            if embedding_adapter_id in self.embedding_adapters:
+                embedding_adapter = self.embedding_adapters[
+                    embedding_adapter_id
+                ][Common.METADATA][Common.ADAPTER]
+                embedding_metadata = embedding_config_data.get(
+                    Common.ADAPTER_METADATA
+                )
+                embedding_adapter_class = embedding_adapter(embedding_metadata)
+                return embedding_adapter_class.get_embedding_instance()
+            else:
+                raise SdkError(
+                    f"Embedding adapter not supported : "
+                    f"{embedding_adapter_id}"
+                )
+        except Exception as e:
+            self.tool.stream_log(
+                log=f"Error getting embedding: {e}", level=LogLevel.ERROR
+            )
+            raise SdkError(f"Error getting embedding instance: {e}")
 
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
         embedding_list = embedding._get_text_embedding(self.__TEST_SNIPPET)
