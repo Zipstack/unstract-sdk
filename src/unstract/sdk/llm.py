@@ -3,16 +3,18 @@ import re
 import time
 from typing import Any, Optional
 
-from llama_index.llms import LLM
-from llama_index.llms.base import CompletionResponse
+from llama_index.core.llms import LLM, CompletionResponse
 from unstract.adapters.constants import Common
 from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolSettingsKey
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.utils.service_context import ServiceContext
+from unstract.sdk.utils.callback_manager import (
+    CallbackManager as UNCallbackManager,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +55,8 @@ class ToolLLM:
         retries: int = 3,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
-        ServiceContext.get_service_context(
+        # Setup callback manager to collect Usage stats
+        UNCallbackManager.set_callback_manager(
             platform_api_key=platform_api_key, llm=llm
         )
         for i in range(retries):
@@ -87,13 +90,11 @@ class ToolLLM:
                 time.sleep(5)
         return None
 
-    def get_llm(
-        self, adapter_instance_id: Optional[str] = None
-    ) -> Optional[LLM]:
+    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LLM:
         """Returns the LLM object for the tool.
 
         Returns:
-            Optional[LLM]: The LLM object for the tool.
+            LLM: The LLM object for the tool.
             (llama_index.llms.base.LLM)
         """
         adapter_instance_id = (
@@ -114,20 +115,22 @@ class ToolLLM:
                     ][Common.ADAPTER]
                     llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
                     llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
-                    llm_instance: Optional[
-                        LLM
-                    ] = llm_adapter_class.get_llm_instance()
+                    llm_instance: LLM = llm_adapter_class.get_llm_instance()
                     return llm_instance
                 else:
-                    return None
+                    raise SdkError(
+                        f"LLM adapter not supported : " f"{llm_adapter_id}"
+                    )
             except Exception as e:
                 self.tool.stream_log(
                     log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR
                 )
-                return None
+                raise SdkError(f"Error getting llm instance: {e}")
         else:
-            logger.error("The adapter_instance_id parameter is None")
-            return None
+            raise SdkError(
+                f"Adapter_instance_id does not have "
+                f"a valid value: {adapter_instance_id}"
+            )
 
     def get_max_tokens(self, reserved_for_output: int = 0) -> int:
         """Returns the maximum number of tokens that can be used for the LLM.

@@ -1,6 +1,5 @@
 import requests
-from llama_index.callbacks import TokenCountingHandler
-from llama_index.callbacks.schema import CBEventType
+from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.helper import SdkHelper

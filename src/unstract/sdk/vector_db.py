@@ -1,7 +1,10 @@
 import logging
 from typing import Union
 
-from llama_index.vector_stores.types import BasePydanticVectorStore, VectorStore
+from llama_index.core.vector_stores.types import (
+    BasePydanticVectorStore,
+    VectorStore,
+)
 from unstract.adapters.constants import Common
 from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
@@ -41,7 +44,7 @@ class ToolVectorDB:
 
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
-    ) -> Union[BasePydanticVectorStore, VectorStore, None]:
+    ) -> Union[BasePydanticVectorStore, VectorStore]:
         adapter_instance_id = (
             adapter_instance_id
             if adapter_instance_id
@@ -73,10 +76,18 @@ class ToolVectorDB:
                     )
                     return vector_db_adapter_class.get_vector_db_instance()
                 else:
-                    return None
+                    raise SdkError(
+                        f"VectorDB adapter not supported : "
+                        f"{vector_db_adapter_id}"
+                    )
             except Exception as e:
                 self.tool.stream_log(
                     log=f"Unable to get vector_db {adapter_instance_id}: {e}",
                     level=LogLevel.ERROR,
                 )
-                return None
+                raise SdkError(f"Error getting vectorDB instance: {e}")
+        else:
+            raise SdkError(
+                f"Adapter_instance_id does not have "
+                f"a valid value: {adapter_instance_id}"
+            )
