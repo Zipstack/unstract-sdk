@@ -13,7 +13,7 @@ dependencies = [
     "python-dotenv==1.0.0",
     # LLM Triad
     "unstract-adapters~=0.9.0",
-    "llama-index==0.10.23",
+    "llama-index==0.10.28",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
 ]
@@ -68,3 +68,8 @@ package-dir = "src"
 [tool.pdm.version]
 source = "file"
 path = "src/unstract/sdk/__init__.py"
+
+# Adding the following override to resolve dependency version
+# for environs. Otherwise, it stays stuck while resolving pins
+[tool.pdm.resolution.overrides]
+grpcio = ">=1.62.1"
