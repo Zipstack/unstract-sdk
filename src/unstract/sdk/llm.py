@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class ToolLLM:
     """Class to handle LLMs for Unstract Tools."""
 
-    code_block_regex = re.compile(r"```.*?\n(.*?)\n```", re.DOTALL)
+    json_regex = re.compile(r"\{(?:.|\n)*\}")
 
     def __init__(
         self,
@@ -62,9 +62,9 @@ class ToolLLM:
         for i in range(retries):
             try:
                 response: CompletionResponse = llm.complete(prompt, **kwargs)
-                match = cls.code_block_regex.search(response.text)
+                match = cls.json_regex.search(response.text)
                 if match:
-                    response.text = match.group(1)
+                    response.text = match.group(0)
 
                 usage = {}
                 llm_token_counts = llm.callback_manager.handlers[
