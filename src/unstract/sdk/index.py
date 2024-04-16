@@ -236,7 +236,8 @@ class ToolIndex:
         full_text = []
         extracted_text = ""
         try:
-            if not output_file_path:
+            mime_type = ToolUtils.get_file_mime_type(file_path)
+            if mime_type == "text/plain":
                 with open(file_path, encoding="utf-8") as file:
                     extracted_text = file.read()
             else:
