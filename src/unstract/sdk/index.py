@@ -236,13 +236,17 @@ class ToolIndex:
         full_text = []
         extracted_text = ""
         try:
-            x2text = X2Text(tool=self.tool)
-            x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
-                adapter_instance_id=x2text_adapter
-            )
-            extracted_text = x2text_adapter_inst.process(
-                input_file_path=file_path, output_file_path=output_file_path
-            )
+            if not output_file_path:
+                with open(file_path, encoding="utf-8") as file:
+                    extracted_text = file.read()
+            else:
+                x2text = X2Text(tool=self.tool)
+                x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
+                    adapter_instance_id=x2text_adapter
+                )
+                extracted_text = x2text_adapter_inst.process(
+                    input_file_path=file_path, output_file_path=output_file_path
+                )
         except AdapterError as e:
             # Wrapping AdapterErrors with SdkError
             raise IndexingError(str(e)) from e
