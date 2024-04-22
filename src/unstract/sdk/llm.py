@@ -57,32 +57,26 @@ class ToolLLM:
     ) -> Optional[dict[str, Any]]:
         # Setup callback manager to collect Usage stats
         UNCallbackManager.set_callback_manager(
-            platform_api_key=platform_api_key, llm=llm
+            platform_api_key=platform_api_key, llm=llm, **kwargs
         )
+        # Removing specific keys from kwargs
+        new_kwargs = kwargs.copy()
+        for key in [
+            "workflow_id",
+            "execution_id",
+            "adapter_instance_id",
+            "run_id",
+        ]:
+            new_kwargs.pop(key, None)
         for i in range(retries):
             try:
-                response: CompletionResponse = llm.complete(prompt, **kwargs)
+                response: CompletionResponse = llm.complete(
+                    prompt, **new_kwargs
+                )
                 match = cls.json_regex.search(response.text)
                 if match:
                     response.text = match.group(0)
-
-                usage = {}
-                llm_token_counts = llm.callback_manager.handlers[
-                    0
-                ].llm_token_counts
-                if llm_token_counts:
-                    llm_token_count = llm_token_counts[0]
-                    usage[
-                        "prompt_token_count"
-                    ] = llm_token_count.prompt_token_count
-                    usage[
-                        "completion_token_count"
-                    ] = llm_token_count.completion_token_count
-                    usage[
-                        "total_token_count"
-                    ] = llm_token_count.total_token_count
-
-                return {"response": response, "usage": usage}
+                return {"response": response}
 
             except Exception as e:
                 if i == retries - 1:

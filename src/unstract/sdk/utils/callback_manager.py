@@ -41,8 +41,7 @@ class CallbackManager:
         platform_api_key: str,
         llm: Optional[LLM] = None,
         embedding: Optional[BaseEmbedding] = None,
-        workflow_id: str = "",
-        execution_id: str = "",
+        **kwargs,
     ) -> LlamaIndexCallbackManager:
         """Sets the standard callback manager for the llm. This is to be called
         explicitly whenever there is a need for the callback handling defined
@@ -52,7 +51,7 @@ class CallbackManager:
             llm (LLM): The LLM type
 
         Returns:
-            CallbackManager tyoe of llama index
+            CallbackManager type of llama index
 
         Example:
             UNCallbackManager.set_callback_manager(
@@ -73,8 +72,7 @@ class CallbackManager:
             platform_api_key=platform_api_key,
             llm_model=llm,
             embed_model=embedding,
-            workflow_id=workflow_id,
-            execution_id=execution_id,
+            **kwargs,
         )
 
         callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(

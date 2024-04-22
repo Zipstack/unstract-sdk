@@ -33,23 +33,26 @@ class Audit(StreamMixin):
         self,
         platform_api_key: str,
         token_counter: TokenCountingHandler = None,
-        workflow_id: str = "",
-        execution_id: str = "",
         external_service: str = "",
         event_type: CBEventType = None,
+        **kwargs,
     ) -> None:
         """Pushes the usage data to the platform service.
 
         Args:
+            platform_api_key (str): The platform API key.
             token_counter (TokenCountingHandler, optional): The token counter
-              object. Defaults to None.
+                object. Defaults to None.
+            external_service (str, optional): The name of the external service.
+                Defaults to "".
+            event_type (CBEventType, optional): The type of the event. Defaults
+                to None.
             workflow_id (str, optional): The ID of the workflow. Defaults to "".
             execution_id (str, optional): The ID of the execution. Defaults
-              to "".
-            external_service (str, optional): The name of the external service.
-              Defaults to "".
-            event_type (CBEventType, optional): The type of the event. Defaults
-              to None.
+                to "".
+            adapter_instance_id (str, optional): The adapter instance ID.
+                Defaults to "".
+            run_id (str, optional): The run ID. Defaults to "".
 
         Returns:
             None
@@ -66,11 +69,18 @@ class Audit(StreamMixin):
         )
         bearer_token = platform_api_key
 
+        workflow_id = kwargs.get("workflow_id", "")
+        execution_id = kwargs.get("execution_id", "")
+        adapter_instance_id = kwargs.get("adapter_instance_id", "")
+        run_id = kwargs.get("run_id", "")
+
         data = {
             "usage_type": event_type,
             "external_service": external_service,
             "workflow_id": workflow_id,
             "execution_id": execution_id,
+            "adapter_instance_id": adapter_instance_id,
+            "run_id": run_id,
             "embedding_tokens": token_counter.total_embedding_token_count,
             "prompt_tokens": token_counter.prompt_llm_token_count,
             "completion_tokens": token_counter.completion_llm_token_count,
@@ -84,6 +94,7 @@ class Audit(StreamMixin):
             response = requests.post(
                 url, headers=headers, json=data, timeout=30
             )
+            token_counter.reset_counts()
             if response.status_code != 200:
                 self.stream_log(
                     log=(
