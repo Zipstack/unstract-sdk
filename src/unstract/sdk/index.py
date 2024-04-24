@@ -14,6 +14,7 @@ from llama_index.core.vector_stores import (
 from unstract.adapters.exceptions import AdapterError
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
+from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.exceptions import IndexingError, SdkError
@@ -38,11 +39,6 @@ class ToolIndex:
         embedding_li = embedd_helper.get_embedding(
             adapter_instance_id=embedding_type
         )
-        if embedding_li is None:
-            self.tool.stream_log(
-                f"Error loading {embedding_type}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {embedding_type}")
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
 
         vdb_helper = ToolVectorDB(
@@ -52,12 +48,6 @@ class ToolIndex:
             adapter_instance_id=vector_db,
             embedding_dimension=embedding_dimension,
         )
-
-        if vector_db_li is None:
-            self.tool.stream_log(
-                f"Error loading {vector_db}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {vector_db}")
 
         try:
             self.tool.stream_log(f">>> Querying {vector_db}...")
@@ -153,7 +143,7 @@ class ToolIndex:
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
 
-        doc_id = ToolIndex.generate_file_id(
+        doc_id = self.generate_file_id(
             tool_id=tool_id,
             file_hash=file_hash,
             vector_db=vector_db,
@@ -162,35 +152,25 @@ class ToolIndex:
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
         )
-
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
-        vdb_helper = ToolVectorDB(
-            tool=self.tool,
-        )
-
+        # Get embedding instance
         embedd_helper = ToolEmbedding(tool=self.tool)
-
         embedding_li = embedd_helper.get_embedding(
             adapter_instance_id=embedding_type
         )
-        if embedding_li is None:
-            self.tool.stream_log(
-                f"Error loading {embedding_type}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {embedding_type}")
-
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
+
+        # Get vectorDB instance
+        vdb_helper = ToolVectorDB(
+            tool=self.tool,
+        )
         vector_db_li = vdb_helper.get_vector_db(
             adapter_instance_id=vector_db,
             embedding_dimension=embedding_dimension,
         )
-        if vector_db_li is None:
-            self.tool.stream_log(
-                f"Error loading {vector_db}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {vector_db}")
 
+        # Checking if document is already indexed against doc_id
         doc_id_eq_filter = MetadataFilter.from_dict(
             {"key": "doc_id", "operator": FilterOperator.EQ, "value": doc_id}
         )
@@ -319,8 +299,8 @@ class ToolIndex:
         self.tool.stream_log("File has been indexed successfully")
         return doc_id
 
-    @staticmethod
     def generate_file_id(
+        self,
         tool_id: str,
         file_hash: str,
         vector_db: str,
@@ -332,7 +312,7 @@ class ToolIndex:
         """Generates a unique ID useful for identifying files during indexing.
 
         Args:
-            tool_id (str): Unique ID of the tool developed / exported
+            tool_id (str): Unique ID of the tool or workflow
             file_hash (str): Hash of the file contents
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
@@ -343,7 +323,18 @@ class ToolIndex:
         Returns:
             str: Key representing unique ID for a file
         """
-        return (
-            f"{tool_id}|{vector_db}|{embedding}|{x2text}|"
-            f"{chunk_size}|{chunk_overlap}|{file_hash}"
-        )
+        index_key = {
+            "tool_id": tool_id,
+            "file_hash": file_hash,
+            "vector_db_config": ToolAdapter.get_adapter_config(
+                self.tool, vector_db
+            ),
+            "embedding_config": ToolAdapter.get_adapter_config(
+                self.tool, embedding
+            ),
+            "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
+            "chunk_size": chunk_size,
+            "chunk_overlap": chunk_overlap,
+        }
+        hashed_index_key = ToolUtils.hash_str(ToolUtils.json_to_str(index_key))
+        return hashed_index_key

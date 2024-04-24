@@ -5,8 +5,6 @@ from typing import Any
 
 import magic
 
-from unstract.sdk.constants import FileReaderSettings
-
 
 class ToolUtils:
     """Class containing utility methods."""
@@ -38,18 +36,24 @@ class ToolUtils:
             raise ValueError(f"Unsupported hash_method: {hash_method}")
 
     @staticmethod
-    def get_hash_from_file(file_path: str):
-        hashes = []
-        chunk_size = FileReaderSettings.FILE_READER_CHUNK_SIZE
+    def get_hash_from_file(file_path: str) -> str:
+        """Computes the hash for a file.
 
-        with open(file_path, "rb") as f:
-            while True:
-                chunk = f.read(chunk_size)
-                if not chunk:
-                    break  # End of file
-                hashes.append(ToolUtils.hash_str(chunk))
-        hash_value = ToolUtils.hash_str("".join(hashes))
-        return hash_value
+        Uses sha256 to compute the file hash through a buffered read.
+
+        Args:
+            file_path (str): Path to file that needs to be hashed
+
+        Returns:
+            str: SHA256 hash of the file
+        """
+        h = sha256()
+        b = bytearray(128 * 1024)
+        mv = memoryview(b)
+        with open(file_path, "rb", buffering=0) as f:
+            while n := f.readinto(mv):
+                h.update(mv[:n])
+        return str(h.hexdigest())
 
     @staticmethod
     def load_json(file_to_load: str) -> dict[str, Any]:

@@ -1,5 +1,4 @@
 from abc import ABCMeta
-from typing import Optional
 
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
@@ -8,6 +7,7 @@ from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.tool.base import BaseTool
 
 
@@ -16,7 +16,7 @@ class X2Text(metaclass=ABCMeta):
         self.tool = tool
         self.x2text_adapters = adapters
 
-    def get_x2text(self, adapter_instance_id: str) -> Optional[X2TextAdapter]:
+    def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
         try:
             x2text_config = ToolAdapter.get_adapter_config(
                 self.tool, adapter_instance_id
@@ -49,4 +49,4 @@ class X2Text(metaclass=ABCMeta):
                 log=f"Unable to get x2text adapter {adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
-            return None
+            raise SdkError(f"Error getting vectorDB instance: {e}")
