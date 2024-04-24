@@ -31,17 +31,13 @@ class UnstractSDKToolsStaticTest(unittest.TestCase):
 
     def test_properties(self):
         properties = ToolUtils.json_to_str(
-            ToolConfigHelper.properties(
-                properties_file="config/tool_properties.json"
-            )
+            ToolConfigHelper.properties(properties_file="config/tool_properties.json")
         )
         self.assertIsNotNone(properties)
 
     def test_stream_properties(self):
         properties = ToolUtils.json_to_str(
-            ToolConfigHelper.properties(
-                properties_file="config/tool_properties.json"
-            )
+            ToolConfigHelper.properties(properties_file="config/tool_properties.json")
         )
         captured_output = StringIO()
         with patch("sys.stdout", new=captured_output):

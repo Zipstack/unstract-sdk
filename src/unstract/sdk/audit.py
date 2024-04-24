@@ -81,9 +81,7 @@ class Audit(StreamMixin):
         headers = {"Authorization": f"Bearer {bearer_token}"}
 
         try:
-            response = requests.post(
-                url, headers=headers, json=data, timeout=30
-            )
+            response = requests.post(url, headers=headers, json=data, timeout=30)
             if response.status_code != 200:
                 self.stream_log(
                     log=(

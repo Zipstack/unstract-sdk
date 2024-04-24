@@ -25,9 +25,7 @@ class PromptTool:
 
         """
         self.tool = tool
-        self.base_url = SdkHelper.get_platform_base_url(
-            prompt_host, prompt_port
-        )
+        self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
         self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
     def answer_prompt(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -36,9 +34,7 @@ class PromptTool:
     def single_pass_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._post_call("single-pass-extraction", payload)
 
-    def _post_call(
-        self, url_path: str, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _post_call(self, url_path: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
 
@@ -63,9 +59,7 @@ class PromptTool:
             "structure_output": "",
         }
         url: str = f"{self.base_url}/{url_path}"
-        headers: dict[str, str] = {
-            "Authorization": f"Bearer {self.bearer_token}"
-        }
+        headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
         try:
             # TODO: Review timeout value
             response: Response = requests.post(

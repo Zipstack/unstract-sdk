@@ -12,9 +12,7 @@ from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolSettingsKey
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.utils.callback_manager import (
-    CallbackManager as UNCallbackManager,
-)
+from unstract.sdk.utils.callback_manager import CallbackManager as UNCallbackManager
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +40,7 @@ class ToolLLM:
         self.tool = tool
         self.max_tokens = 1024 * 4
         self.llm_adapters = adapters
-        self.llm_adapter_instance_id = tool_settings.get(
-            ToolSettingsKey.LLM_ADAPTER_ID
-        )
+        self.llm_adapter_instance_id = tool_settings.get(ToolSettingsKey.LLM_ADAPTER_ID)
 
     @classmethod
     def run_completion(
@@ -67,20 +63,14 @@ class ToolLLM:
                     response.text = match.group(0)
 
                 usage = {}
-                llm_token_counts = llm.callback_manager.handlers[
-                    0
-                ].llm_token_counts
+                llm_token_counts = llm.callback_manager.handlers[0].llm_token_counts
                 if llm_token_counts:
                     llm_token_count = llm_token_counts[0]
-                    usage[
-                        "prompt_token_count"
-                    ] = llm_token_count.prompt_token_count
+                    usage["prompt_token_count"] = llm_token_count.prompt_token_count
                     usage[
                         "completion_token_count"
                     ] = llm_token_count.completion_token_count
-                    usage[
-                        "total_token_count"
-                    ] = llm_token_count.total_token_count
+                    usage["total_token_count"] = llm_token_count.total_token_count
 
                 return {"response": response, "usage": usage}
 
@@ -98,9 +88,7 @@ class ToolLLM:
             (llama_index.llms.base.LLM)
         """
         adapter_instance_id = (
-            adapter_instance_id
-            if adapter_instance_id
-            else self.llm_adapter_instance_id
+            adapter_instance_id if adapter_instance_id else self.llm_adapter_instance_id
         )
         # Support for get_llm using adapter_instance_id
         if adapter_instance_id is not None:
@@ -110,17 +98,15 @@ class ToolLLM:
                 )
                 llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
                 if llm_adapter_id in self.llm_adapters:
-                    llm_adapter = self.llm_adapters[llm_adapter_id][
-                        Common.METADATA
-                    ][Common.ADAPTER]
+                    llm_adapter = self.llm_adapters[llm_adapter_id][Common.METADATA][
+                        Common.ADAPTER
+                    ]
                     llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
                     llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
                     llm_instance: LLM = llm_adapter_class.get_llm_instance()
                     return llm_instance
                 else:
-                    raise SdkError(
-                        f"LLM adapter not supported : " f"{llm_adapter_id}"
-                    )
+                    raise SdkError(f"LLM adapter not supported : " f"{llm_adapter_id}")
             except Exception as e:
                 self.tool.stream_log(
                     log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR

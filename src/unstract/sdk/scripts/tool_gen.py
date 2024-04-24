@@ -39,12 +39,8 @@ def main() -> None:
         description="Script to generate a new Unstract tool",
         epilog="Unstract SDK",
     )
-    parser.add_argument(
-        "--command", type=str, help="Command to execute", required=True
-    )
-    parser.add_argument(
-        "--tool-name", type=str, help="Tool name", required=False
-    )
+    parser.add_argument("--command", type=str, help="Command to execute", required=True)
+    parser.add_argument("--tool-name", type=str, help="Tool name", required=False)
     parser.add_argument(
         "--location",
         type=str,

@@ -45,9 +45,7 @@ class ToolExecutor:
             args (argparse.Namespace): Parsed arguments to execute with
         """
         if args.settings is None:
-            self.tool.stream_error_and_exit(
-                "--settings are required for RUN command"
-            )
+            self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
         self._setup_for_run()

@@ -22,9 +22,7 @@ class ToolEmbedding:
         )
         self.embedding_adapter_id: Optional[str] = None
 
-    def get_embedding(
-        self, adapter_instance_id: Optional[str] = None
-    ) -> BaseEmbedding:
+    def get_embedding(self, adapter_instance_id: Optional[str] = None) -> BaseEmbedding:
         adapter_instance_id = (
             adapter_instance_id
             if adapter_instance_id
@@ -42,18 +40,15 @@ class ToolEmbedding:
             embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
             self.embedding_adapter_id = embedding_adapter_id
             if embedding_adapter_id in self.embedding_adapters:
-                embedding_adapter = self.embedding_adapters[
-                    embedding_adapter_id
-                ][Common.METADATA][Common.ADAPTER]
-                embedding_metadata = embedding_config_data.get(
-                    Common.ADAPTER_METADATA
-                )
+                embedding_adapter = self.embedding_adapters[embedding_adapter_id][
+                    Common.METADATA
+                ][Common.ADAPTER]
+                embedding_metadata = embedding_config_data.get(Common.ADAPTER_METADATA)
                 embedding_adapter_class = embedding_adapter(embedding_metadata)
                 return embedding_adapter_class.get_embedding_instance()
             else:
                 raise SdkError(
-                    f"Embedding adapter not supported : "
-                    f"{embedding_adapter_id}"
+                    f"Embedding adapter not supported : " f"{embedding_adapter_id}"
                 )
         except Exception as e:
             self.tool.stream_log(

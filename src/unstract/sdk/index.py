@@ -19,9 +19,7 @@ from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.exceptions import IndexingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.callback_manager import (
-    CallbackManager as UNCallbackManager,
-)
+from unstract.sdk.utils.callback_manager import CallbackManager as UNCallbackManager
 from unstract.sdk.vector_db import ToolVectorDB
 from unstract.sdk.x2txt import X2Text
 
@@ -31,13 +29,9 @@ class ToolIndex:
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
-    def get_text_from_index(
-        self, embedding_type: str, vector_db: str, doc_id: str
-    ):
+    def get_text_from_index(self, embedding_type: str, vector_db: str, doc_id: str):
         embedd_helper = ToolEmbedding(tool=self.tool)
-        embedding_li = embedd_helper.get_embedding(
-            adapter_instance_id=embedding_type
-        )
+        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
         if embedding_li is None:
             self.tool.stream_log(
                 f"Error loading {embedding_type}", level=LogLevel.ERROR
@@ -54,9 +48,7 @@ class ToolIndex:
         )
 
         if vector_db_li is None:
-            self.tool.stream_log(
-                f"Error loading {vector_db}", level=LogLevel.ERROR
-            )
+            self.tool.stream_log(f"Error loading {vector_db}", level=LogLevel.ERROR)
             raise SdkError(f"Error loading {vector_db}")
 
         try:
@@ -171,9 +163,7 @@ class ToolIndex:
 
         embedd_helper = ToolEmbedding(tool=self.tool)
 
-        embedding_li = embedd_helper.get_embedding(
-            adapter_instance_id=embedding_type
-        )
+        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
         if embedding_li is None:
             self.tool.stream_log(
                 f"Error loading {embedding_type}", level=LogLevel.ERROR
@@ -186,9 +176,7 @@ class ToolIndex:
             embedding_dimension=embedding_dimension,
         )
         if vector_db_li is None:
-            self.tool.stream_log(
-                f"Error loading {vector_db}", level=LogLevel.ERROR
-            )
+            self.tool.stream_log(f"Error loading {vector_db}", level=LogLevel.ERROR)
             raise SdkError(f"Error loading {vector_db}")
 
         doc_id_eq_filter = MetadataFilter.from_dict(
@@ -275,26 +263,20 @@ class ToolIndex:
             parser = SimpleNodeParser.from_defaults(
                 chunk_size=len(documents[0].text) + 10, chunk_overlap=0
             )
-            nodes = parser.get_nodes_from_documents(
-                documents, show_progress=True
-            )
+            nodes = parser.get_nodes_from_documents(documents, show_progress=True)
             node = nodes[0]
             node.embedding = embedding_li.get_query_embedding(" ")
             vector_db_li.add(nodes=[node])
             self.tool.stream_log("Added node to vector db")
         else:
-            storage_context = StorageContext.from_defaults(
-                vector_store=vector_db_li
-            )
+            storage_context = StorageContext.from_defaults(vector_store=vector_db_li)
             parser = SimpleNodeParser.from_defaults(
                 chunk_size=chunk_size, chunk_overlap=chunk_overlap
             )
 
             # Set callback_manager to collect Usage stats
             callback_manager = UNCallbackManager.set_callback_manager(
-                platform_api_key=self.tool.get_env_or_die(
-                    ToolEnv.PLATFORM_API_KEY
-                ),
+                platform_api_key=self.tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
                 embedding=embedding_li,
             )
 

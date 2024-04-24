@@ -1,10 +1,7 @@
 import logging
 from typing import Union
 
-from llama_index.core.vector_stores.types import (
-    BasePydanticVectorStore,
-    VectorStore,
-)
+from llama_index.core.vector_stores.types import BasePydanticVectorStore, VectorStore
 from unstract.adapters.constants import Common
 from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
@@ -57,12 +54,10 @@ class ToolVectorDB:
                 )
                 vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
                 if vector_db_adapter_id in self.vector_db_adapters:
-                    vector_db_adapter = self.vector_db_adapters[
-                        vector_db_adapter_id
-                    ][Common.METADATA][Common.ADAPTER]
-                    vector_db_metadata = vector_db_config.get(
-                        Common.ADAPTER_METADATA
-                    )
+                    vector_db_adapter = self.vector_db_adapters[vector_db_adapter_id][
+                        Common.METADATA
+                    ][Common.ADAPTER]
+                    vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
                     org = self.__get_org_id()
                     # Adding the collection prefix and embedding type
                     # to the metadata
@@ -71,14 +66,11 @@ class ToolVectorDB:
                         VectorDbConstants.EMBEDDING_DIMENSION
                     ] = embedding_dimension
 
-                    vector_db_adapter_class = vector_db_adapter(
-                        vector_db_metadata
-                    )
+                    vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
                     return vector_db_adapter_class.get_vector_db_instance()
                 else:
                     raise SdkError(
-                        f"VectorDB adapter not supported : "
-                        f"{vector_db_adapter_id}"
+                        f"VectorDB adapter not supported : " f"{vector_db_adapter_id}"
                     )
             except Exception as e:
                 self.tool.stream_log(

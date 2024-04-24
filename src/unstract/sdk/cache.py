@@ -14,9 +14,7 @@ class ToolCache(PlatformBase):
         - PLATFORM_SERVICE_API_KEY environment variable is required.
     """
 
-    def __init__(
-        self, tool: BaseTool, platform_host: str, platform_port: int
-    ) -> None:
+    def __init__(self, tool: BaseTool, platform_host: str, platform_port: int) -> None:
         """
         Args:
             tool (AbstractTool): Instance of AbstractTool
@@ -73,14 +71,10 @@ class ToolCache(PlatformBase):
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            self.tool.stream_log(
-                f"Successfully retrieved cached data for key: {key}"
-            )
+            self.tool.stream_log(f"Successfully retrieved cached data for key: {key}")
             return response.text
         elif response.status_code == 404:
-            self.tool.stream_log(
-                f"Data not found for key: {key}", level=LogLevel.WARN
-            )
+            self.tool.stream_log(f"Data not found for key: {key}", level=LogLevel.WARN)
             return None
         else:
             self.tool.stream_log(
@@ -104,9 +98,7 @@ class ToolCache(PlatformBase):
         response = requests.delete(url, headers=headers)
 
         if response.status_code == 200:
-            self.tool.stream_log(
-                f"Successfully deleted cached data for key: {key}"
-            )
+            self.tool.stream_log(f"Successfully deleted cached data for key: {key}")
             return True
         else:
             self.tool.stream_log(

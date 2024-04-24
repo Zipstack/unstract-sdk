@@ -28,17 +28,15 @@ class X2Text(metaclass=ABCMeta):
                 ][Common.ADAPTER]
                 x2text_metadata = x2text_config.get(Common.ADAPTER_METADATA)
                 # Add x2text service host, port and platform_service_key
-                x2text_metadata[
+                x2text_metadata[X2TextConstants.X2TEXT_HOST] = self.tool.get_env_or_die(
                     X2TextConstants.X2TEXT_HOST
-                ] = self.tool.get_env_or_die(X2TextConstants.X2TEXT_HOST)
-                x2text_metadata[
-                    X2TextConstants.X2TEXT_PORT
-                ] = self.tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
-                x2text_metadata[
-                    X2TextConstants.PLATFORM_SERVICE_API_KEY
-                ] = self.tool.get_env_or_die(
-                    X2TextConstants.PLATFORM_SERVICE_API_KEY
                 )
+                x2text_metadata[X2TextConstants.X2TEXT_PORT] = self.tool.get_env_or_die(
+                    X2TextConstants.X2TEXT_PORT
+                )
+                x2text_metadata[
+                    X2TextConstants.PLATFORM_SERVICE_API_KEY
+                ] = self.tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
 
                 x2text_adapter_class = x2text_adapter(x2text_metadata)
 

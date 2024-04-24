@@ -56,9 +56,7 @@ class BaseTool(ABC, StreamMixin):
         if parsed_args.command not in Command.static_commands():
             tool._exec_metadata = tool._get_exec_metadata()
             tool.workflow_id = tool._exec_metadata.get(MetadataKey.WORKFLOW_ID)
-            tool.execution_id = tool._exec_metadata.get(
-                MetadataKey.EXECUTION_ID
-            )
+            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID)
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
         return tool
 
@@ -108,15 +106,11 @@ class BaseTool(ABC, StreamMixin):
             self.stream_error_and_exit(f"{data_dir} is not a directory")
         return base_path.absolute()
 
-    def _get_file_from_data_dir(
-        self, file_to_get: str, raise_err: bool = False
-    ) -> str:
+    def _get_file_from_data_dir(self, file_to_get: str, raise_err: bool = False) -> str:
         base_path: Path = self._get_data_dir()
         file_path = base_path / file_to_get
         if raise_err and not file_path.exists():
-            self.stream_error_and_exit(
-                f"{file_to_get} is missing in TOOL_DATA_DIR"
-            )
+            self.stream_error_and_exit(f"{file_to_get} is missing in TOOL_DATA_DIR")
         return str(file_path)
 
     def get_source_file(self) -> str:
@@ -171,17 +165,11 @@ class BaseTool(ABC, StreamMixin):
             with open(metadata_path, encoding="utf-8") as f:
                 metadata_json = loads(f.read())
         except JSONDecodeError as e:
-            self.stream_error_and_exit(
-                f"JSON decode error for {metadata_path}: {e}"
-            )
+            self.stream_error_and_exit(f"JSON decode error for {metadata_path}: {e}")
         except FileNotFoundError:
-            self.stream_error_and_exit(
-                f"Metadata file not found at {metadata_path}"
-            )
+            self.stream_error_and_exit(f"Metadata file not found at {metadata_path}")
         except OSError as e:
-            self.stream_error_and_exit(
-                f"OS Error while opening {metadata_path}: {e}"
-            )
+            self.stream_error_and_exit(f"OS Error while opening {metadata_path}: {e}")
         return metadata_json
 
     def _write_exec_metadata(self, metadata: dict[str, Any]) -> None:
@@ -204,18 +192,12 @@ class BaseTool(ABC, StreamMixin):
         tool_metadata = {
             MetadataKey.TOOL_NAME: self.properties[PropKey.FUNCTION_NAME],
             MetadataKey.ELAPSED_TIME: self.elapsed_time(),
-            MetadataKey.OUTPUT_TYPE: self.properties[PropKey.RESULT][
-                PropKey.TYPE
-            ],
+            MetadataKey.OUTPUT_TYPE: self.properties[PropKey.RESULT][PropKey.TYPE],
         }
         if MetadataKey.TOTAL_ELA_TIME not in self._exec_metadata:
-            self._exec_metadata[
-                MetadataKey.TOTAL_ELA_TIME
-            ] = self.elapsed_time()
+            self._exec_metadata[MetadataKey.TOTAL_ELA_TIME] = self.elapsed_time()
         else:
-            self._exec_metadata[
-                MetadataKey.TOTAL_ELA_TIME
-            ] += self.elapsed_time()
+            self._exec_metadata[MetadataKey.TOTAL_ELA_TIME] += self.elapsed_time()
 
         if MetadataKey.TOOL_META not in self._exec_metadata:
             self._exec_metadata[MetadataKey.TOOL_META] = [tool_metadata]
@@ -231,9 +213,7 @@ class BaseTool(ABC, StreamMixin):
             data (Union[str, dict[str, Any]]): Data to be written
         """
         output_type = self.properties[PropKey.RESULT][PropKey.TYPE]
-        if output_type is PropKey.OutputType.JSON and not isinstance(
-            data, dict
-        ):
+        if output_type is PropKey.OutputType.JSON and not isinstance(data, dict):
             # TODO: Validate JSON type output with output schema as well
             self.stream_error_and_exit(
                 f"Expected result to have type {PropKey.OutputType.JSON} "

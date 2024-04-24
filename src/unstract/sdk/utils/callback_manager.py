@@ -2,9 +2,7 @@ import logging
 from typing import Callable, Optional, Union
 
 import tiktoken
-from llama_index.core.callbacks import (
-    CallbackManager as LlamaIndexCallbackManager,
-)
+from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackManager
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM

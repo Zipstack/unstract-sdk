@@ -58,9 +58,7 @@ class ToolValidator:
         props = self.tool.properties
         self.restrictions = props.get(PropKey.RESTRICTIONS)
 
-    def validate_pre_execution(
-        self, settings: dict[str, Any]
-    ) -> dict[str, Any]:
+    def validate_pre_execution(self, settings: dict[str, Any]) -> dict[str, Any]:
         """Performs validation before the tool executes on the input file.
 
         Args:
@@ -71,9 +69,7 @@ class ToolValidator:
         """
         input_file = Path(self.tool.get_input_file())
         if not input_file.is_file():
-            self.tool.stream_error_and_exit(
-                f"Input file not found: {input_file}"
-            )
+            self.tool.stream_error_and_exit(f"Input file not found: {input_file}")
         self._validate_restrictions(input_file)
         self._validate_settings_and_fill_defaults(settings)
         # Call tool's validation hook to execute custom validation
@@ -104,9 +100,7 @@ class ToolValidator:
             spec_schema = self.tool.spec
             DefaultsGeneratingValidator(spec_schema).validate(tool_settings)
         except JSONDecodeError as e:
-            self.tool.stream_error_and_exit(
-                f"Settings are not a valid JSON: {str(e)}"
-            )
+            self.tool.stream_error_and_exit(f"Settings are not a valid JSON: {str(e)}")
         except ValidationError as e:
             self.tool.stream_error_and_exit(f"Invalid settings: {str(e)}")
 
@@ -124,14 +118,10 @@ class ToolValidator:
             f"Checking input file size... (max file size: {max_file_size})"
         )
         file_size = input_file.stat().st_size
-        self.tool.stream_log(
-            f"Input file size: {self._human_readable_size(file_size)}"
-        )
+        self.tool.stream_log(f"Input file size: {self._human_readable_size(file_size)}")
 
         if file_size > max_size_in_bytes:
-            source_name = self.tool.get_exec_metadata.get(
-                MetadataKey.SOURCE_NAME
-            )
+            source_name = self.tool.get_exec_metadata.get(MetadataKey.SOURCE_NAME)
             self.tool.stream_error_and_exit(
                 f"File {source_name} exceeds the maximum "
                 f"allowed size of {max_file_size}"
@@ -196,9 +186,7 @@ class ToolValidator:
         """
         self.tool.stream_log("Checking input file type...")
 
-        allowed_exts: list[str] = self.restrictions.get(
-            PropKey.ALLOWED_FILE_TYPES
-        )
+        allowed_exts: list[str] = self.restrictions.get(PropKey.ALLOWED_FILE_TYPES)
         allowed_exts = [allowed_type.lower() for allowed_type in allowed_exts]
         if "*" in allowed_exts:
             self.tool.stream_log("Skipping check, tool allows all file types")
