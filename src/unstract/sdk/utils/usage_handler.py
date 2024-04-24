@@ -94,7 +94,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
-                external_service=self.llm_model.metadata.model_name,
+                model_name=self.llm_model.metadata.model_name,
                 **self.kwargs,
             )
 
@@ -110,6 +110,6 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
-                external_service=self.embed_model.model_name,
+                model_name=self.embed_model.model_name,
                 **self.kwargs,
             )

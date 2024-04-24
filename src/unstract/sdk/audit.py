@@ -15,15 +15,6 @@ class Audit(StreamMixin):
 
     Attributes:
         None
-
-    Example usage:
-        audit = Audit()
-        audit.push_usage_data(
-            token_counter,
-            workflow_id,
-            execution_id,
-            external_service,
-            event_type)
     """
 
     def __init__(self, log_level: LogLevel = LogLevel.INFO) -> None:
@@ -33,7 +24,7 @@ class Audit(StreamMixin):
         self,
         platform_api_key: str,
         token_counter: TokenCountingHandler = None,
-        external_service: str = "",
+        model_name: str = "",
         event_type: CBEventType = None,
         **kwargs,
     ) -> None:
@@ -43,7 +34,7 @@ class Audit(StreamMixin):
             platform_api_key (str): The platform API key.
             token_counter (TokenCountingHandler, optional): The token counter
                 object. Defaults to None.
-            external_service (str, optional): The name of the external service.
+            model_name (str, optional): The name of the model.
                 Defaults to "".
             event_type (CBEventType, optional): The type of the event. Defaults
                 to None.
@@ -75,12 +66,12 @@ class Audit(StreamMixin):
         run_id = kwargs.get("run_id", "")
 
         data = {
-            "usage_type": event_type,
-            "external_service": external_service,
             "workflow_id": workflow_id,
             "execution_id": execution_id,
             "adapter_instance_id": adapter_instance_id,
             "run_id": run_id,
+            "usage_type": event_type,
+            "model_name": model_name,
             "embedding_tokens": token_counter.total_embedding_token_count,
             "prompt_tokens": token_counter.prompt_llm_token_count,
             "completion_tokens": token_counter.completion_llm_token_count,
