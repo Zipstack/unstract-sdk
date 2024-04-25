@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:4713342aa52b74d4fbf6781c21b180976e9fb2b5c42f58d010bffb55b55b189a"
+content_hash = "sha256:735c12c16a4f9a04f2fe478515da9ca812329c5961c5172dd907d2d8fdf928e0"
 
 [[package]]
 name = "aiohttp"
@@ -1809,15 +1809,15 @@ files = [
 
 [[package]]
 name = "llama-parse"
-version = "0.4.1"
+version = "0.4.2"
 requires_python = "<4.0,>=3.8.1"
 summary = "Parse files into RAG-Optimized formats."
 dependencies = [
     "llama-index-core>=0.10.29",
 ]
 files = [
-    {file = "llama_parse-0.4.1-py3-none-any.whl", hash = "sha256:2c08962b66791c61fc360ae2042f953729c7b8decc3590d01fea5a98ca1f6676"},
-    {file = "llama_parse-0.4.1.tar.gz", hash = "sha256:d723af84d6a1fc99eb431915d21865d20b76d8a246dbaa124d1f96c956a644f7"},
+    {file = "llama_parse-0.4.2-py3-none-any.whl", hash = "sha256:5ce0390141f216dcd88c1123fea7f2a4f561d177f791a97217a3db3509dec4ff"},
+    {file = "llama_parse-0.4.2.tar.gz", hash = "sha256:fa04c09730b102155f6505de9cf91998c86d334581f0f12597c5eb47ca5db859"},
 ]
 
 [[package]]
@@ -2094,7 +2094,7 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.23.4"
+version = "1.23.6"
 requires_python = ">=3.7.1"
 summary = "The official Python library for the openai API"
 dependencies = [
@@ -2107,8 +2107,8 @@ dependencies = [
     "typing-extensions<5,>=4.7",
 ]
 files = [
-    {file = "openai-1.23.4-py3-none-any.whl", hash = "sha256:ecb72dcb415c8a1f1b6ef2fe32f8fc9a0942727b6365e8caedf916db5c19b180"},
-    {file = "openai-1.23.4.tar.gz", hash = "sha256:72c5a2ab2cda5727b6897f9d079aec16ceccf7dd2e0e0c84a21f7304d5484563"},
+    {file = "openai-1.23.6-py3-none-any.whl", hash = "sha256:f406c76ba279d16b9aca5a89cee0d968488e39f671f4dc6f0d690ac3c6f6fca1"},
+    {file = "openai-1.23.6.tar.gz", hash = "sha256:612de2d54cf580920a1156273f84aada6b3dca26d048f62eb5364a4314d7f449"},
 ]
 
 [[package]]
@@ -3531,7 +3531,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.12.0"
+version = "0.12.1"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
@@ -3557,8 +3557,8 @@ dependencies = [
     "singleton-decorator~=1.0.0",
 ]
 files = [
-    {file = "unstract_adapters-0.12.0-py3-none-any.whl", hash = "sha256:17fb31aa7702ce20093f026e2f5e3e7e3d92d403fa5d55f79bf9056f121db8f9"},
-    {file = "unstract_adapters-0.12.0.tar.gz", hash = "sha256:eea8c08914668157f583c2c920662b2b4e73a54f5e17d04dc6c5c01e413f0009"},
+    {file = "unstract_adapters-0.12.1-py3-none-any.whl", hash = "sha256:35bcce98d4b36d5369ddd0062cfc72f246e03e28d93d95d32384fc4a259a9a02"},
+    {file = "unstract_adapters-0.12.1.tar.gz", hash = "sha256:ad50071d8d8bcbf90cc70fb0d129ba48a22558940157b5a2e63745dc932f93ce"},
 ]
 
 [[package]]
