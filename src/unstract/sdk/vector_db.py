@@ -42,33 +42,40 @@ class ToolVectorDB:
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
     ) -> Union[BasePydanticVectorStore, VectorStore]:
+        """Gets an instance of LlamaIndex's VectorStore.
+
+        Args:
+            adapter_instance_id (str): UUID of the vector DB adapter
+            embedding_dimension (int): Embedding dimension for the vector store
+
+        Returns:
+            Union[BasePydanticVectorStore, VectorStore]: Vector store instance
+        """
         try:
             vector_db_config = ToolAdapter.get_adapter_config(
                 self.tool, adapter_instance_id
             )
             vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
-            if vector_db_adapter_id in self.vector_db_adapters:
-                vector_db_adapter = self.vector_db_adapters[
-                    vector_db_adapter_id
-                ][Common.METADATA][Common.ADAPTER]
-                vector_db_metadata = vector_db_config.get(
-                    Common.ADAPTER_METADATA
-                )
-                org = self.__get_org_id()
-                # Adding the collection prefix and embedding type
-                # to the metadata
-                vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
-                vector_db_metadata[
-                    VectorDbConstants.EMBEDDING_DIMENSION
-                ] = embedding_dimension
-
-                vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
-                return vector_db_adapter_class.get_vector_db_instance()
-            else:
+            if vector_db_adapter_id not in self.vector_db_adapters:
                 raise SdkError(
                     f"VectorDB adapter not supported : "
                     f"{vector_db_adapter_id}"
                 )
+
+            vector_db_adapter = self.vector_db_adapters[vector_db_adapter_id][
+                Common.METADATA
+            ][Common.ADAPTER]
+            vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
+            org = self.__get_org_id()
+            # Adding the collection prefix and embedding type
+            # to the metadata
+            vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
+            vector_db_metadata[
+                VectorDbConstants.EMBEDDING_DIMENSION
+            ] = embedding_dimension
+
+            vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
+            return vector_db_adapter_class.get_vector_db_instance()
         except Exception as e:
             self.tool.stream_log(
                 log=f"Unable to get vector_db {adapter_instance_id}: {e}",

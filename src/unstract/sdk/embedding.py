@@ -17,25 +17,33 @@ class ToolEmbedding:
         self.embedding_adapters = adapters
 
     def get_embedding(self, adapter_instance_id: str) -> BaseEmbedding:
+        """Gets an instance of LlamaIndex's embedding object.
+
+        Args:
+            adapter_instance_id (str): UUID of the embedding adapter
+
+        Returns:
+            BaseEmbedding: Embedding instance
+        """
         try:
             embedding_config_data = ToolAdapter.get_adapter_config(
                 self.tool, adapter_instance_id
             )
             embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
-            if embedding_adapter_id in self.embedding_adapters:
-                embedding_adapter = self.embedding_adapters[
-                    embedding_adapter_id
-                ][Common.METADATA][Common.ADAPTER]
-                embedding_metadata = embedding_config_data.get(
-                    Common.ADAPTER_METADATA
-                )
-                embedding_adapter_class = embedding_adapter(embedding_metadata)
-                return embedding_adapter_class.get_embedding_instance()
-            else:
+            if embedding_adapter_id not in self.embedding_adapters:
                 raise SdkError(
                     f"Embedding adapter not supported : "
                     f"{embedding_adapter_id}"
                 )
+
+            embedding_adapter = self.embedding_adapters[embedding_adapter_id][
+                Common.METADATA
+            ][Common.ADAPTER]
+            embedding_metadata = embedding_config_data.get(
+                Common.ADAPTER_METADATA
+            )
+            embedding_adapter_class = embedding_adapter(embedding_metadata)
+            return embedding_adapter_class.get_embedding_instance()
         except Exception as e:
             self.tool.stream_log(
                 log=f"Error getting embedding: {e}", level=LogLevel.ERROR
