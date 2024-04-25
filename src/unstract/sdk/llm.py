@@ -96,18 +96,18 @@ class ToolLLM:
                 self.tool, adapter_instance_id
             )
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
-            if llm_adapter_id in self.llm_adapters:
-                llm_adapter = self.llm_adapters[llm_adapter_id][
-                    Common.METADATA
-                ][Common.ADAPTER]
-                llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
-                llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
-                llm_instance: LLM = llm_adapter_class.get_llm_instance()
-                return llm_instance
-            else:
+            if llm_adapter_id not in self.llm_adapters:
                 raise SdkError(
                     f"LLM adapter not supported : " f"{llm_adapter_id}"
                 )
+
+            llm_adapter = self.llm_adapters[llm_adapter_id][
+                Common.METADATA
+            ][Common.ADAPTER]
+            llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
+            llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
+            llm_instance: LLM = llm_adapter_class.get_llm_instance()
+            return llm_instance
         except Exception as e:
             self.tool.stream_log(
                 log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR
