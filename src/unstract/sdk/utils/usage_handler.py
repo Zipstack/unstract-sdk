@@ -36,16 +36,14 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         platform_api_key: str,
         llm_model: LLM = None,
         embed_model: BaseEmbedding = None,
-        workflow_id: str = "",
-        execution_id: str = "",
         event_starts_to_ignore: Optional[list[CBEventType]] = None,
         event_ends_to_ignore: Optional[list[CBEventType]] = None,
         verbose: bool = False,
         log_level: LogLevel = LogLevel.INFO,
+        **kwargs,
     ) -> None:
+        self.kwargs = kwargs
         self._verbose = verbose
-        self.workflow_id = workflow_id
-        self.execution_id = execution_id
         self.token_counter = token_counter
         self.llm_model = llm_model
         self.embed_model = embed_model
@@ -96,9 +94,8 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
-                external_service=self.llm_model.metadata.model_name,
-                workflow_id=self.workflow_id,
-                execution_id=self.execution_id,
+                model_name=self.llm_model.metadata.model_name,
+                **self.kwargs,
             )
 
         elif (
@@ -113,7 +110,6 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
-                external_service=self.embed_model.model_name,
-                workflow_id=self.workflow_id,
-                execution_id=self.execution_id,
+                model_name=self.embed_model.model_name,
+                **self.kwargs,
             )
