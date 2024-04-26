@@ -38,12 +38,14 @@ class Audit(StreamMixin):
                 Defaults to "".
             event_type (CBEventType, optional): The type of the event. Defaults
                 to None.
-            workflow_id (str, optional): The ID of the workflow. Defaults to "".
-            execution_id (str, optional): The ID of the execution. Defaults
-                to "".
-            adapter_instance_id (str, optional): The adapter instance ID.
-                Defaults to "".
-            run_id (str, optional): The run ID. Defaults to "".
+            **kwargs: Optional keyword arguments.
+                workflow_id (str, optional): The ID of the workflow.
+                    Defaults to "".
+                execution_id (str, optional): The ID of the execution. Defaults
+                    to "".
+                adapter_instance_id (str, optional): The adapter instance ID.
+                    Defaults to "".
+                run_id (str, optional): The run ID. Defaults to "".
 
         Returns:
             None
@@ -85,7 +87,6 @@ class Audit(StreamMixin):
             response = requests.post(
                 url, headers=headers, json=data, timeout=30
             )
-            token_counter.reset_counts()
             if response.status_code != 200:
                 self.stream_log(
                     log=(
@@ -102,3 +103,6 @@ class Audit(StreamMixin):
                 log=f"Error while pushing usage details: {e}",
                 level=LogLevel.ERROR,
             )
+
+        finally:
+            token_counter.reset_counts()
