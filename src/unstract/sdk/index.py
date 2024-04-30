@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from llama_index.core import Document
@@ -20,9 +21,7 @@ from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.exceptions import IndexingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.callback_manager import (
-    CallbackManager as UNCallbackManager,
-)
+from unstract.sdk.utils.callback_manager import CallbackManager as UNCallbackManager
 from unstract.sdk.vector_db import ToolVectorDB
 from unstract.sdk.x2txt import X2Text
 
@@ -32,13 +31,9 @@ class ToolIndex:
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
-    def get_text_from_index(
-        self, embedding_type: str, vector_db: str, doc_id: str
-    ):
+    def get_text_from_index(self, embedding_type: str, vector_db: str, doc_id: str):
         embedd_helper = ToolEmbedding(tool=self.tool)
-        embedding_li = embedd_helper.get_embedding(
-            adapter_instance_id=embedding_type
-        )
+        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
 
         vdb_helper = ToolVectorDB(
@@ -139,26 +134,20 @@ class ToolIndex:
         Returns:
             str: A unique ID for the file and indexing arguments combination
         """
-        # Make file content hash if not available
-        if not file_hash:
-            file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
-
         doc_id = self.generate_file_id(
             tool_id=tool_id,
             file_hash=file_hash,
             vector_db=vector_db,
             embedding=embedding_type,
             x2text=x2text_adapter,
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
+            chunk_size=str(chunk_size),
+            chunk_overlap=str(chunk_overlap),
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
         # Get embedding instance
         embedd_helper = ToolEmbedding(tool=self.tool)
-        embedding_li = embedd_helper.get_embedding(
-            adapter_instance_id=embedding_type
-        )
+        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
 
         # Get vectorDB instance
@@ -255,26 +244,20 @@ class ToolIndex:
             parser = SimpleNodeParser.from_defaults(
                 chunk_size=len(documents[0].text) + 10, chunk_overlap=0
             )
-            nodes = parser.get_nodes_from_documents(
-                documents, show_progress=True
-            )
+            nodes = parser.get_nodes_from_documents(documents, show_progress=True)
             node = nodes[0]
             node.embedding = embedding_li.get_query_embedding(" ")
             vector_db_li.add(nodes=[node])
             self.tool.stream_log("Added node to vector db")
         else:
-            storage_context = StorageContext.from_defaults(
-                vector_store=vector_db_li
-            )
+            storage_context = StorageContext.from_defaults(vector_store=vector_db_li)
             parser = SimpleNodeParser.from_defaults(
                 chunk_size=chunk_size, chunk_overlap=chunk_overlap
             )
 
             # Set callback_manager to collect Usage stats
             callback_manager = UNCallbackManager.set_callback_manager(
-                platform_api_key=self.tool.get_env_or_die(
-                    ToolEnv.PLATFORM_API_KEY
-                ),
+                platform_api_key=self.tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
                 embedding=embedding_li,
             )
 
@@ -302,39 +285,45 @@ class ToolIndex:
     def generate_file_id(
         self,
         tool_id: str,
-        file_hash: str,
         vector_db: str,
         embedding: str,
         x2text: str,
         chunk_size: str,
         chunk_overlap: str,
+        file_path: Optional[str] = None,
+        file_hash: Optional[str] = None,
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
 
         Args:
             tool_id (str): Unique ID of the tool or workflow
-            file_hash (str): Hash of the file contents
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
             x2text (str): UUID of the X2Text adapter
             chunk_size (str): Chunk size for indexing
             chunk_overlap (str): Chunk overlap for indexing
+            file_path (Optional[str]): Path to the file that needs to be indexed.
+                Defaults to None. One of file_path or file_hash needs to be specified.
+            file_hash (Optional[str], optional): SHA256 hash of the file.
+                Defaults to None. If None, the hash is generated with file_path.
 
         Returns:
             str: Key representing unique ID for a file
         """
+        if not file_path and not file_hash:
+            raise ValueError("One of `file_path` or `file_hash` need to be provided")
+
+        if not file_hash:
+            file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
+
         index_key = {
             "tool_id": tool_id,
             "file_hash": file_hash,
-            "vector_db_config": ToolAdapter.get_adapter_config(
-                self.tool, vector_db
-            ),
-            "embedding_config": ToolAdapter.get_adapter_config(
-                self.tool, embedding
-            ),
+            "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
+            "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
             "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
             "chunk_size": chunk_size,
             "chunk_overlap": chunk_overlap,
         }
-        hashed_index_key = ToolUtils.hash_str(ToolUtils.json_to_str(index_key))
+        hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
