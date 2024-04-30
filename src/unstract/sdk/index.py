@@ -136,12 +136,13 @@ class ToolIndex:
         """
         doc_id = self.generate_file_id(
             tool_id=tool_id,
-            file_hash=file_hash,
             vector_db=vector_db,
             embedding=embedding_type,
             x2text=x2text_adapter,
             chunk_size=str(chunk_size),
             chunk_overlap=str(chunk_overlap),
+            file_path=file_path,
+            file_hash=file_hash,
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
@@ -316,6 +317,9 @@ class ToolIndex:
         if not file_hash:
             file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
 
+        # Whole adapter config is used currently even though it contains some keys
+        # which might not be relevant to indexing. This is easier for now than
+        # marking certain keys of the adapter config as necessary.
         index_key = {
             "tool_id": tool_id,
             "file_hash": file_hash,
@@ -325,5 +329,7 @@ class ToolIndex:
             "chunk_size": chunk_size,
             "chunk_overlap": chunk_overlap,
         }
+        # JSON keys are sorted to ensure that the same key gets hashed even in
+        # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
