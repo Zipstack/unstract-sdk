@@ -10,7 +10,7 @@ from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv, ToolSettingsKey
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
@@ -21,12 +21,9 @@ logger = logging.getLogger(__name__)
 class ToolVectorDB:
     """Class to handle VectorDB for Unstract Tools."""
 
-    def __init__(self, tool: BaseTool, tool_settings: dict[str, str] = {}):
+    def __init__(self, tool: BaseTool):
         self.tool = tool
         self.vector_db_adapters = adapters
-        self.vector_db_adapter_instance_id = tool_settings.get(
-            ToolSettingsKey.VECTOR_DB_ADAPTER_ID
-        )
 
     def __get_org_id(self) -> str:
         platform_helper = PlatformHelper(
@@ -45,49 +42,43 @@ class ToolVectorDB:
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
     ) -> Union[BasePydanticVectorStore, VectorStore]:
-        adapter_instance_id = (
-            adapter_instance_id
-            if adapter_instance_id
-            else self.vector_db_adapter_instance_id
-        )
-        if adapter_instance_id is not None:
-            try:
-                vector_db_config = ToolAdapter.get_adapter_config(
-                    self.tool, adapter_instance_id
-                )
-                vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
-                if vector_db_adapter_id in self.vector_db_adapters:
-                    vector_db_adapter = self.vector_db_adapters[
-                        vector_db_adapter_id
-                    ][Common.METADATA][Common.ADAPTER]
-                    vector_db_metadata = vector_db_config.get(
-                        Common.ADAPTER_METADATA
-                    )
-                    org = self.__get_org_id()
-                    # Adding the collection prefix and embedding type
-                    # to the metadata
-                    vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
-                    vector_db_metadata[
-                        VectorDbConstants.EMBEDDING_DIMENSION
-                    ] = embedding_dimension
+        """Gets an instance of LlamaIndex's VectorStore.
 
-                    vector_db_adapter_class = vector_db_adapter(
-                        vector_db_metadata
-                    )
-                    return vector_db_adapter_class.get_vector_db_instance()
-                else:
-                    raise SdkError(
-                        f"VectorDB adapter not supported : "
-                        f"{vector_db_adapter_id}"
-                    )
-            except Exception as e:
-                self.tool.stream_log(
-                    log=f"Unable to get vector_db {adapter_instance_id}: {e}",
-                    level=LogLevel.ERROR,
-                )
-                raise SdkError(f"Error getting vectorDB instance: {e}")
-        else:
-            raise SdkError(
-                f"Adapter_instance_id does not have "
-                f"a valid value: {adapter_instance_id}"
+        Args:
+            adapter_instance_id (str): UUID of the vector DB adapter
+            embedding_dimension (int): Embedding dimension for the vector store
+
+        Returns:
+            Union[BasePydanticVectorStore, VectorStore]: Vector store instance
+        """
+        try:
+            vector_db_config = ToolAdapter.get_adapter_config(
+                self.tool, adapter_instance_id
             )
+            vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
+            if vector_db_adapter_id not in self.vector_db_adapters:
+                raise SdkError(
+                    f"VectorDB adapter not supported : "
+                    f"{vector_db_adapter_id}"
+                )
+
+            vector_db_adapter = self.vector_db_adapters[vector_db_adapter_id][
+                Common.METADATA
+            ][Common.ADAPTER]
+            vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
+            org = self.__get_org_id()
+            # Adding the collection prefix and embedding type
+            # to the metadata
+            vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
+            vector_db_metadata[
+                VectorDbConstants.EMBEDDING_DIMENSION
+            ] = embedding_dimension
+
+            vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
+            return vector_db_adapter_class.get_vector_db_instance()
+        except Exception as e:
+            self.tool.stream_log(
+                log=f"Unable to get vector_db {adapter_instance_id}: {e}",
+                level=LogLevel.ERROR,
+            )
+            raise SdkError(f"Error getting vectorDB instance: {e}")

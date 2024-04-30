@@ -146,7 +146,3 @@ class ToolSettingsKey:
     EMBEDDING_ADAPTER_ID = "embeddingAdapterId"
     VECTOR_DB_ADAPTER_ID = "vectorDbAdapterId"
     X2TEXT_ADAPTER_ID = "x2TextAdapterId"
-
-
-class FileReaderSettings:
-    FILE_READER_CHUNK_SIZE = 8192
