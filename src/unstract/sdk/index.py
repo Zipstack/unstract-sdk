@@ -31,7 +31,9 @@ class ToolIndex:
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
-    def get_text_from_index(self, embedding_type: str, vector_db: str, doc_id: str):
+    def get_text_from_index(
+        self, embedding_type: str, vector_db: str, doc_id: str
+    ) -> Optional[str]:
         embedd_helper = ToolEmbedding(tool=self.tool)
         embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
         embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
@@ -326,8 +328,10 @@ class ToolIndex:
             "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
             "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
             "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
-            "chunk_size": chunk_size,
-            "chunk_overlap": chunk_overlap,
+            # Typed and hashed as strings since the final hash is persisted
+            # and this is required to be backward compatible
+            "chunk_size": str(chunk_size),
+            "chunk_overlap": str(chunk_overlap),
         }
         # JSON keys are sorted to ensure that the same key gets hashed even in
         # case where the fields are reordered.
