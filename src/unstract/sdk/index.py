@@ -230,6 +230,9 @@ class ToolIndex:
             }
         )
 
+        if not extracted_text:
+            raise IndexingError("No text available to index")
+
         # Check if chunking is required
         documents = []
         for item in full_text:
