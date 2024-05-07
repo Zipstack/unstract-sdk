@@ -15,3 +15,19 @@ class IndexingError(SdkError):
         if "404" in message:
             message = "Index not found. Please check vector db adapter settings."
         super().__init__(message)
+
+
+class ToolLLMError(SdkError):
+    DEFAULT_MESSAGE = "Error ocurred related to LLM"
+
+
+class ToolEmbeddingError(SdkError):
+    DEFAULT_MESSAGE = "Error ocurred related to embedding"
+
+
+class ToolVectorDBError(SdkError):
+    DEFAULT_MESSAGE = "Error ocurred related to vector DB"
+
+
+class RateLimitError(SdkError):
+    DEFAULT_MESSAGE = "Running into rate limit errors, please try again later"

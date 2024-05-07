@@ -12,10 +12,12 @@ dependencies = [
     "python-magic~=0.4.27",
     "python-dotenv==1.0.0",
     # LLM Triad
-    "unstract-adapters~=0.12.1",
+    "unstract-adapters~=0.14.0",
     "llama-index==0.10.28",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
+    # Error handling, remove after moving it to adapters
+    "openai~=1.21.2"
 ]
 readme = "README.md"
 urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }

@@ -4,7 +4,7 @@ from unstract.adapters.embedding import adapters
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
-from unstract.sdk.exceptions import SdkError
+from unstract.sdk.exceptions import SdkError, ToolEmbeddingError
 from unstract.sdk.tool.base import BaseTool
 
 
@@ -32,23 +32,20 @@ class ToolEmbedding:
             embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
             if embedding_adapter_id not in self.embedding_adapters:
                 raise SdkError(
-                    f"Embedding adapter not supported : "
-                    f"{embedding_adapter_id}"
+                    f"Embedding adapter not supported : " f"{embedding_adapter_id}"
                 )
 
             embedding_adapter = self.embedding_adapters[embedding_adapter_id][
                 Common.METADATA
             ][Common.ADAPTER]
-            embedding_metadata = embedding_config_data.get(
-                Common.ADAPTER_METADATA
-            )
+            embedding_metadata = embedding_config_data.get(Common.ADAPTER_METADATA)
             embedding_adapter_class = embedding_adapter(embedding_metadata)
             return embedding_adapter_class.get_embedding_instance()
         except Exception as e:
             self.tool.stream_log(
                 log=f"Error getting embedding: {e}", level=LogLevel.ERROR
             )
-            raise SdkError(f"Error getting embedding instance: {e}")
+            raise ToolEmbeddingError(f"Error getting embedding instance: {e}")
 
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
         embedding_list = embedding._get_text_embedding(self.__TEST_SNIPPET)
