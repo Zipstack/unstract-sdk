@@ -29,5 +29,9 @@ class ToolVectorDBError(SdkError):
     DEFAULT_MESSAGE = "Error ocurred related to vector DB"
 
 
+class X2TextError(SdkError):
+    DEFAULT_MESSAGE = "Error ocurred related to text extractor"
+
+
 class RateLimitError(SdkError):
     DEFAULT_MESSAGE = "Running into rate limit errors, please try again later"

@@ -45,7 +45,7 @@ class ToolEmbedding:
             self.tool.stream_log(
                 log=f"Error getting embedding: {e}", level=LogLevel.ERROR
             )
-            raise ToolEmbeddingError(f"Error getting embedding instance: {e}")
+            raise ToolEmbeddingError(f"Error getting embedding instance: {e}") from e
 
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
         embedding_list = embedding._get_text_embedding(self.__TEST_SNIPPET)

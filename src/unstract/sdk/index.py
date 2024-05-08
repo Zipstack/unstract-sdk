@@ -196,7 +196,7 @@ class ToolIndex:
                     f"Error deleting nodes for {doc_id}: {e}",
                     level=LogLevel.ERROR,
                 )
-                raise SdkError(f"Error deleting nodes for {doc_id}: {e}")
+                raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
             doc_id_found = False
 
         if doc_id_found:

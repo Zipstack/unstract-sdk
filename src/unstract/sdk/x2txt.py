@@ -7,7 +7,7 @@ from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
-from unstract.sdk.exceptions import SdkError
+from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.tool.base import BaseTool
 
 
@@ -28,17 +28,15 @@ class X2Text(metaclass=ABCMeta):
                 ][Common.ADAPTER]
                 x2text_metadata = x2text_config.get(Common.ADAPTER_METADATA)
                 # Add x2text service host, port and platform_service_key
-                x2text_metadata[
+                x2text_metadata[X2TextConstants.X2TEXT_HOST] = self.tool.get_env_or_die(
                     X2TextConstants.X2TEXT_HOST
-                ] = self.tool.get_env_or_die(X2TextConstants.X2TEXT_HOST)
-                x2text_metadata[
-                    X2TextConstants.X2TEXT_PORT
-                ] = self.tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
-                x2text_metadata[
-                    X2TextConstants.PLATFORM_SERVICE_API_KEY
-                ] = self.tool.get_env_or_die(
-                    X2TextConstants.PLATFORM_SERVICE_API_KEY
                 )
+                x2text_metadata[X2TextConstants.X2TEXT_PORT] = self.tool.get_env_or_die(
+                    X2TextConstants.X2TEXT_PORT
+                )
+                x2text_metadata[
+                    X2TextConstants.PLATFORM_SERVICE_API_KEY
+                ] = self.tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
 
                 x2text_adapter_class = x2text_adapter(x2text_metadata)
 
@@ -49,4 +47,4 @@ class X2Text(metaclass=ABCMeta):
                 log=f"Unable to get x2text adapter {adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
-            raise SdkError(f"Error getting vectorDB instance: {e}")
+            raise X2TextError(f"Error getting text extractor: {e}") from e

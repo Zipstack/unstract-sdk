@@ -103,7 +103,7 @@ class ToolLLM:
             self.tool.stream_log(
                 log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR
             )
-            raise ToolLLMError(f"Error getting llm instance: {e}")
+            raise ToolLLMError(f"Error getting llm instance: {e}") from e
 
     def get_max_tokens(self, reserved_for_output: int = 0) -> int:
         """Returns the maximum number of tokens that can be used for the LLM.
