@@ -77,4 +77,4 @@ class ToolVectorDB:
                 log=f"Unable to get vector_db {adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
-            raise ToolVectorDBError(f"Error getting vectorDB instance: {e}")
+            raise ToolVectorDBError(f"Error getting vectorDB instance: {e}") from e
