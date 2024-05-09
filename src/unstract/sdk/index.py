@@ -246,29 +246,33 @@ class ToolIndex:
             document.id_ = doc_id
             documents.append(document)
         self.tool.stream_log(f"Number of documents: {len(documents)}")
-        if chunk_size == 0:
-            parser = SimpleNodeParser.from_defaults(
-                chunk_size=len(documents[0].text) + 10, chunk_overlap=0
-            )
-            nodes = parser.get_nodes_from_documents(documents, show_progress=True)
-            node = nodes[0]
-            node.embedding = embedding_li.get_query_embedding(" ")
-            vector_db_li.add(nodes=[node])
-            self.tool.stream_log("Added node to vector db")
-        else:
-            storage_context = StorageContext.from_defaults(vector_store=vector_db_li)
-            parser = SimpleNodeParser.from_defaults(
-                chunk_size=chunk_size, chunk_overlap=chunk_overlap
-            )
 
-            # Set callback_manager to collect Usage stats
-            callback_manager = UNCallbackManager.set_callback_manager(
-                platform_api_key=self.tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-                embedding=embedding_li,
-            )
+        try:
+            if chunk_size == 0:
+                parser = SimpleNodeParser.from_defaults(
+                    chunk_size=len(documents[0].text) + 10, chunk_overlap=0
+                )
+                nodes = parser.get_nodes_from_documents(documents, show_progress=True)
+                node = nodes[0]
+                node.embedding = embedding_li.get_query_embedding(" ")
+                vector_db_li.add(nodes=[node])
+                self.tool.stream_log("Added node to vector db")
+            else:
+                storage_context = StorageContext.from_defaults(
+                    vector_store=vector_db_li
+                )
+                parser = SimpleNodeParser.from_defaults(
+                    chunk_size=chunk_size, chunk_overlap=chunk_overlap
+                )
 
-            self.tool.stream_log("Adding nodes to vector db...")
-            try:
+                # Set callback_manager to collect Usage stats
+                callback_manager = UNCallbackManager.set_callback_manager(
+                    platform_api_key=self.tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                    embedding=embedding_li,
+                )
+
+                self.tool.stream_log("Adding nodes to vector db...")
+
                 VectorStoreIndex.from_documents(
                     documents,
                     storage_context=storage_context,
@@ -277,13 +281,13 @@ class ToolIndex:
                     node_parser=parser,
                     callback_manager=callback_manager,
                 )
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error adding nodes to vector db: {e}",
-                    level=LogLevel.ERROR,
-                )
-                raise IndexingError(str(e)) from e
-            self.tool.stream_log("Added nodes to vector db")
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error adding nodes to vector db: {e}",
+                level=LogLevel.ERROR,
+            )
+            raise IndexingError(str(e)) from e
+        self.tool.stream_log("Added nodes to vector db")
 
         self.tool.stream_log("File has been indexed successfully")
         return doc_id
