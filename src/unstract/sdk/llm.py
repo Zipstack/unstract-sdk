@@ -70,9 +70,10 @@ class ToolLLM:
             return {"response": response}
         # TODO: Handle for all LLM providers
         except OpenAIAPIError as e:
-            msg = e.message
+            msg = "OpenAI error: "
+            msg += e.message
             if hasattr(e, "body") and "message" in e.body:
-                msg = e.body["message"]
+                msg += e.body["message"]
             if isinstance(e, OpenAIRateLimitError):
                 raise RateLimitError(msg)
             raise ToolLLMError(msg) from e
