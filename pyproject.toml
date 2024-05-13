@@ -12,7 +12,7 @@ dependencies = [
     "python-magic~=0.4.27",
     "python-dotenv==1.0.0",
     # LLM Triad
-    "unstract-adapters~=0.15.0",
+    "unstract-adapters~=0.15.1",
     "llama-index==0.10.28",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
