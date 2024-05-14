@@ -37,7 +37,7 @@ class Index:
         try:
             embedding = Embedding(
                 tool=self.tool,
-                adapter_intance_id=embedding_instance_id,
+                adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
             )
         except SdkError as e:
@@ -165,7 +165,7 @@ class Index:
         try:
             embedding = Embedding(
                 tool=self.tool,
-                adapter_intance_id=embedding_instance_id,
+                adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
             )
         except SdkError as e:

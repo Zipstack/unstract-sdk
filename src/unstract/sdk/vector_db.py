@@ -39,10 +39,12 @@ class VectorDB:
     ):
         self.tool = tool
         self.adapter_instance_id = adapter_instance_id
-        self.embedding_instance = embedding
-        self.embedding_dimension = (
-            embedding.length if embedding else VectorDB.DEFAULT_EMBEDDING_DIMENSION
-        )
+        if embedding:
+            self.embedding_instance = embedding.embedding_instance
+            self.embedding_dimension = embedding.length
+        else:
+            self.embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
+
         self.vector_db_instance: Union[
             BasePydanticVectorStore, VectorStore
         ] = self._get_vector_db()
@@ -105,6 +107,8 @@ class VectorDB:
         show_progress: bool = False,
         **kwargs,
     ) -> IndexType:
+        if not self.embedding_instance:
+            raise VectorDBError("Vector DB does not have an embedding initialised")
         parser = kwargs.get("node_parser")
         return VectorStoreIndex.from_documents(
             documents,
@@ -115,6 +119,8 @@ class VectorDB:
         )
 
     def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
+        if not self.embedding_instance:
+            raise VectorDBError("Vector DB does not have an embedding initialised")
         return VectorStoreIndex.from_vector_store(
             vector_store=self.vector_db_instance,
             embed_model=self.embedding_instance,

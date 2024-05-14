@@ -1,6 +1,7 @@
 from abc import ABCMeta
-from typing import Optional
+from typing import Any, Optional
 
+from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
 from unstract.adapters.x2text.constants import X2TextConstants
@@ -51,3 +52,15 @@ class X2Text(metaclass=ABCMeta):
                 level=LogLevel.ERROR,
             )
             raise X2TextError(f"Error getting text extractor: {e}") from e
+
+    def process(
+        self,
+        input_file_path: str,
+        output_file_path: Optional[str] = None,
+        **kwargs: dict[Any, Any],
+    ) -> str:
+        return self.x2text_instance.process(input_file_path, output_file_path, **kwargs)
+
+    @deprecated("Use the class instance")
+    def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
+        return self.x2text_instance

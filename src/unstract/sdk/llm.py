@@ -2,7 +2,8 @@ import logging
 import re
 from typing import Any, Optional
 
-from llama_index.core.llms import LLM, CompletionResponse
+from llama_index.core.llms import LLM as LlamaIndexLLM
+from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
 from typing_extensions import deprecated
@@ -40,7 +41,7 @@ class LLM:
         self.tool = tool
         self.adapter_instance_id = adapter_instance_id
         self.usage_kwargs = usage_kwargs.copy()
-        self.llm_instance: LLM = self._get_llm(self.adapter_instance_id)
+        self.llm_instance: LlamaIndexLLM = self._get_llm(self.adapter_instance_id)
 
     def run_completion(
         self,
@@ -64,7 +65,7 @@ class LLM:
                 raise RateLimitError(msg)
             raise LLMError(msg) from e
 
-    def _get_llm(self, adapter_instance_id: str) -> LLM:
+    def _get_llm(self, adapter_instance_id: str) -> LlamaIndexLLM:
         """Returns the LLM object for the tool.
 
         Returns:
@@ -106,7 +107,7 @@ class LLM:
         return self.MAX_TOKENS - reserved_for_output
 
     @deprecated("Use the new class LLM")
-    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LLM:
+    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
         return self.llm_instance
 
 

@@ -15,9 +15,9 @@ class Embedding:
     MAX_TOKENS = 1024 * 16
     embedding_adapters = adapters
 
-    def __init__(self, tool: BaseTool, adapter_intance_id: str, **usage_kwargs):
+    def __init__(self, tool: BaseTool, adapter_instance_id: str, **usage_kwargs):
         self.tool = tool
-        self.adapter_instance_id = adapter_intance_id
+        self.adapter_instance_id = adapter_instance_id
         self.usage_kwargs = usage_kwargs
         self.embedding_instance: BaseEmbedding = self._get_embedding()
         self.length: int = self._get_embedding_length()

@@ -1,6 +1,7 @@
 from abc import ABCMeta
 from typing import Optional
 
+from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.ocr import adapters
 from unstract.adapters.ocr.ocr_adapter import OCRAdapter
@@ -42,3 +43,12 @@ class OCR(metaclass=ABCMeta):
                 level=LogLevel.ERROR,
             )
             return None
+
+    def process(
+        self, input_file_path: str, output_file_path: Optional[str] = None
+    ) -> str:
+        return self.ocr_instance.process(input_file_path, output_file_path)
+
+    @deprecated("Use the class instance")
+    def get_x2text(self, adapter_instance_id: str) -> OCRAdapter:
+        return self.ocr_instance
