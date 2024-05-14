@@ -89,7 +89,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         ):
             model_name = self.llm_model.metadata.model_name
             # Need to push the data to via platform service
-            self.stream_log(log=f"Pushing llm usage llm for model {model_name}")
+            self.stream_log(log=f"Pushing llm usage for model {model_name}")
             Audit(log_level=self.log_level).push_usage_data(
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
@@ -105,7 +105,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         ):
             model_name = self.embed_model.model_name
             # Need to push the data to via platform service
-            self.stream_log(log=f"Pushing llm usage llm for model {model_name}")
+            self.stream_log(log=f"Pushing embedding usage for model {model_name}")
             Audit(log_level=self.log_level).push_usage_data(
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,

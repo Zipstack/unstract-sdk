@@ -2,9 +2,7 @@ import json
 from typing import Optional
 
 from llama_index.core import Document
-from llama_index.core.indices.vector_store import VectorStoreIndex
 from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.core.storage import StorageContext
 from llama_index.core.vector_stores import (
     FilterOperator,
     MetadataFilter,
@@ -13,75 +11,90 @@ from llama_index.core.vector_stores import (
     VectorStoreQueryResult,
 )
 from unstract.adapters.exceptions import AdapterError
-from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv
-from unstract.sdk.embedding import ToolEmbedding
+from unstract.sdk.constants import LogLevel
+from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.callback_manager import CallbackManager as UNCallbackManager
-from unstract.sdk.vector_db import ToolVectorDB
+from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
 
 
-class ToolIndex:
+class Index:
     def __init__(self, tool: BaseTool):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
     def get_text_from_index(
-        self, embedding_type: str, vector_db: str, doc_id: str
-    ) -> Optional[str]:
-        embedd_helper = ToolEmbedding(tool=self.tool)
-        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
-        embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
-
-        vdb_helper = ToolVectorDB(
-            tool=self.tool,
-        )
-        vector_db_li = vdb_helper.get_vector_db(
-            adapter_instance_id=vector_db,
-            embedding_dimension=embedding_dimension,
-        )
+        self,
+        embedding_instance_id: str,
+        vector_db_instance_id: str,
+        doc_id: str,
+        **usage_kwargs,
+    ):
+        try:
+            embedding = Embedding(
+                tool=self.tool,
+                adapter_intance_id=embedding_instance_id,
+                usage_kwargs=usage_kwargs,
+            )
+        except SdkError as e:
+            self.tool.stream_log(embedding_instance_id)
+            raise SdkError(f"Error loading {embedding_instance_id}: {e}")
 
         try:
-            self.tool.stream_log(f">>> Querying {vector_db}...")
-            self.tool.stream_log(f">>> {doc_id}")
-            doc_id_eq_filter = MetadataFilter.from_dict(
-                {
-                    "key": "doc_id",
-                    "operator": FilterOperator.EQ,
-                    "value": doc_id,
-                }
+            vector_db = VectorDB(
+                tool=self.tool,
+                adapter_instance_id=vector_db_instance_id,
+                embedding=embedding,
             )
-            filters = MetadataFilters(filters=[doc_id_eq_filter])
-            q = VectorStoreQuery(
-                query_embedding=embedding_li.get_query_embedding(" "),
-                doc_ids=[doc_id],
-                filters=filters,
-                similarity_top_k=10000,
-            )
-        except Exception as e:
-            self.tool.stream_log(
-                f"Error querying {vector_db}: {e}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error querying {vector_db}: {e}")
 
-        n: VectorStoreQueryResult = vector_db_li.query(query=q)
-        if len(n.nodes) > 0:
-            self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
-            all_text = ""
-            for node in n.nodes:
-                all_text += node.get_content()
-            return all_text
-        else:
-            self.tool.stream_log(f"No nodes found for {doc_id}")
-            return None
+        except SdkError as e:
+            self.tool.stream_log(
+                f"Error loading {vector_db_instance_id}", level=LogLevel.ERROR
+            )
+            raise SdkError(f"Error loading {vector_db_instance_id}: {e}")
+        try:
+            try:
+                self.tool.stream_log(f">>> Querying {vector_db_instance_id}...")
+                self.tool.stream_log(f">>> {doc_id}")
+                doc_id_eq_filter = MetadataFilter.from_dict(
+                    {
+                        "key": "doc_id",
+                        "operator": FilterOperator.EQ,
+                        "value": doc_id,
+                    }
+                )
+                filters = MetadataFilters(filters=[doc_id_eq_filter])
+                q = VectorStoreQuery(
+                    query_embedding=embedding.get_query_embedding(" "),
+                    doc_ids=[doc_id],
+                    filters=filters,
+                    similarity_top_k=10000,
+                )
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error querying {vector_db}: {e}", level=LogLevel.ERROR
+                )
+                raise SdkError(f"Error querying {vector_db}: {e}")
+
+            n: VectorStoreQueryResult = vector_db.query(query=q)
+            if len(n.nodes) > 0:
+                self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
+                all_text = ""
+                for node in n.nodes:
+                    all_text += node.get_content()
+                return all_text
+            else:
+                self.tool.stream_log(f"No nodes found for {doc_id}")
+                return None
+        finally:
+            vector_db.close()
 
     def _cleanup_text(self, full_text):
-        # Remove text which is not requried
+        # Remove text which is not required
         full_text_lines = full_text.split("\n")
         new_context_lines = []
         empty_line_count = 0
@@ -104,24 +117,25 @@ class ToolIndex:
     def index_file(
         self,
         tool_id: str,
-        embedding_type: str,
-        vector_db: str,
-        x2text_adapter: str,
+        embedding_instance_id: str,
+        vector_db_instance_id: str,
+        x2text_instance_id: str,
         file_path: str,
         chunk_size: int,
         chunk_overlap: int,
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
+        **usage_kwargs,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
         Args:
-            tool_id (str): UUID of the tool (workflow_id in case its called
+            tool_id (str): UUID of the tool (workflow_id in case it's called
                 from workflow)
-            embedding_type (str): UUID of the embedding service configured
-            vector_db (str): UUID of the vector DB configured
-            x2text_adapter (str): UUID of the x2text adapter configured.
+            embedding_instance_id (str): UUID of the embedding service configured
+            vector_db_instance_id (str): UUID of the vector DB configured
+            x2text_instance_id (str): UUID of the x2text adapter configured.
                 This is to extract text from documents.
             file_path (str): Path to the file that needs to be indexed.
             chunk_size (int): Chunk size to be used for indexing
@@ -138,9 +152,9 @@ class ToolIndex:
         """
         doc_id = self.generate_file_id(
             tool_id=tool_id,
-            vector_db=vector_db,
-            embedding=embedding_type,
-            x2text=x2text_adapter,
+            vector_db=vector_db_instance_id,
+            embedding=embedding_instance_id,
+            x2text=x2text_instance_id,
             chunk_size=str(chunk_size),
             chunk_overlap=str(chunk_overlap),
             file_path=file_path,
@@ -148,19 +162,29 @@ class ToolIndex:
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
-        # Get embedding instance
-        embedd_helper = ToolEmbedding(tool=self.tool)
-        embedding_li = embedd_helper.get_embedding(adapter_instance_id=embedding_type)
-        embedding_dimension = embedd_helper.get_embedding_length(embedding_li)
+        try:
+            embedding = Embedding(
+                tool=self.tool,
+                adapter_intance_id=embedding_instance_id,
+                usage_kwargs=usage_kwargs,
+            )
+        except SdkError as e:
+            self.tool.stream_log(
+                f"Error loading {embedding_instance_id}", level=LogLevel.ERROR
+            )
+            raise SdkError(f"Error loading {embedding_instance_id}: {e}")
 
-        # Get vectorDB instance
-        vdb_helper = ToolVectorDB(
-            tool=self.tool,
-        )
-        vector_db_li = vdb_helper.get_vector_db(
-            adapter_instance_id=vector_db,
-            embedding_dimension=embedding_dimension,
-        )
+        try:
+            vector_db = VectorDB(
+                tool=self.tool,
+                adapter_instance_id=vector_db_instance_id,
+                embedding=embedding,
+            )
+        except SdkError as e:
+            self.tool.stream_log(
+                f"Error loading {vector_db_instance_id}", level=LogLevel.ERROR
+            )
+            raise SdkError(f"Error loading {vector_db_instance_id}: {e}")
 
         # Checking if document is already indexed against doc_id
         doc_id_eq_filter = MetadataFilter.from_dict(
@@ -168,14 +192,14 @@ class ToolIndex:
         )
         filters = MetadataFilters(filters=[doc_id_eq_filter])
         q = VectorStoreQuery(
-            query_embedding=embedding_li.get_query_embedding(" "),
+            query_embedding=embedding.get_query_embedding(" "),
             doc_ids=[doc_id],
             filters=filters,
         )
 
         doc_id_found = False
         try:
-            n: VectorStoreQueryResult = vector_db_li.query(query=q)
+            n: VectorStoreQueryResult = vector_db.query(query=q)
             if len(n.nodes) > 0:
                 doc_id_found = True
                 self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
@@ -183,13 +207,13 @@ class ToolIndex:
                 self.tool.stream_log(f"No nodes found for {doc_id}")
         except Exception as e:
             self.tool.stream_log(
-                f"Error querying {vector_db}: {e}", level=LogLevel.ERROR
+                f"Error querying {vector_db_instance_id}: {e}", level=LogLevel.ERROR
             )
 
         if doc_id_found and reindex:
             # Delete the nodes for the doc_id
             try:
-                vector_db_li.delete(ref_doc_id=doc_id)
+                vector_db.delete(ref_doc_id=doc_id)
                 self.tool.stream_log(f"Deleted nodes for {doc_id}")
             except Exception as e:
                 self.tool.stream_log(
@@ -213,11 +237,8 @@ class ToolIndex:
                 with open(file_path, encoding="utf-8") as file:
                     extracted_text = file.read()
             else:
-                x2text = X2Text(tool=self.tool)
-                x2text_adapter_inst: X2TextAdapter = x2text.get_x2text(
-                    adapter_instance_id=x2text_adapter
-                )
-                extracted_text = x2text_adapter_inst.process(
+                x2text = X2Text(tool=self.tool, adapter_instance_id=x2text_instance_id)
+                extracted_text = x2text.process(
                     input_file_path=file_path, output_file_path=output_file_path
                 )
         except AdapterError as e:
@@ -254,33 +275,24 @@ class ToolIndex:
                 )
                 nodes = parser.get_nodes_from_documents(documents, show_progress=True)
                 node = nodes[0]
-                node.embedding = embedding_li.get_query_embedding(" ")
-                vector_db_li.add(nodes=[node])
+                node.embedding = embedding.get_query_embedding(" ")
+                vector_db.add(nodes=[node])
                 self.tool.stream_log("Added node to vector db")
             else:
-                storage_context = StorageContext.from_defaults(
-                    vector_store=vector_db_li
-                )
+                storage_context = vector_db.get_storage_context()
                 parser = SimpleNodeParser.from_defaults(
                     chunk_size=chunk_size, chunk_overlap=chunk_overlap
                 )
 
-                # Set callback_manager to collect Usage stats
-                callback_manager = UNCallbackManager.set_callback_manager(
-                    platform_api_key=self.tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-                    embedding=embedding_li,
-                )
+            self.tool.stream_log("Adding nodes to vector db...")
 
-                self.tool.stream_log("Adding nodes to vector db...")
-
-                VectorStoreIndex.from_documents(
-                    documents,
-                    storage_context=storage_context,
-                    show_progress=True,
-                    embed_model=embedding_li,
-                    node_parser=parser,
-                    callback_manager=callback_manager,
-                )
+            vector_db.get_vector_store_index_from_storage_context(
+                documents,
+                storage_context=storage_context,
+                show_progress=True,
+                embed_model=embedding,
+                node_parser=parser,
+            )
         except Exception as e:
             self.tool.stream_log(
                 f"Error adding nodes to vector db: {e}",
@@ -344,3 +356,7 @@ class ToolIndex:
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
+
+
+# Legacy
+ToolIndex = Index

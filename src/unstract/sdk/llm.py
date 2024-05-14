@@ -5,26 +5,29 @@ from typing import Any, Optional
 from llama_index.core.llms import LLM, CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
+from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
-from unstract.sdk.exceptions import RateLimitError, SdkError, ToolLLMError
+from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.utils.callback_manager import CallbackManager as UNCallbackManager
 
 logger = logging.getLogger(__name__)
 
 
-class ToolLLM:
+class LLM:
     """Class to handle LLMs for Unstract Tools."""
 
     json_regex = re.compile(r"\[(?:.|\n)*\]|\{(?:.|\n)*\}")
+    json_regex = re.compile(r"\{(?:.|\n)*\}")
+    llm_adapters = adapters
+    MAX_TOKENS = 1024 * 4
 
-    def __init__(self, tool: BaseTool):
-        """ToolLLM constructor.
+    def __init__(self, tool: BaseTool, adapter_instance_id: str, **usage_kwargs):
+        """
 
         Notes:
             - "Azure OpenAI" : Environment variables required
@@ -35,36 +38,19 @@ class ToolLLM:
             tool (AbstractTool): Instance of AbstractTool
         """
         self.tool = tool
-        self.max_tokens = 1024 * 4
-        self.llm_adapters = adapters
-        self.llm_config_data: Optional[dict[str, Any]] = None
+        self.adapter_instance_id = adapter_instance_id
+        self.usage_kwargs = usage_kwargs.copy()
+        self.llm_instance: LLM = self._get_llm(self.adapter_instance_id)
 
-    @classmethod
     def run_completion(
-        cls,
-        llm: LLM,
-        platform_api_key: str,
+        self,
         prompt: str,
         retries: int = 3,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
-        # Setup callback manager to collect Usage stats
-        UNCallbackManager.set_callback_manager(
-            platform_api_key=platform_api_key, llm=llm, **kwargs
-        )
-        # Removing specific keys from kwargs
-        new_kwargs = kwargs.copy()
-        for key in [
-            "workflow_id",
-            "execution_id",
-            "adapter_instance_id",
-            "run_id",
-        ]:
-            new_kwargs.pop(key, None)
-
         try:
-            response: CompletionResponse = llm.complete(prompt, **new_kwargs)
-            match = cls.json_regex.search(response.text)
+            response: CompletionResponse = self.llm_instance.complete(prompt, **kwargs)
+            match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
             return {"response": response}
@@ -76,9 +62,9 @@ class ToolLLM:
                 msg += e.body["message"]
             if isinstance(e, OpenAIRateLimitError):
                 raise RateLimitError(msg)
-            raise ToolLLMError(msg) from e
+            raise LLMError(msg) from e
 
-    def get_llm(self, adapter_instance_id: str) -> LLM:
+    def _get_llm(self, adapter_instance_id: str) -> LLM:
         """Returns the LLM object for the tool.
 
         Returns:
@@ -87,7 +73,7 @@ class ToolLLM:
         """
         try:
             llm_config_data = ToolAdapter.get_adapter_config(
-                self.tool, adapter_instance_id
+                self.tool, self.adapter_instance_id
             )
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
             if llm_adapter_id not in self.llm_adapters:
@@ -104,9 +90,9 @@ class ToolLLM:
             self.tool.stream_log(
                 log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR
             )
-            raise ToolLLMError(f"Error getting llm instance: {e}") from e
+            raise LLMError(f"Error getting llm instance: {e}") from e
 
-    def get_max_tokens(self, reserved_for_output: int = 0) -> int:
+    def _get_max_tokens(self, reserved_for_output: int = 0) -> int:
         """Returns the maximum number of tokens that can be used for the LLM.
 
         Args:
@@ -117,4 +103,12 @@ class ToolLLM:
             Returns:
                 int: The maximum number of tokens that can be used for the LLM.
         """
-        return self.max_tokens - reserved_for_output
+        return self.MAX_TOKENS - reserved_for_output
+
+    @deprecated("Use the new class LLM")
+    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LLM:
+        return self.llm_instance
+
+
+# Legacy
+ToolLLM = LLM

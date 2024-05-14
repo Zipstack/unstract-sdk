@@ -17,15 +17,15 @@ class IndexingError(SdkError):
         super().__init__(message)
 
 
-class ToolLLMError(SdkError):
+class LLMError(SdkError):
     DEFAULT_MESSAGE = "Error ocurred related to LLM"
 
 
-class ToolEmbeddingError(SdkError):
+class EmbeddingError(SdkError):
     DEFAULT_MESSAGE = "Error ocurred related to embedding"
 
 
-class ToolVectorDBError(SdkError):
+class VectorDBError(SdkError):
     DEFAULT_MESSAGE = "Error ocurred related to vector DB"
 
 

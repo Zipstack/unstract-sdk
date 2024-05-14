@@ -2,9 +2,7 @@ import logging
 from typing import Callable, Optional, Union
 
 import tiktoken
-from llama_index.core.callbacks import (
-    CallbackManager as LlamaIndexCallbackManager,
-)
+from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackManager
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
@@ -39,10 +37,9 @@ class CallbackManager:
     @staticmethod
     def set_callback_manager(
         platform_api_key: str,
-        llm: Optional[LLM] = None,
-        embedding: Optional[BaseEmbedding] = None,
+        model: Union[LLM, BaseEmbedding],
         **kwargs,
-    ) -> LlamaIndexCallbackManager:
+    ) -> None:
         """Sets the standard callback manager for the llm. This is to be called
         explicitly whenever there is a need for the callback handling defined
         here as handlers is to be invoked.
@@ -61,12 +58,32 @@ class CallbackManager:
             )
         """
 
-        if llm:
-            tokenizer = CallbackManager.get_tokenizer(llm)
-        elif embedding:
-            tokenizer = CallbackManager.get_tokenizer(embedding)
+        # Nothing to do if callback manager is already set for the instance
+        if (
+            model
+            and model.callback_manager
+            and len(model.callback_manager.handlers) > 0
+        ):
+            return
 
+        model.callback_manager = CallbackManager.get_callback_manager(
+            model, platform_api_key, **kwargs
+        )
+
+    @staticmethod
+    def get_callback_manager(
+        model: Union[LLM, BaseEmbedding],
+        platform_api_key: str,
+        **kwargs,
+    ) -> LlamaIndexCallbackManager:
+        tokenizer = CallbackManager.get_tokenizer(model)
         token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
+        llm = None
+        embedding = None
+        if isinstance(model, LLM):
+            llm = model
+        elif isinstance(model, BaseEmbedding):
+            embedding = model
         usage_handler = UsageHandler(
             token_counter=token_counter,
             platform_api_key=platform_api_key,
@@ -78,12 +95,6 @@ class CallbackManager:
         callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(
             handlers=[token_counter, usage_handler]
         )
-
-        if llm is not None:
-            llm.callback_manager = callback_manager
-        if embedding is not None:
-            embedding.callback_manager = callback_manager
-
         return callback_manager
 
     @staticmethod
