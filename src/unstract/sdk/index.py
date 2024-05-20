@@ -284,15 +284,15 @@ class Index:
                     chunk_size=chunk_size, chunk_overlap=chunk_overlap
                 )
 
-            self.tool.stream_log("Adding nodes to vector db...")
+                self.tool.stream_log("Adding nodes to vector db...")
 
-            vector_db.get_vector_store_index_from_storage_context(
-                documents,
-                storage_context=storage_context,
-                show_progress=True,
-                embed_model=embedding,
-                node_parser=parser,
-            )
+                vector_db.get_vector_store_index_from_storage_context(
+                    documents,
+                    storage_context=storage_context,
+                    show_progress=True,
+                    embed_model=embedding,
+                    node_parser=parser,
+                )
         except Exception as e:
             self.tool.stream_log(
                 f"Error adding nodes to vector db: {e}",
