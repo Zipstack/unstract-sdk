@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from llama_index.core import Document
 from llama_index.core.node_parser import SimpleNodeParser
@@ -32,7 +32,7 @@ class Index:
         embedding_instance_id: str,
         vector_db_instance_id: str,
         doc_id: str,
-        **usage_kwargs,
+        usage_kwargs: dict[Any, Any] = None,
     ):
         try:
             embedding = Embedding(
@@ -126,7 +126,7 @@ class Index:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
-        **usage_kwargs,
+        usage_kwargs: dict[Any, Any] = None,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -265,6 +265,7 @@ class Index:
                 metadata={"section": item["section"]},
             )
             document.id_ = doc_id
+            document.doc_id = doc_id
             documents.append(document)
         self.tool.stream_log(f"Number of documents: {len(documents)}")
 
@@ -276,7 +277,7 @@ class Index:
                 nodes = parser.get_nodes_from_documents(documents, show_progress=True)
                 node = nodes[0]
                 node.embedding = embedding.get_query_embedding(" ")
-                vector_db.add(nodes=[node])
+                vector_db.add(doc_id, nodes=[node])
                 self.tool.stream_log("Added node to vector db")
             else:
                 storage_context = vector_db.get_storage_context()

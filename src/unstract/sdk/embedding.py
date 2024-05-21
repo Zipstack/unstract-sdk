@@ -1,3 +1,5 @@
+from typing import Any
+
 from llama_index.core.base.embeddings.base import Embedding
 from llama_index.core.embeddings import BaseEmbedding
 from typing_extensions import deprecated
@@ -5,9 +7,10 @@ from unstract.adapters.constants import Common
 from unstract.adapters.embedding import adapters
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.callback_manager import CallbackManager
 
 
 class Embedding:
@@ -15,12 +18,25 @@ class Embedding:
     MAX_TOKENS = 1024 * 16
     embedding_adapters = adapters
 
-    def __init__(self, tool: BaseTool, adapter_instance_id: str, **usage_kwargs):
-        self.tool = tool
-        self.adapter_instance_id = adapter_instance_id
-        self.usage_kwargs = usage_kwargs
-        self.embedding_instance: BaseEmbedding = self._get_embedding()
-        self.length: int = self._get_embedding_length()
+    def __init__(
+        self,
+        tool: BaseTool,
+        adapter_instance_id: str,
+        usage_kwargs: dict[Any, Any] = None,
+    ):
+        self._tool = tool
+        self._adapter_instance_id = adapter_instance_id
+        self._embedding_instance: BaseEmbedding = self._get_embedding()
+        self._length: int = self._get_embedding_length()
+
+        self._usage_kwargs = usage_kwargs.copy()
+        self._usage_kwargs["adapter_instance_id"] = adapter_instance_id
+        platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+        CallbackManager.set_callback_manager(
+            platform_api_key=platform_api_key,
+            model=self._embedding_instance,
+            kwargs=self._usage_kwargs,
+        )
 
     def _get_embedding(self) -> BaseEmbedding:
         """Gets an instance of LlamaIndex's embedding object.
@@ -33,7 +49,7 @@ class Embedding:
         """
         try:
             embedding_config_data = ToolAdapter.get_adapter_config(
-                self.tool, self.adapter_instance_id
+                self._tool, self._adapter_instance_id
             )
             embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
             if embedding_adapter_id not in self.embedding_adapters:
@@ -48,16 +64,18 @@ class Embedding:
             embedding_adapter_class = embedding_adapter(embedding_metadata)
             return embedding_adapter_class.get_embedding_instance()
         except Exception as e:
-            self.tool.stream_log(
+            self._tool.stream_log(
                 log=f"Error getting embedding: {e}", level=LogLevel.ERROR
             )
             raise EmbeddingError(f"Error getting embedding instance: {e}") from e
 
     def get_query_embedding(self, query: str) -> Embedding:
-        return self.embedding_instance.get_query_embedding(query)
+        return self._embedding_instance.get_query_embedding(query)
 
     def _get_embedding_length(self) -> int:
-        embedding_list = self.embedding_instance._get_text_embedding(self._TEST_SNIPPET)
+        embedding_list = self._embedding_instance._get_text_embedding(
+            self._TEST_SNIPPET
+        )
         embedding_dimension = len(embedding_list)
         return embedding_dimension
 

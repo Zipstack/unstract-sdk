@@ -38,7 +38,7 @@ class CallbackManager:
     def set_callback_manager(
         platform_api_key: str,
         model: Union[LLM, BaseEmbedding],
-        **kwargs,
+        kwargs,
     ) -> None:
         """Sets the standard callback manager for the llm. This is to be called
         explicitly whenever there is a need for the callback handling defined
@@ -67,14 +67,14 @@ class CallbackManager:
             return
 
         model.callback_manager = CallbackManager.get_callback_manager(
-            model, platform_api_key, **kwargs
+            model, platform_api_key, kwargs
         )
 
     @staticmethod
     def get_callback_manager(
         model: Union[LLM, BaseEmbedding],
         platform_api_key: str,
-        **kwargs,
+        kwargs,
     ) -> LlamaIndexCallbackManager:
         tokenizer = CallbackManager.get_tokenizer(model)
         token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
@@ -89,7 +89,7 @@ class CallbackManager:
             platform_api_key=platform_api_key,
             llm_model=llm,
             embed_model=embedding,
-            **kwargs,
+            kwargs=kwargs,
         )
 
         callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(

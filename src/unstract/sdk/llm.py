@@ -12,9 +12,10 @@ from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.callback_manager import CallbackManager
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,12 @@ class LLM:
     llm_adapters = adapters
     MAX_TOKENS = 1024 * 4
 
-    def __init__(self, tool: BaseTool, adapter_instance_id: str, **usage_kwargs):
+    def __init__(
+        self,
+        tool: BaseTool,
+        adapter_instance_id: str,
+        usage_kwargs: dict[Any, Any] = None,
+    ):
         """
 
         Notes:
@@ -38,10 +44,18 @@ class LLM:
         Args:
             tool (AbstractTool): Instance of AbstractTool
         """
-        self.tool = tool
-        self.adapter_instance_id = adapter_instance_id
-        self.usage_kwargs = usage_kwargs.copy()
-        self.llm_instance: LlamaIndexLLM = self._get_llm(self.adapter_instance_id)
+        self._tool = tool
+        self._adapter_instance_id = adapter_instance_id
+        self._llm_instance: LlamaIndexLLM = self._get_llm(self._adapter_instance_id)
+
+        self._usage_kwargs = usage_kwargs.copy()
+        self._usage_kwargs["adapter_instance_id"] = adapter_instance_id
+        platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+        CallbackManager.set_callback_manager(
+            platform_api_key=platform_api_key,
+            model=self._llm_instance,
+            kwargs=self._usage_kwargs,
+        )
 
     def run_completion(
         self,
@@ -50,7 +64,7 @@ class LLM:
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
         try:
-            response: CompletionResponse = self.llm_instance.complete(prompt, **kwargs)
+            response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
@@ -74,7 +88,7 @@ class LLM:
         """
         try:
             llm_config_data = ToolAdapter.get_adapter_config(
-                self.tool, self.adapter_instance_id
+                self._tool, self._adapter_instance_id
             )
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
             if llm_adapter_id not in self.llm_adapters:
@@ -88,7 +102,7 @@ class LLM:
             llm_instance: LLM = llm_adapter_class.get_llm_instance()
             return llm_instance
         except Exception as e:
-            self.tool.stream_log(
+            self._tool.stream_log(
                 log=f"Unable to get llm instance: {e}", level=LogLevel.ERROR
             )
             raise LLMError(f"Error getting llm instance: {e}") from e
@@ -108,7 +122,7 @@ class LLM:
 
     @deprecated("Use the new class LLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
-        return self.llm_instance
+        return self._llm_instance
 
 
 # Legacy

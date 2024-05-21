@@ -37,23 +37,23 @@ class VectorDB:
         adapter_instance_id: str,
         embedding: Optional[Embedding] = None,
     ):
-        self.tool = tool
-        self.adapter_instance_id = adapter_instance_id
+        self._tool = tool
+        self._adapter_instance_id = adapter_instance_id
         if embedding:
-            self.embedding_instance = embedding.embedding_instance
-            self.embedding_dimension = embedding.length
+            self._embedding_instance = embedding._embedding_instance
+            self._embedding_dimension = embedding._length
         else:
-            self.embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
+            self._embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
 
-        self.vector_db_instance: Union[
+        self._vector_db_instance: Union[
             BasePydanticVectorStore, VectorStore
         ] = self._get_vector_db()
 
     def _get_org_id(self) -> str:
         platform_helper = PlatformHelper(
-            tool=self.tool,
-            platform_host=self.tool.get_env_or_die(ToolEnv.PLATFORM_HOST),
-            platform_port=self.tool.get_env_or_die(ToolEnv.PLATFORM_PORT),
+            tool=self._tool,
+            platform_host=self._tool.get_env_or_die(ToolEnv.PLATFORM_HOST),
+            platform_port=self._tool.get_env_or_die(ToolEnv.PLATFORM_PORT),
         )
         # fetch org id from bearer token
         platform_details = platform_helper.get_platform_details()
@@ -71,7 +71,7 @@ class VectorDB:
         """
         try:
             vector_db_config = ToolAdapter.get_adapter_config(
-                self.tool, self.adapter_instance_id
+                self._tool, self._adapter_instance_id
             )
             vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
             if vector_db_adapter_id not in self.vector_db_adapters:
@@ -89,13 +89,13 @@ class VectorDB:
             vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
             vector_db_metadata[
                 VectorDbConstants.EMBEDDING_DIMENSION
-            ] = self.embedding_dimension
+            ] = self._embedding_dimension
 
             self.vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
             return self.vector_db_adapter_class.get_vector_db_instance()
         except Exception as e:
-            self.tool.stream_log(
-                log=f"Unable to get vector_db {self.adapter_instance_id}: {e}",
+            self._tool.stream_log(
+                log=f"Unable to get vector_db {self._adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
             raise VectorDBError(f"Error getting vectorDB instance: {e}") from e
@@ -107,51 +107,61 @@ class VectorDB:
         show_progress: bool = False,
         **kwargs,
     ) -> IndexType:
-        if not self.embedding_instance:
+        if not self._embedding_instance:
             raise VectorDBError("Vector DB does not have an embedding initialised")
         parser = kwargs.get("node_parser")
         return VectorStoreIndex.from_documents(
             documents,
             storage_context=storage_context,
             show_progress=show_progress,
-            embed_model=self.embedding_instance,
+            embed_model=self._embedding_instance,
             node_parser=parser,
         )
 
     def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
-        if not self.embedding_instance:
+        if not self._embedding_instance:
             raise VectorDBError("Vector DB does not have an embedding initialised")
         return VectorStoreIndex.from_vector_store(
-            vector_store=self.vector_db_instance,
-            embed_model=self.embedding_instance,
+            vector_store=self._vector_db_instance,
+            embed_model=self._embedding_instance,
             kwargs=kwargs,
         )
 
     def get_storage_context(self) -> StorageContext:
-        return StorageContext.from_defaults(vector_store=self.vector_db_instance)
+        return StorageContext.from_defaults(vector_store=self._vector_db_instance)
 
     def query(self, query) -> VectorStoreQueryResult:
-        return self.vector_db_instance.query(query=query)
+        return self._vector_db_instance.query(query=query)
 
     def delete(self, ref_doc_id: str, **delete_kwargs: Any) -> None:
-        self.vector_db_instance.delete(
+        if not self.vector_db_adapter_class:
+            raise VectorDBError("Vector DB is not initialised properly")
+        self.vector_db_adapter_class.delete(
             ref_doc_id=ref_doc_id, delete_kwargs=delete_kwargs
         )
 
     def add(
         self,
+        ref_doc_id,
         nodes: list[BaseNode],
     ) -> list[str]:
-        return self.vector_db_instance.add(nodes=nodes)
+        if not self.vector_db_adapter_class:
+            raise VectorDBError("Vector DB is not initialised properly")
+        self.vector_db_adapter_class.add(
+            ref_doc_id=ref_doc_id,
+            nodes=nodes,
+        )
 
     @deprecated("Use the new class VectorDB")
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
     ) -> Union[BasePydanticVectorStore, VectorStore]:
-        self.embedding_dimension = embedding_dimension
-        return self.vector_db_instance
+        self._embedding_dimension = embedding_dimension
+        return self._vector_db_instance
 
     def close(self, **kwargs):
+        if not self.vector_db_adapter_class:
+            raise VectorDBError("Vector DB is not initialised properly")
         self.vector_db_adapter_class.close()
 
 
