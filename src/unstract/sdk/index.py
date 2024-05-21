@@ -265,7 +265,6 @@ class Index:
                 metadata={"section": item["section"]},
             )
             document.id_ = doc_id
-            document.doc_id = doc_id
             documents.append(document)
         self.tool.stream_log(f"Number of documents: {len(documents)}")
 
