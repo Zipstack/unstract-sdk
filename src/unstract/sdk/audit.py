@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 
@@ -26,7 +28,7 @@ class Audit(StreamMixin):
         token_counter: TokenCountingHandler = None,
         model_name: str = "",
         event_type: CBEventType = None,
-        **kwargs,
+        kwargs: dict[Any, Any] = None,
     ) -> None:
         """Pushes the usage data to the platform service.
 
@@ -84,9 +86,7 @@ class Audit(StreamMixin):
         headers = {"Authorization": f"Bearer {bearer_token}"}
 
         try:
-            response = requests.post(
-                url, headers=headers, json=data, timeout=30
-            )
+            response = requests.post(url, headers=headers, json=data, timeout=30)
             if response.status_code != 200:
                 self.stream_log(
                     log=(

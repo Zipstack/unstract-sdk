@@ -40,9 +40,9 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         event_ends_to_ignore: Optional[list[CBEventType]] = None,
         verbose: bool = False,
         log_level: LogLevel = LogLevel.INFO,
-        **kwargs,
+        kwargs: dict[Any, Any] = None,
     ) -> None:
-        self.kwargs = kwargs
+        self.kwargs = kwargs.copy()
         self._verbose = verbose
         self.token_counter = token_counter
         self.llm_model = llm_model
@@ -70,7 +70,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         payload: Optional[dict[str, Any]] = None,
         event_id: str = "",
         parent_id: str = "",
-        **kwargs: Any,
+        kwargs: dict[Any, Any] = None,
     ) -> str:
         return event_id
 
@@ -79,7 +79,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         event_type: CBEventType,
         payload: Optional[dict[str, Any]] = None,
         event_id: str = "",
-        **kwargs: Any,
+        kwargs: dict[Any, Any] = None,
     ) -> None:
         """Push the usage of  LLM or Embedding to platform service."""
         if (
@@ -89,13 +89,13 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         ):
             model_name = self.llm_model.metadata.model_name
             # Need to push the data to via platform service
-            self.stream_log(log=f"Pushing llm usage llm for model {model_name}")
+            self.stream_log(log=f"Pushing llm usage for model {model_name}")
             Audit(log_level=self.log_level).push_usage_data(
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
                 model_name=self.llm_model.metadata.model_name,
-                **self.kwargs,
+                kwargs=self.kwargs,
             )
 
         elif (
@@ -105,11 +105,11 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
         ):
             model_name = self.embed_model.model_name
             # Need to push the data to via platform service
-            self.stream_log(log=f"Pushing llm usage llm for model {model_name}")
+            self.stream_log(log=f"Pushing embedding usage for model {model_name}")
             Audit(log_level=self.log_level).push_usage_data(
                 platform_api_key=self.platform_api_key,
                 token_counter=self.token_counter,
                 event_type=event_type,
                 model_name=self.embed_model.model_name,
-                **self.kwargs,
+                kwargs=self.kwargs,
             )

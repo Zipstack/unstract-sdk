@@ -1,5 +1,7 @@
 from abc import ABCMeta
+from typing import Any, Optional
 
+from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
 from unstract.adapters.x2text.constants import X2TextConstants
@@ -12,14 +14,16 @@ from unstract.sdk.tool.base import BaseTool
 
 
 class X2Text(metaclass=ABCMeta):
-    def __init__(self, tool: BaseTool):
+    def __init__(self, tool: BaseTool, adapter_instance_id: str):
         self.tool = tool
         self.x2text_adapters = adapters
+        self.adapter_instance_id = adapter_instance_id
+        self.x2text_instance: X2TextAdapter = self._get_x2text()
 
-    def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
+    def _get_x2text(self) -> Optional[X2TextAdapter]:
         try:
             x2text_config = ToolAdapter.get_adapter_config(
-                self.tool, adapter_instance_id
+                self.tool, self.adapter_instance_id
             )
             x2text_adapter_id = x2text_config.get(Common.ADAPTER_ID)
             if x2text_adapter_id in self.x2text_adapters:
@@ -38,13 +42,25 @@ class X2Text(metaclass=ABCMeta):
                     X2TextConstants.PLATFORM_SERVICE_API_KEY
                 ] = self.tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
 
-                x2text_adapter_class = x2text_adapter(x2text_metadata)
+                self.x2text_instance = x2text_adapter(x2text_metadata)
 
-                return x2text_adapter_class
+                return self.x2text_instance
 
         except Exception as e:
             self.tool.stream_log(
-                log=f"Unable to get x2text adapter {adapter_instance_id}: {e}",
+                log=f"Unable to get x2text adapter {self.adapter_instance_id}: {e}",
                 level=LogLevel.ERROR,
             )
             raise X2TextError(f"Error getting text extractor: {e}") from e
+
+    def process(
+        self,
+        input_file_path: str,
+        output_file_path: Optional[str] = None,
+        **kwargs: dict[Any, Any],
+    ) -> str:
+        return self.x2text_instance.process(input_file_path, output_file_path, **kwargs)
+
+    @deprecated("Use the class instance")
+    def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
+        return self.x2text_instance

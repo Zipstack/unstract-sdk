@@ -146,3 +146,8 @@ class ToolSettingsKey:
     EMBEDDING_ADAPTER_ID = "embeddingAdapterId"
     VECTOR_DB_ADAPTER_ID = "vectorDbAdapterId"
     X2TEXT_ADAPTER_ID = "x2TextAdapterId"
+    ADAPTER_INSTANCE_ID = "adapter_instance_id"
+    EMBEDDING_DIMENSION = "embedding_dimension"
+    RUN_ID = "run_id"
+    WORKFLOW_ID = "workflow_id"
+    EXECUTION_ID = "execution_id"
