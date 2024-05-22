@@ -24,7 +24,6 @@ class LLM:
     """Class to handle LLMs for Unstract Tools."""
 
     json_regex = re.compile(r"\[(?:.|\n)*\]|\{(?:.|\n)*\}")
-    json_regex = re.compile(r"\{(?:.|\n)*\}")
     llm_adapters = adapters
     MAX_TOKENS = 1024 * 4
 

@@ -76,9 +76,9 @@ class Index:
                 )
             except Exception as e:
                 self.tool.stream_log(
-                    f"Error querying {vector_db}: {e}", level=LogLevel.ERROR
+                    f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
                 )
-                raise SdkError(f"Error querying {vector_db}: {e}")
+                raise SdkError(f"Error Error building query {vector_db}: {e}")
 
             n: VectorStoreQueryResult = vector_db.query(query=q)
             if len(n.nodes) > 0:
