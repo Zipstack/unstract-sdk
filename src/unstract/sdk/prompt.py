@@ -1,7 +1,14 @@
 from typing import Any, Optional
 
 import requests
-from requests import RequestException, Response
+from requests import (
+    ConnectionError,
+    HTTPError,
+    RequestException,
+    Response,
+    Timeout,
+    TooManyRedirects,
+)
 
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
@@ -25,9 +32,7 @@ class PromptTool:
 
         """
         self.tool = tool
-        self.base_url = SdkHelper.get_platform_base_url(
-            prompt_host, prompt_port
-        )
+        self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
         self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
     def answer_prompt(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -36,9 +41,7 @@ class PromptTool:
     def single_pass_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._post_call("single-pass-extraction", payload)
 
-    def _post_call(
-        self, url_path: str, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _post_call(self, url_path: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
 
@@ -63,17 +66,26 @@ class PromptTool:
             "structure_output": "",
         }
         url: str = f"{self.base_url}/{url_path}"
-        headers: dict[str, str] = {
-            "Authorization": f"Bearer {self.bearer_token}"
-        }
+        headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
+        response: Response = Response()
         try:
             # TODO: Review timeout value
-            response: Response = requests.post(
-                url, json=payload, headers=headers, timeout=600
-            )
+            response = requests.post(url, json=payload, headers=headers, timeout=600)
             response.raise_for_status()
             result["status"] = "OK"
             result["structure_output"] = response.text
+        except ConnectionError as connect_err:
+            msg = "Unable to connect to prompt service. Please contact admin."
+            result["error"] = self._stringify_and_stream_err(connect_err, msg)
+        except Timeout as time_out:
+            msg = "Request to run prompt has timed out"
+            result["error"] = self._stringify_and_stream_err(time_out, msg)
+        except TooManyRedirects as too_many_redirects:
+            msg = "Too many redirects while connecting to prompt service."
+            result["error"] = self._stringify_and_stream_err(too_many_redirects, msg)
+        except HTTPError as http_err:
+            msg = "Error while fetching prompt response."
+            result["error"] = self._stringify_and_stream_err(http_err, msg)
         except RequestException as e:
             # Extract error information from the response if available
             error_message = str(e)
@@ -90,6 +102,14 @@ class PromptTool:
                 level=LogLevel.ERROR,
             )
         return result
+
+    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> str:
+        error_message = str(err)
+        self.tool.stream_log(
+            f"{msg}: {error_message}",
+            level=LogLevel.ERROR,
+        )
+        return error_message
 
     @staticmethod
     def get_exported_tool(
