@@ -1,9 +1,9 @@
+import logging
 from typing import Any, Optional
 
 import requests
 from requests import (
     ConnectionError,
-    HTTPError,
     RequestException,
     Response,
     Timeout,
@@ -13,6 +13,8 @@ from requests import (
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+
+logger = logging.getLogger(__name__)
 
 
 class PromptTool:
@@ -76,16 +78,18 @@ class PromptTool:
             result["structure_output"] = response.text
         except ConnectionError as connect_err:
             msg = "Unable to connect to prompt service. Please contact admin."
-            result["error"] = self._stringify_and_stream_err(connect_err, msg)
+            self._stringify_and_stream_err(connect_err, msg)
+            result["error"] = msg
         except Timeout as time_out:
-            msg = "Request to run prompt has timed out"
-            result["error"] = self._stringify_and_stream_err(time_out, msg)
+            msg = """Request to run prompt has timed out.
+                   Probable causes would be connectivity issues in LLMs."""
+            self._stringify_and_stream_err(time_out, msg)
+            result["error"] = msg
         except TooManyRedirects as too_many_redirects:
-            msg = "Too many redirects while connecting to prompt service."
-            result["error"] = self._stringify_and_stream_err(too_many_redirects, msg)
-        except HTTPError as http_err:
-            msg = "Error while fetching prompt response."
-            result["error"] = self._stringify_and_stream_err(http_err, msg)
+            msg = """Too many redirects while connecting to prompt service."
+                    Try clearing cache or contact admin"""
+            self._stringify_and_stream_err(too_many_redirects, msg)
+            result["error"] = msg
         except RequestException as e:
             # Extract error information from the response if available
             error_message = str(e)
@@ -103,13 +107,11 @@ class PromptTool:
             )
         return result
 
-    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> str:
+    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> None:
         error_message = str(err)
-        self.tool.stream_log(
-            f"{msg}: {error_message}",
-            level=LogLevel.ERROR,
-        )
-        return error_message
+        trace = f"{msg}: {error_message}"
+        self.tool.stream_log(trace, level=LogLevel.ERROR)
+        logger.error(trace)
 
     @staticmethod
     def get_exported_tool(
