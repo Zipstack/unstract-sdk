@@ -71,9 +71,10 @@ class LLM:
         # TODO: Handle for all LLM providers
         except OpenAIAPIError as e:
             msg = "OpenAI error: "
-            msg += e.message
             if hasattr(e, "body") and "message" in e.body:
                 msg += e.body["message"]
+            else:
+                msg += e.message
             if isinstance(e, OpenAIRateLimitError):
                 raise RateLimitError(msg)
             raise LLMError(msg) from e
