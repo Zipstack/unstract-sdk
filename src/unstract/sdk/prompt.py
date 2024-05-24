@@ -86,7 +86,7 @@ class PromptTool:
             self._stringify_and_stream_err(time_out, msg)
             result["error"] = msg
         except TooManyRedirects as too_many_redirects:
-            msg = """Too many redirects while connecting to prompt service."
+            msg = """Too many redirects while connecting to prompt service.
                     Try clearing cache or contact admin"""
             self._stringify_and_stream_err(too_many_redirects, msg)
             result["error"] = msg
