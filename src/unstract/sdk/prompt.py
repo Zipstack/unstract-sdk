@@ -65,7 +65,6 @@ class PromptTool:
         headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
         response: Response = Response()
         try:
-            # TODO: Review timeout value
             response = requests.post(url, json=payload, headers=headers, timeout=600)
             response.raise_for_status()
             result["status"] = "OK"
@@ -77,7 +76,7 @@ class PromptTool:
         except Timeout as time_out:
             msg = (
                 "Request to run prompt has timed out. "
-                "Probable causes would be connectivity issues in LLMs."
+                "Probable causes might be connectivity issues in LLMs."
             )
             self._stringify_and_stream_err(time_out, msg)
             result["error"] = msg
