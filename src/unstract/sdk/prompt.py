@@ -82,7 +82,7 @@ class PromptTool:
             result["error"] = msg
         except Timeout as time_out:
             msg = """Request to run prompt has timed out.
-                   Probable causes would be connectivity issues in LLMs."""
+                   Probable cause might be connectivity issues in LLMs."""
             self._stringify_and_stream_err(time_out, msg)
             result["error"] = msg
         except TooManyRedirects as too_many_redirects:
