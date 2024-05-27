@@ -2,13 +2,7 @@ import logging
 from typing import Any, Optional
 
 import requests
-from requests import (
-    ConnectionError,
-    RequestException,
-    Response,
-    Timeout,
-    TooManyRedirects,
-)
+from requests import ConnectionError, RequestException, Response, Timeout
 
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
@@ -81,14 +75,11 @@ class PromptTool:
             self._stringify_and_stream_err(connect_err, msg)
             result["error"] = msg
         except Timeout as time_out:
-            msg = """Request to run prompt has timed out.
-                   Probable causes would be connectivity issues in LLMs."""
+            msg = (
+                "Request to run prompt has timed out. "
+                "Probable causes would be connectivity issues in LLMs."
+            )
             self._stringify_and_stream_err(time_out, msg)
-            result["error"] = msg
-        except TooManyRedirects as too_many_redirects:
-            msg = """Too many redirects while connecting to prompt service."
-                    Try clearing cache or contact admin"""
-            self._stringify_and_stream_err(too_many_redirects, msg)
             result["error"] = msg
         except RequestException as e:
             # Extract error information from the response if available
