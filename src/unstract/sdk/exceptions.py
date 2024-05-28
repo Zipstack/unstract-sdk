@@ -33,5 +33,9 @@ class X2TextError(SdkError):
     DEFAULT_MESSAGE = "Error ocurred related to text extractor"
 
 
+class OCRError(SdkError):
+    DEFAULT_MESSAGE = "Error ocurred related to OCR"
+
+
 class RateLimitError(SdkError):
     DEFAULT_MESSAGE = "Running into rate limit errors, please try again later"

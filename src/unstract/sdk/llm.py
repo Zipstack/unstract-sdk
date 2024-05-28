@@ -30,7 +30,7 @@ class LLM:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str,
+        adapter_instance_id: str = None,
         usage_kwargs: dict[Any, Any] = None,
     ):
         """
@@ -45,25 +45,30 @@ class LLM:
         """
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
-        self._llm_instance: LlamaIndexLLM = self._get_llm(self._adapter_instance_id)
+        self._llm_instance: LlamaIndexLLM = None
+        self._usage_kwargs = usage_kwargs if usage_kwargs else dict()
+        self._initialise()
 
-        self._usage_kwargs = usage_kwargs.copy()
-        self._usage_kwargs["adapter_instance_id"] = adapter_instance_id
-        platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-        CallbackManager.set_callback_manager(
-            platform_api_key=platform_api_key,
-            model=self._llm_instance,
-            kwargs=self._usage_kwargs,
-        )
+    def _initialise(self):
+        if self._adapter_instance_id:
+            self._llm_instance = self._get_llm(self._adapter_instance_id)
+            self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
+            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+            CallbackManager.set_callback(
+                platform_api_key=platform_api_key,
+                model=self._llm_instance,
+                kwargs=self._usage_kwargs,
+            )
 
-    def run_completion(
-        self,
+    @classmethod
+    def complete(
+        cls,
         prompt: str,
         retries: int = 3,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
         try:
-            response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
+            response: CompletionResponse = cls._llm_instance.complete(prompt, **kwargs)
             match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
@@ -87,6 +92,8 @@ class LLM:
             (llama_index.llms.base.LLM)
         """
         try:
+            if not self._adapter_instance_id:
+                raise LLMError("Adapter instance ID not set. " "Initialisation failed")
             llm_config_data = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
@@ -107,7 +114,7 @@ class LLM:
             )
             raise LLMError(f"Error getting llm instance: {e}") from e
 
-    def _get_max_tokens(self, reserved_for_output: int = 0) -> int:
+    def get_max_tokens(self, reserved_for_output: int = 0) -> int:
         """Returns the maximum number of tokens that can be used for the LLM.
 
         Args:
@@ -120,9 +127,52 @@ class LLM:
         """
         return self.MAX_TOKENS - reserved_for_output
 
-    @deprecated("Use the new class LLM")
+    @deprecated("Deprecated class and method. Use LLM instead of ToolLLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
+        if not self._llm_instance:
+            self._adapter_instance_id = adapter_instance_id
+            self._initialise()
         return self._llm_instance
+
+    @classmethod
+    @deprecated("Deprecated class and method. Use LLM and complete() instead")
+    def run_completion(
+        cls,
+        llm: LlamaIndexLLM,
+        platform_api_key: str,
+        prompt: str,
+        retries: int = 3,
+        **kwargs: Any,
+    ) -> Optional[dict[str, Any]]:
+        # Setup callback manager to collect Usage stats
+        CallbackManager.set_callback_manager(
+            platform_api_key=platform_api_key, llm=llm, **kwargs
+        )
+        # Removing specific keys from kwargs
+        new_kwargs = kwargs.copy()
+        for key in [
+            "workflow_id",
+            "execution_id",
+            "adapter_instance_id",
+            "run_id",
+        ]:
+            new_kwargs.pop(key, None)
+
+        try:
+            response: CompletionResponse = llm.complete(prompt, **new_kwargs)
+            match = cls.json_regex.search(response.text)
+            if match:
+                response.text = match.group(0)
+            return {"response": response}
+        # TODO: Handle for all LLM providers
+        except OpenAIAPIError as e:
+            msg = "OpenAI error: "
+            msg += e.message
+            if hasattr(e, "body") and "message" in e.body:
+                msg += e.body["message"]
+            if isinstance(e, OpenAIRateLimitError):
+                raise RateLimitError(msg)
+            raise LLMError(msg) from e
 
 
 # Legacy

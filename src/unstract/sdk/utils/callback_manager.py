@@ -7,6 +7,7 @@ from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
 from transformers import AutoTokenizer
+from typing_extensions import deprecated
 
 from unstract.sdk.utils.usage_handler import UsageHandler
 
@@ -35,10 +36,10 @@ class CallbackManager:
     """
 
     @staticmethod
-    def set_callback_manager(
+    def set_callback(
         platform_api_key: str,
         model: Union[LLM, BaseEmbedding],
-        kwargs,
+        **kwargs,
     ) -> None:
         """Sets the standard callback manager for the llm. This is to be called
         explicitly whenever there is a need for the callback handling defined
@@ -130,3 +131,22 @@ class CallbackManager:
         except OSError as e:
             logger.warning(str(e))
             return fallback_tokenizer
+
+    @staticmethod
+    @deprecated("Deprecated method. Use the latest set_callback instead")
+    def set_callback_manager(
+        platform_api_key: str,
+        llm: Optional[LLM] = None,
+        embedding: Optional[BaseEmbedding] = None,
+        **kwargs,
+    ) -> LlamaIndexCallbackManager:
+        callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager()
+        if llm:
+            CallbackManager.set_callback(platform_api_key, model=llm, **kwargs)
+            callback_manager = llm.callback_manager
+        if embedding:
+            CallbackManager.set_callback_manager(
+                platform_api_key, model=embedding, **kwargs
+            )
+            callback_manager = embedding.callback_manager
+        return callback_manager

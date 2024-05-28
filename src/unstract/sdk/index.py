@@ -10,6 +10,7 @@ from llama_index.core.vector_stores import (
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
+from typing_extensions import deprecated
 from unstract.adapters.exceptions import AdapterError
 
 from unstract.sdk.adapters import ToolAdapter
@@ -27,7 +28,7 @@ class Index:
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
-    def get_text_from_index(
+    def query_text_from_index(
         self,
         embedding_instance_id: str,
         vector_db_instance_id: str,
@@ -114,7 +115,7 @@ class Index:
         )
         return "\n".join(new_context_lines)
 
-    def index_file(
+    def index(
         self,
         tool_id: str,
         embedding_instance_id: str,
@@ -150,7 +151,7 @@ class Index:
         Returns:
             str: A unique ID for the file and indexing arguments combination
         """
-        doc_id = self.generate_file_id(
+        doc_id = self._generate_file_id(
             tool_id=tool_id,
             vector_db=vector_db_instance_id,
             embedding=embedding_instance_id,
@@ -283,9 +284,17 @@ class Index:
                 parser = SimpleNodeParser.from_defaults(
                     chunk_size=chunk_size, chunk_overlap=chunk_overlap
                 )
-
                 self.tool.stream_log("Adding nodes to vector db...")
-
+                # TODO: Phase 2:
+                # Post insertion to VDB, use query using doc_id and
+                # store all the VDB ids to a table against the doc_id
+                # During deletion for cases where metadata filtering
+                # does not work, these ids can be used for direct deletion
+                # This new table will also act like an audit trail for
+                # all nodes that were added to the VDB by Unstract
+                # Once this is in place, the overridden implementation
+                # of prefixing ids with doc_id before adding to VDB
+                # can be removed
                 vector_db.get_vector_store_index_from_storage_context(
                     documents,
                     storage_context=storage_context,
@@ -304,7 +313,7 @@ class Index:
         self.tool.stream_log("File has been indexed successfully")
         return doc_id
 
-    def generate_file_id(
+    def _generate_file_id(
         self,
         tool_id: str,
         vector_db: str,
@@ -356,6 +365,45 @@ class Index:
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
+
+    @deprecated("Deprecated class and method. Use Index and index() instead")
+    def index_file(
+        self,
+        tool_id: str,
+        embedding_type: str,
+        vector_db: str,
+        x2text_adapter: str,
+        file_path: str,
+        chunk_size: int,
+        chunk_overlap: int,
+        reindex: bool = False,
+        file_hash: Optional[str] = None,
+        output_file_path: Optional[str] = None,
+    ) -> str:
+        return self.index(
+            tool_id=tool_id,
+            embedding_instance_id=embedding_type,
+            vector_db_instance_id=vector_db,
+            x2text_instance_id=x2text_adapter,
+            file_path=file_path,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            reindex=reindex,
+            file_hash=file_hash,
+            output_file_path=output_file_path,
+        )
+
+    @deprecated(
+        "Deprecated class and method. Use Index and query_texy_from_index() instead"
+    )
+    def get_text_from_index(
+        self, embedding_type: str, vector_db: str, doc_id: str
+    ) -> Optional[str]:
+        return self.query_text_from_index(
+            embedding_instance_id=embedding_type,
+            vector_db_instance_id=vector_db,
+            doc_id=doc_id,
+        )
 
 
 # Legacy
