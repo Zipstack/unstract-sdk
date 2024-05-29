@@ -88,6 +88,17 @@ class Embedding:
         embedding_dimension = len(embedding_list)
         return embedding_dimension
 
+    def get_class_name(self) -> str:
+        """Gets the class name of the Llama Index Embedding.
+
+        Args:
+            NA
+
+            Returns:
+                Class name
+        """
+        return self._embedding_instance.class_name()
+
     @deprecated("Deprecated class and method. Use Embedding instead of ToolEmbedding")
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
         return self._get_embedding_length()

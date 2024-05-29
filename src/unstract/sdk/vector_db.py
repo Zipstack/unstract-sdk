@@ -165,6 +165,22 @@ class VectorDB:
             nodes=nodes,
         )
 
+    def close(self, **kwargs):
+        if not self.vector_db_adapter_class:
+            raise VectorDBError("Vector DB is not initialised properly")
+        self.vector_db_adapter_class.close()
+
+    def get_class_name(self) -> str:
+        """Gets the class name of the Llama Index Vector DB.
+
+        Args:
+            NA
+
+            Returns:
+                Class name
+        """
+        return self._vector_db_instance.class_name()
+
     @deprecated("Deprecated class and method. Use VectorDB instead of ToolVectorDB")
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
@@ -173,11 +189,6 @@ class VectorDB:
             self._adapter_instance_id = adapter_instance_id
             self._initialise()
         return self._vector_db_instance
-
-    def close(self, **kwargs):
-        if not self.vector_db_adapter_class:
-            raise VectorDBError("Vector DB is not initialised properly")
-        self.vector_db_adapter_class.close()
 
 
 # Legacy

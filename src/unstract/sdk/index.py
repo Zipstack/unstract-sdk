@@ -151,7 +151,7 @@ class Index:
         Returns:
             str: A unique ID for the file and indexing arguments combination
         """
-        doc_id = self._generate_file_id(
+        doc_id = self.generate_file_id(
             tool_id=tool_id,
             vector_db=vector_db_instance_id,
             embedding=embedding_instance_id,
@@ -313,7 +313,7 @@ class Index:
         self.tool.stream_log("File has been indexed successfully")
         return doc_id
 
-    def _generate_file_id(
+    def generate_file_id(
         self,
         tool_id: str,
         vector_db: str,

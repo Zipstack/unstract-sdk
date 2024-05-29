@@ -26,6 +26,7 @@ class LLM:
     json_regex = re.compile(r"\[(?:.|\n)*\]|\{(?:.|\n)*\}")
     llm_adapters = adapters
     MAX_TOKENS = 1024 * 4
+    RESPONSE = "response"
 
     def __init__(
         self,
@@ -60,19 +61,18 @@ class LLM:
                 kwargs=self._usage_kwargs,
             )
 
-    @classmethod
     def complete(
-        cls,
+        self,
         prompt: str,
         retries: int = 3,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
         try:
-            response: CompletionResponse = cls._llm_instance.complete(prompt, **kwargs)
+            response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
-            return {"response": response}
+            return {LLM.RESPONSE: response}
         # TODO: Handle for all LLM providers
         except OpenAIAPIError as e:
             msg = "OpenAI error: "
@@ -126,6 +126,28 @@ class LLM:
                 int: The maximum number of tokens that can be used for the LLM.
         """
         return self.MAX_TOKENS - reserved_for_output
+
+    def set_max_tokens(self, max_tokens: int) -> None:
+        """Set the maximum number of tokens that can be used for the LLM.
+
+        Args:
+            max_tokens (int): The number of tokens to be used at the maximum
+
+            Returns:
+                None
+        """
+        self._llm_instance.max_tokens = max_tokens
+
+    def get_class_name(self) -> str:
+        """Gets the class name of the Llama Index LLM.
+
+        Args:
+            NA
+
+            Returns:
+                Class name
+        """
+        return self._llm_instance.class_name()
 
     @deprecated("Deprecated class and method. Use LLM instead of ToolLLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
