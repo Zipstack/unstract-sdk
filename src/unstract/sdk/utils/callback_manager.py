@@ -39,7 +39,7 @@ class CallbackManager:
     def set_callback(
         platform_api_key: str,
         model: Union[LLM, BaseEmbedding],
-        **kwargs,
+        kwargs,
     ) -> None:
         """Sets the standard callback manager for the llm. This is to be called
         explicitly whenever there is a need for the callback handling defined
