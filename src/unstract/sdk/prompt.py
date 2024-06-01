@@ -37,6 +37,9 @@ class PromptTool:
     def single_pass_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._post_call("single-pass-extraction", payload)
 
+    def summarize(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post_call("summarize", payload)
+
     def _post_call(self, url_path: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
