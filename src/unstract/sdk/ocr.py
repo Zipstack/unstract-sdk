@@ -57,10 +57,7 @@ class OCR(metaclass=ABCMeta):
     ) -> str:
         return self._ocr_instance.process(input_file_path, output_file_path)
 
-    @deprecated(
-        "Deprecated method. Use the latest OCR to instantiate "
-        "and then invoke process()"
-    )
+    @deprecated("Instantiate OCR and call process() instead")
     def get_x2text(self, adapter_instance_id: str) -> OCRAdapter:
         if not self._ocr_instance:
             self._adapter_instance_id = adapter_instance_id

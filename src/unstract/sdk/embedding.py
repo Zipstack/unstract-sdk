@@ -28,7 +28,7 @@ class Embedding:
         self._adapter_instance_id = adapter_instance_id
         self._embedding_instance: BaseEmbedding = None
         self._length: int = None
-        self._usage_kwargs = usage_kwargs if usage_kwargs else dict()
+        self._usage_kwargs = usage_kwargs
         self._initialise()
 
     def _initialise(self):
@@ -99,13 +99,11 @@ class Embedding:
         """
         return self._embedding_instance.class_name()
 
-    @deprecated("Deprecated class and method. Use Embedding instead of ToolEmbedding")
+    @deprecated("Use Embedding instead of ToolEmbedding")
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
         return self._get_embedding_length()
 
-    @deprecated(
-        "Deprecated class and method. " "Use Embedding instead of ToolEmbedding"
-    )
+    @deprecated("Use Embedding instead of ToolEmbedding")
     def get_embedding(self, adapter_instance_id: str) -> BaseEmbedding:
         if not self._embedding_instance:
             self._adapter_instance_id = adapter_instance_id

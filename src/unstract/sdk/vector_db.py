@@ -33,7 +33,7 @@ class VectorDB:
     EMBEDDING_INSTANCE_ERROR = (
         "Vector DB does not have an embedding initialised."
         "Migrate to VectorDB instead of deprecated ToolVectorDB "
-        "to use the latest features"
+        "and pass in an Embedding to proceed"
     )
 
     def __init__(
@@ -181,7 +181,7 @@ class VectorDB:
         """
         return self._vector_db_instance.class_name()
 
-    @deprecated("Deprecated class and method. Use VectorDB instead of ToolVectorDB")
+    @deprecated("Use VectorDB instead of ToolVectorDB")
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
     ) -> Union[BasePydanticVectorStore, VectorStore]:

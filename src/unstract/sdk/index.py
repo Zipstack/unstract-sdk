@@ -28,7 +28,7 @@ class Index:
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
 
-    def query_text_from_index(
+    def query_index(
         self,
         embedding_instance_id: str,
         vector_db_instance_id: str,
@@ -373,7 +373,7 @@ class Index:
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
 
-    @deprecated("Deprecated class and method. Use Index and index() instead")
+    @deprecated("Instantiate Index and call index() instead")
     def index_file(
         self,
         tool_id: str,
@@ -406,7 +406,7 @@ class Index:
     def get_text_from_index(
         self, embedding_type: str, vector_db: str, doc_id: str
     ) -> Optional[str]:
-        return self.query_text_from_index(
+        return self.query_index(
             embedding_instance_id=embedding_type,
             vector_db_instance_id=vector_db,
             doc_id=doc_id,

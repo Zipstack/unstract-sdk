@@ -133,7 +133,7 @@ class CallbackManager:
             return fallback_tokenizer
 
     @staticmethod
-    @deprecated("Deprecated method. Use the latest set_callback instead")
+    @deprecated("Use set_callback() instead")
     def set_callback_manager(
         platform_api_key: str,
         llm: Optional[LLM] = None,

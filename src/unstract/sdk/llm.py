@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class LLM:
-    """Class to handle LLMs for Unstract Tools."""
+    """Em"""
 
     json_regex = re.compile(r"\[(?:.|\n)*\]|\{(?:.|\n)*\}")
     llm_adapters = adapters
@@ -47,7 +47,7 @@ class LLM:
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
         self._llm_instance: LlamaIndexLLM = None
-        self._usage_kwargs = usage_kwargs if usage_kwargs else dict()
+        self._usage_kwargs = usage_kwargs
         self._initialise()
 
     def _initialise(self):
@@ -149,7 +149,7 @@ class LLM:
         """
         return self._llm_instance.class_name()
 
-    @deprecated("Deprecated class and method. Use LLM instead of ToolLLM")
+    @deprecated("Use LLM instead of ToolLLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
         if not self._llm_instance:
             self._adapter_instance_id = adapter_instance_id
@@ -157,7 +157,7 @@ class LLM:
         return self._llm_instance
 
     @classmethod
-    @deprecated("Deprecated class and method. Use LLM and complete() instead")
+    @deprecated("Instantiate LLM and call complete() instead")
     def run_completion(
         cls,
         llm: LlamaIndexLLM,

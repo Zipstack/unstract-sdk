@@ -72,10 +72,7 @@ class X2Text(metaclass=ABCMeta):
             input_file_path, output_file_path, **kwargs
         )
 
-    @deprecated(
-        "Deprecated method. Use the latest X2Text to "
-        "instantiate and then invoke process()"
-    )
+    @deprecated("Instantiate X2Text and call process() instead")
     def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
         if not self._x2text_instance:
             self._adapter_instance_id = adapter_instance_id
