@@ -33,7 +33,7 @@ class Index:
         embedding_instance_id: str,
         vector_db_instance_id: str,
         doc_id: str,
-        usage_kwargs: dict[Any, Any] = None,
+        usage_kwargs: dict[Any, Any] = {},
     ):
         try:
             embedding = Embedding(
@@ -127,7 +127,7 @@ class Index:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
-        usage_kwargs: dict[Any, Any] = None,
+        usage_kwargs: dict[Any, Any] = {},
     ) -> str:
         """Indexes an individual file using the passed arguments.
 

@@ -32,7 +32,7 @@ class LLM:
         self,
         tool: BaseTool,
         adapter_instance_id: str = None,
-        usage_kwargs: dict[Any, Any] = None,
+        usage_kwargs: dict[Any, Any] = {},
     ):
         """
 

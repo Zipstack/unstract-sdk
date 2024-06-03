@@ -22,7 +22,7 @@ class Embedding:
         self,
         tool: BaseTool,
         adapter_instance_id: str = None,
-        usage_kwargs: dict[Any, Any] = None,
+        usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
