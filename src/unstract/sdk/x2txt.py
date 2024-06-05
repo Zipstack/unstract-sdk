@@ -14,7 +14,7 @@ from unstract.sdk.tool.base import BaseTool
 
 
 class X2Text(metaclass=ABCMeta):
-    def __init__(self, tool: BaseTool, adapter_instance_id: str = None):
+    def __init__(self, tool: BaseTool, adapter_instance_id: Optional[str] = None):
         self._tool = tool
         self._x2text_adapters = adapters
         self._adapter_instance_id = adapter_instance_id

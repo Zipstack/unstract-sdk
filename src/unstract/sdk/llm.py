@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class LLM:
-    """Em"""
+    """Interface to handle all LLM interactions."""
 
     json_regex = re.compile(r"\[(?:.|\n)*\]|\{(?:.|\n)*\}")
     llm_adapters = adapters
@@ -31,7 +31,7 @@ class LLM:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str = None,
+        adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
         """

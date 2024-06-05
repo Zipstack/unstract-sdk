@@ -39,7 +39,7 @@ class VectorDB:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str = None,
+        adapter_instance_id: Optional[str] = None,
         embedding: Optional[Embedding] = None,
     ):
         self._tool = tool

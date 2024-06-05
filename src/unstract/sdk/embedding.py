@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from llama_index.core.base.embeddings.base import Embedding
 from llama_index.core.embeddings import BaseEmbedding
@@ -21,7 +21,7 @@ class Embedding:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str = None,
+        adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
