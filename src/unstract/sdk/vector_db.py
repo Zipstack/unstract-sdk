@@ -81,7 +81,7 @@ class VectorDB:
         try:
             if not self._adapter_instance_id:
                 raise VectorDBError(
-                    "Adapter instance ID not set. " "Initialisation failed"
+                    "Adapter instance ID not set. Initialisation failed"
                 )
             vector_db_config = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
