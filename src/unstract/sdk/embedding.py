@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from llama_index.core.base.embeddings.base import Embedding
 from llama_index.core.embeddings import BaseEmbedding
@@ -21,22 +21,27 @@ class Embedding:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str,
+        adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
-        self._embedding_instance: BaseEmbedding = self._get_embedding()
-        self._length: int = self._get_embedding_length()
+        self._embedding_instance: BaseEmbedding = None
+        self._length: int = None
+        self._usage_kwargs = usage_kwargs
+        self._initialise()
 
-        self._usage_kwargs = usage_kwargs.copy()
-        self._usage_kwargs["adapter_instance_id"] = adapter_instance_id
-        platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-        CallbackManager.set_callback_manager(
-            platform_api_key=platform_api_key,
-            model=self._embedding_instance,
-            kwargs=self._usage_kwargs,
-        )
+    def _initialise(self):
+        if self._adapter_instance_id:
+            self._embedding_instance = self._get_embedding()
+            self._length: int = self._get_embedding_length()
+            self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
+            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+            CallbackManager.set_callback(
+                platform_api_key=platform_api_key,
+                model=self._embedding_instance,
+                kwargs=self._usage_kwargs,
+            )
 
     def _get_embedding(self) -> BaseEmbedding:
         """Gets an instance of LlamaIndex's embedding object.
@@ -48,6 +53,10 @@ class Embedding:
             BaseEmbedding: Embedding instance
         """
         try:
+            if not self._adapter_instance_id:
+                raise EmbeddingError(
+                    "Adapter instance ID not set. " "Initialisation failed"
+                )
             embedding_config_data = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
@@ -79,9 +88,27 @@ class Embedding:
         embedding_dimension = len(embedding_list)
         return embedding_dimension
 
-    @deprecated("Use the new class Embedding")
+    def get_class_name(self) -> str:
+        """Gets the class name of the Llama Index Embedding.
+
+        Args:
+            NA
+
+            Returns:
+                Class name
+        """
+        return self._embedding_instance.class_name()
+
+    @deprecated("Use Embedding instead of ToolEmbedding")
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
-        return self._get_embedding_length(embedding)
+        return self._get_embedding_length()
+
+    @deprecated("Use Embedding instead of ToolEmbedding")
+    def get_embedding(self, adapter_instance_id: str) -> BaseEmbedding:
+        if not self._embedding_instance:
+            self._adapter_instance_id = adapter_instance_id
+            self._initialise()
+        return self._embedding_instance
 
 
 # Legacy
