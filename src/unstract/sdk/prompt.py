@@ -68,7 +68,7 @@ class PromptTool:
         headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
         response: Response = Response()
         try:
-            response = requests.post(url, json=payload, headers=headers, timeout=600)
+            response = requests.post(url, json=payload, headers=headers)
             response.raise_for_status()
             result["status"] = "OK"
             result["structure_output"] = response.text
