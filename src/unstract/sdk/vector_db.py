@@ -30,24 +30,33 @@ class VectorDB:
 
     vector_db_adapters = adapters
     DEFAULT_EMBEDDING_DIMENSION = 1536
+    EMBEDDING_INSTANCE_ERROR = (
+        "Vector DB does not have an embedding initialised."
+        "Migrate to VectorDB instead of deprecated ToolVectorDB "
+        "and pass in an Embedding to proceed"
+    )
 
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: str,
+        adapter_instance_id: Optional[str] = None,
         embedding: Optional[Embedding] = None,
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
+        self._vector_db_instance = None
+        self._embedding_instance = None
+        self._embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
+        self._initialise(embedding)
+
+    def _initialise(self, embedding: Optional[Embedding] = None):
         if embedding:
             self._embedding_instance = embedding._embedding_instance
             self._embedding_dimension = embedding._length
-        else:
-            self._embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
-
-        self._vector_db_instance: Union[
-            BasePydanticVectorStore, VectorStore
-        ] = self._get_vector_db()
+        if self._adapter_instance_id:
+            self._vector_db_instance: Union[
+                BasePydanticVectorStore, VectorStore
+            ] = self._get_vector_db()
 
     def _get_org_id(self) -> str:
         platform_helper = PlatformHelper(
@@ -70,6 +79,10 @@ class VectorDB:
             Union[BasePydanticVectorStore, VectorStore]: Vector store instance
         """
         try:
+            if not self._adapter_instance_id:
+                raise VectorDBError(
+                    "Adapter instance ID not set. Initialisation failed"
+                )
             vector_db_config = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
@@ -108,7 +121,7 @@ class VectorDB:
         **kwargs,
     ) -> IndexType:
         if not self._embedding_instance:
-            raise VectorDBError("Vector DB does not have an embedding initialised")
+            raise VectorDBError(self.EMBEDDING_INSTANCE_ERROR)
         parser = kwargs.get("node_parser")
         return VectorStoreIndex.from_documents(
             documents,
@@ -120,7 +133,7 @@ class VectorDB:
 
     def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
         if not self._embedding_instance:
-            raise VectorDBError("Vector DB does not have an embedding initialised")
+            raise VectorDBError(self.EMBEDDING_INSTANCE_ERROR)
         return VectorStoreIndex.from_vector_store(
             vector_store=self._vector_db_instance,
             embed_model=self._embedding_instance,
@@ -152,17 +165,30 @@ class VectorDB:
             nodes=nodes,
         )
 
-    @deprecated("Use the new class VectorDB")
-    def get_vector_db(
-        self, adapter_instance_id: str, embedding_dimension: int
-    ) -> Union[BasePydanticVectorStore, VectorStore]:
-        self._embedding_dimension = embedding_dimension
-        return self._vector_db_instance
-
     def close(self, **kwargs):
         if not self.vector_db_adapter_class:
             raise VectorDBError("Vector DB is not initialised properly")
         self.vector_db_adapter_class.close()
+
+    def get_class_name(self) -> str:
+        """Gets the class name of the Llama Index Vector DB.
+
+        Args:
+            NA
+
+            Returns:
+                Class name
+        """
+        return self._vector_db_instance.class_name()
+
+    @deprecated("Use VectorDB instead of ToolVectorDB")
+    def get_vector_db(
+        self, adapter_instance_id: str, embedding_dimension: int
+    ) -> Union[BasePydanticVectorStore, VectorStore]:
+        if not self._vector_db_instance:
+            self._adapter_instance_id = adapter_instance_id
+            self._initialise()
+        return self._vector_db_instance
 
 
 # Legacy

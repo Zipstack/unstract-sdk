@@ -1,18 +1,14 @@
+import logging
 from typing import Any, Optional
 
 import requests
-from requests import (
-    ConnectionError,
-    HTTPError,
-    RequestException,
-    Response,
-    Timeout,
-    TooManyRedirects,
-)
+from requests import ConnectionError, RequestException, Response, Timeout
 
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+
+logger = logging.getLogger(__name__)
 
 
 class PromptTool:
@@ -40,6 +36,9 @@ class PromptTool:
 
     def single_pass_extraction(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._post_call("single-pass-extraction", payload)
+
+    def summarize(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post_call("summarize", payload)
 
     def _post_call(self, url_path: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
@@ -69,23 +68,21 @@ class PromptTool:
         headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
         response: Response = Response()
         try:
-            # TODO: Review timeout value
             response = requests.post(url, json=payload, headers=headers, timeout=600)
             response.raise_for_status()
             result["status"] = "OK"
             result["structure_output"] = response.text
         except ConnectionError as connect_err:
             msg = "Unable to connect to prompt service. Please contact admin."
-            result["error"] = self._stringify_and_stream_err(connect_err, msg)
+            self._stringify_and_stream_err(connect_err, msg)
+            result["error"] = msg
         except Timeout as time_out:
-            msg = "Request to run prompt has timed out"
-            result["error"] = self._stringify_and_stream_err(time_out, msg)
-        except TooManyRedirects as too_many_redirects:
-            msg = "Too many redirects while connecting to prompt service."
-            result["error"] = self._stringify_and_stream_err(too_many_redirects, msg)
-        except HTTPError as http_err:
-            msg = "Error while fetching prompt response."
-            result["error"] = self._stringify_and_stream_err(http_err, msg)
+            msg = (
+                "Request to run prompt has timed out. "
+                "Probable causes might be connectivity issues in LLMs."
+            )
+            self._stringify_and_stream_err(time_out, msg)
+            result["error"] = msg
         except RequestException as e:
             # Extract error information from the response if available
             error_message = str(e)
@@ -103,13 +100,11 @@ class PromptTool:
             )
         return result
 
-    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> str:
+    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> None:
         error_message = str(err)
-        self.tool.stream_log(
-            f"{msg}: {error_message}",
-            level=LogLevel.ERROR,
-        )
-        return error_message
+        trace = f"{msg}: {error_message}"
+        self.tool.stream_log(trace, level=LogLevel.ERROR)
+        logger.error(trace)
 
     @staticmethod
     def get_exported_tool(
