@@ -2,7 +2,7 @@ import logging
 from typing import Any, Optional
 
 import requests
-from requests import ConnectionError, RequestException, Response, Timeout
+from requests import ConnectionError, RequestException, Response
 
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
@@ -68,20 +68,13 @@ class PromptTool:
         headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
         response: Response = Response()
         try:
-            response = requests.post(url, json=payload, headers=headers, timeout=600)
+            response = requests.post(url, json=payload, headers=headers)
             response.raise_for_status()
             result["status"] = "OK"
             result["structure_output"] = response.text
         except ConnectionError as connect_err:
             msg = "Unable to connect to prompt service. Please contact admin."
             self._stringify_and_stream_err(connect_err, msg)
-            result["error"] = msg
-        except Timeout as time_out:
-            msg = (
-                "Request to run prompt has timed out. "
-                "Probable causes might be connectivity issues in LLMs."
-            )
-            self._stringify_and_stream_err(time_out, msg)
             result["error"] = msg
         except RequestException as e:
             # Extract error information from the response if available
