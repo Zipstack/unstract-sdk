@@ -401,7 +401,7 @@ class Index:
         )
 
     @deprecated(
-        "Deprecated class and method. Use Index and query_texy_from_index() instead"
+        "Deprecated class and method. Use Index and query_index() instead"
     )
     def get_text_from_index(
         self, embedding_type: str, vector_db: str, doc_id: str
