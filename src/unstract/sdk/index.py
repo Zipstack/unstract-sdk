@@ -127,6 +127,7 @@ class Index:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
+        enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
     ) -> str:
         """Indexes an individual file using the passed arguments.
@@ -243,7 +244,9 @@ class Index:
                         tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
                     extracted_text = x2text.process(
-                        input_file_path=file_path, output_file_path=output_file_path
+                        input_file_path=file_path,
+                        output_file_path=output_file_path,
+                        enable_highlight=enable_highlight,
                     )
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
@@ -400,9 +403,7 @@ class Index:
             output_file_path=output_file_path,
         )
 
-    @deprecated(
-        "Deprecated class and method. Use Index and query_index() instead"
-    )
+    @deprecated("Deprecated class and method. Use Index and query_index() instead")
     def get_text_from_index(
         self, embedding_type: str, vector_db: str, doc_id: str
     ) -> Optional[str]:

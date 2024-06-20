@@ -209,6 +209,7 @@ class BaseTool(ABC, StreamMixin):
     def update_exec_metadata(self, metadata: dict[str, Any]) -> None:
         for key, value in metadata.items():
             self._exec_metadata[key] = value
+            print(f"Key: {key}, Value: {value}")
 
         self._write_exec_metadata(metadata=self._exec_metadata)
 

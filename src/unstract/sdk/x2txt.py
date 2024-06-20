@@ -69,10 +69,9 @@ class X2Text(metaclass=ABCMeta):
         output_file_path: Optional[str] = None,
         **kwargs: dict[Any, Any],
     ) -> str:
-        # also check if highlight
-
-        if isinstance(self._x2text_instance, LLMWhisperer):
-            print("In instance of LLM whisperer call processor with Hash")
+        if kwargs.get("enable_highlight", False) and isinstance(
+            self._x2text_instance, LLMWhisperer
+        ):
             output = self._x2text_instance.process_with_hash(
                 input_file_path, output_file_path, **kwargs
             )
