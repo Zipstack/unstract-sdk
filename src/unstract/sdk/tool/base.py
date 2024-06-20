@@ -224,6 +224,13 @@ class BaseTool(ABC, StreamMixin):
 
         self._write_exec_metadata(metadata=self._exec_metadata)
 
+    def update_exec_metadata(self,  metadata: dict[str, Any]) -> None:
+        for key, value in metadata.items():
+            self._exec_metadata[key] = value          
+        
+        self._write_exec_metadata(metadata=self._exec_metadata)
+        
+
     def write_tool_result(self, data: Union[str, dict[str, Any]]) -> None:
         """Helps write contents of the tool result into TOOL_DATA_DIR.
 
