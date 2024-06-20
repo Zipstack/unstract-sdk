@@ -5,8 +5,8 @@ from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
 from unstract.adapters.x2text.constants import X2TextConstants
+from unstract.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.adapters.x2text.llm_whisperer.src import LLMWhisperer 
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
@@ -70,19 +70,17 @@ class X2Text(metaclass=ABCMeta):
         **kwargs: dict[Any, Any],
     ) -> str:
         # also check if highlight
-        
-        if isinstance(self._x2text_instance,LLMWhisperer):
+
+        if isinstance(self._x2text_instance, LLMWhisperer):
             print("In instance of LLM whisperer call processor with Hash")
             output = self._x2text_instance.process_with_hash(
-                 input_file_path, output_file_path, **kwargs
-                )
-           
-            self._tool.update_exec_metadata({'whisper_hash':  output['whisper_hash'] })
-            
+                input_file_path, output_file_path, **kwargs
+            )
 
-            return output['extracted_text']
+            self._tool.update_exec_metadata({"whisper_hash": output["whisper_hash"]})
 
-            
+            return output["extracted_text"]
+
             # return the extracted text add the whisper_hash to meta data
 
         return self._x2text_instance.process(
