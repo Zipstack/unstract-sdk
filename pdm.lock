@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:647d5e1b3fb677057a1497b6fe27e589b9c9cea45ee59945263e70f5887f7ea2"
+content_hash = "sha256:8acff0cd90cbb3946d589e7c5526bfdb35c7bff908a73e35433d38612a47785c"
 
 [[package]]
 name = "aiohttp"
@@ -3404,6 +3404,9 @@ files = [
 name = "unstract-adapters"
 version = "0.19.0"
 requires_python = "<3.12,>=3.9"
+git = "https://github.com/Zipstack/unstract-adapters.git"
+ref = "fix/adding_whisper_hash"
+revision = "f3c2a6b65a9ca433a3dc33aae1d88049cd63074c"
 summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
     "filetype~=1.2.0",
@@ -3427,10 +3430,6 @@ dependencies = [
     "llama-index==0.10.38",
     "llama-parse==0.4.1",
     "singleton-decorator~=1.0.0",
-]
-files = [
-    {file = "unstract_adapters-0.19.0-py3-none-any.whl", hash = "sha256:107f15abf98326747625a4e0fa594650746e8bef983763aa761d4bbe36d03431"},
-    {file = "unstract_adapters-0.19.0.tar.gz", hash = "sha256:88655426a09ac3bc86ff81b6de8b1b276f395fa3bb2d697f1b3008f840d57e4c"},
 ]
 
 [[package]]
