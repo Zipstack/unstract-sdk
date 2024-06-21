@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 import requests
 from llama_index.core.callbacks import CBEventType, TokenCountingHandler
@@ -6,6 +6,7 @@ from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.stream import StreamMixin
+from unstract.sdk.utils.token_counter import TokenCounter
 
 
 class Audit(StreamMixin):
@@ -25,7 +26,7 @@ class Audit(StreamMixin):
     def push_usage_data(
         self,
         platform_api_key: str,
-        token_counter: TokenCountingHandler = None,
+        token_counter: Union[TokenCountingHandler, TokenCounter] = None,
         model_name: str = "",
         event_type: CBEventType = None,
         kwargs: dict[Any, Any] = None,
@@ -105,4 +106,5 @@ class Audit(StreamMixin):
             )
 
         finally:
-            token_counter.reset_counts()
+            if isinstance(token_counter, TokenCountingHandler):
+                token_counter.reset_counts()
