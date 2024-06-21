@@ -77,10 +77,7 @@ class X2Text(metaclass=ABCMeta):
             )
 
             self._tool.update_exec_metadata({"whisper_hash": output["whisper_hash"]})
-
             return output["extracted_text"]
-
-            # return the extracted text add the whisper_hash to meta data
 
         return self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs

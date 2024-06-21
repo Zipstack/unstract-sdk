@@ -207,9 +207,23 @@ class BaseTool(ABC, StreamMixin):
         self._write_exec_metadata(metadata=self._exec_metadata)
 
     def update_exec_metadata(self, metadata: dict[str, Any]) -> None:
+        """Helps update the execution metadata with the provided metadata
+        dictionary.
+
+        This method iterates over the key-value pairs in the input metadata dictionary
+        and updates the internal `_exec_metadata` dictionary of the tool instance
+        accordingly. It then writes the updated metadata to the `METADATA.json`
+        file in the tool's data directory.
+
+        Args:
+            metadata (dict[str, Any]): A dictionary containing the metadata
+            key-value pairs to update in the execution metadata.
+
+        Returns:
+            None
+        """
         for key, value in metadata.items():
             self._exec_metadata[key] = value
-            print(f"Key: {key}, Value: {value}")
 
         self._write_exec_metadata(metadata=self._exec_metadata)
 
