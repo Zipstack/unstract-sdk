@@ -12,8 +12,7 @@ dependencies = [
     "python-magic~=0.4.27",
     "python-dotenv==1.0.0",
     # LLM Triad
-    # "unstract-adapters~=0.19.0",
-    "unstract-adapters @ git+https://github.com/Zipstack/unstract-adapters.git@fix/adding_whisper_hash#egg=unstract-adapters",
+    "unstract-adapters~=0.19.0",
     "llama-index==0.10.38",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
