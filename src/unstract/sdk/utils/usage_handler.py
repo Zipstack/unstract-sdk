@@ -8,6 +8,7 @@ from llama_index.core.llms import LLM
 from unstract.sdk.audit import Audit
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.tool.stream import StreamMixin
+from unstract.sdk.utils.token_counter import TokenCounter
 
 
 class UsageHandler(StreamMixin, BaseCallbackHandler):
@@ -32,8 +33,8 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
 
     def __init__(
         self,
-        token_counter: TokenCountingHandler,
         platform_api_key: str,
+        token_counter: Optional[TokenCountingHandler] = None,
         llm_model: LLM = None,
         embed_model: BaseEmbedding = None,
         event_starts_to_ignore: Optional[list[CBEventType]] = None,
@@ -90,9 +91,10 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
             model_name = self.llm_model.metadata.model_name
             # Need to push the data to via platform service
             self.stream_log(log=f"Pushing llm usage for model {model_name}")
+            llm_token_counter: TokenCounter = TokenCounter.get_llm_token_counts(payload)
             Audit(log_level=self.log_level).push_usage_data(
                 platform_api_key=self.platform_api_key,
-                token_counter=self.token_counter,
+                token_counter=llm_token_counter,
                 event_type=event_type,
                 model_name=self.llm_model.metadata.model_name,
                 kwargs=self.kwargs,
@@ -113,3 +115,4 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
                 model_name=self.embed_model.model_name,
                 kwargs=self.kwargs,
             )
+            self.token_counter.reset_counts()

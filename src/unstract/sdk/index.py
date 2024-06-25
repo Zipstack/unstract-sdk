@@ -23,6 +23,10 @@ from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
 
 
+class Constants:
+    TOP_K = 5
+
+
 class Index:
     def __init__(self, tool: BaseTool):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
@@ -73,7 +77,7 @@ class Index:
                     query_embedding=embedding.get_query_embedding(" "),
                     doc_ids=[doc_id],
                     filters=filters,
-                    similarity_top_k=10000,
+                    similarity_top_k=Constants.TOP_K,
                 )
             except Exception as e:
                 self.tool.stream_log(
