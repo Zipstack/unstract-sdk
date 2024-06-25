@@ -12,6 +12,7 @@ from llama_index.core.vector_stores import (
 )
 from typing_extensions import deprecated
 from unstract.adapters.exceptions import AdapterError
+from unstract.adapters.x2text.constants import X2TextConstants
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
@@ -247,10 +248,27 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
-                    extracted_text = x2text.process(
-                        input_file_path=file_path,
-                        output_file_path=output_file_path,
-                        enable_highlight=enable_highlight,
+                    if enable_highlight:
+                        process_response = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                            enable_highlight=enable_highlight,
+                        )
+                        whisper_hash_value = process_response.get(
+                            X2TextConstants.WHISPER_HASH
+                        )
+                        metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
+
+                        self.tool.update_exec_metadata(metadata)
+
+                    else:
+                        process_response = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                        )
+
+                    extracted_text = process_response.get(
+                        X2TextConstants.EXTRACTED_TEXT
                     )
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
