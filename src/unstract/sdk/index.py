@@ -13,6 +13,7 @@ from llama_index.core.vector_stores import (
 from typing_extensions import deprecated
 from unstract.adapters.exceptions import AdapterError
 from unstract.adapters.x2text.constants import X2TextConstants
+from unstract.adapters.x2text.llm_whisperer.src import LLMWhisperer
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
@@ -248,7 +249,9 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
-                    if enable_highlight:
+                    if enable_highlight and isinstance(
+                        x2text._x2text_instance, LLMWhisperer
+                    ):
                         process_response = x2text.process(
                             input_file_path=file_path,
                             output_file_path=output_file_path,
