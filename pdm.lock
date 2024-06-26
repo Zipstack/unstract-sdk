@@ -5,7 +5,7 @@
 groups = ["default", "test", "docs", "lint"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:647d5e1b3fb677057a1497b6fe27e589b9c9cea45ee59945263e70f5887f7ea2"
+content_hash = "sha256:3db5aee372bd137d7e2f64dab69234475aa5f5e010714b070e04fd53522201ac"
 
 [[package]]
 name = "aiohttp"
@@ -1381,7 +1381,6 @@ name = "llama-cloud"
 version = "0.0.6"
 requires_python = "<4,>=3.8"
 summary = ""
-groups = ["default"]
 dependencies = [
     "httpx>=0.20.0",
     "pydantic>=1.10",
@@ -1450,7 +1449,7 @@ files = [
 
 [[package]]
 name = "llama-index-core"
-version = "0.10.50"
+version = "0.10.50.post1"
 requires_python = "<4.0,>=3.8.1"
 summary = "Interface between LLMs and your data"
 groups = ["default"]
@@ -1480,8 +1479,8 @@ dependencies = [
     "wrapt",
 ]
 files = [
-    {file = "llama_index_core-0.10.50-py3-none-any.whl", hash = "sha256:8a1fc49d65156002bb7f4c82458385ee440bd11f81d1bc39ed03ce94f53c9c74"},
-    {file = "llama_index_core-0.10.50.tar.gz", hash = "sha256:9e64dd54b19aca235b360b2f81d6f93014f1439304cc9369a0e53e4cba9e33aa"},
+    {file = "llama_index_core-0.10.50.post1-py3-none-any.whl", hash = "sha256:b97cbb26675bcd9318747479529ce2f74cc75ed83852900ba053f4a980cb26f6"},
+    {file = "llama_index_core-0.10.50.post1.tar.gz", hash = "sha256:cb5999fc09a951b1c5f1118ddbb8573da20116510f070f689231f471ca38aa3f"},
 ]
 
 [[package]]
@@ -1957,6 +1956,7 @@ marker = "sys_platform != \"win32\""
 files = [
     {file = "milvus_lite-2.4.7-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:c828190118b104b05b8c8e0b5a4147811c86b54b8fb67bc2e726ad10fc0b544e"},
     {file = "milvus_lite-2.4.7-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e1537633c39879714fb15082be56a4b97f74c905a6e98e302ec01320561081af"},
+    {file = "milvus_lite-2.4.7-py3-none-manylinux2014_aarch64.whl", hash = "sha256:fcb909d38c83f21478ca9cb500c84264f988c69f62715ae9462e966767fb76dd"},
     {file = "milvus_lite-2.4.7-py3-none-manylinux2014_x86_64.whl", hash = "sha256:f016474d663045787dddf1c3aad13b7d8b61fd329220318f858184918143dcbf"},
 ]
 
@@ -3135,13 +3135,13 @@ files = [
 
 [[package]]
 name = "setuptools"
-version = "70.1.0"
+version = "70.1.1"
 requires_python = ">=3.8"
 summary = "Easily download, build, install, upgrade, and uninstall Python packages"
 groups = ["default"]
 files = [
-    {file = "setuptools-70.1.0-py3-none-any.whl", hash = "sha256:d9b8b771455a97c8a9f3ab3448ebe0b29b5e105f1228bba41028be116985a267"},
-    {file = "setuptools-70.1.0.tar.gz", hash = "sha256:01a1e793faa5bd89abc851fa15d0a0db26f160890c7102cd8dce643e886b47f5"},
+    {file = "setuptools-70.1.1-py3-none-any.whl", hash = "sha256:a58a8fde0541dab0419750bcc521fbdf8585f6e5cb41909df3a472ef7b81ca95"},
+    {file = "setuptools-70.1.1.tar.gz", hash = "sha256:937a48c7cdb7a21eb53cd7f9b59e525503aa8abaf3584c730dc5f7a5bec3a650"},
 ]
 
 [[package]]
