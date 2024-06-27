@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:d0037f13395e7385b3e94ab4a4ab605c9447a83ae150eb4dd407cdaa47d34dfb"
+content_hash = "sha256:59b7a22c5ee38ad98f6897c17299eb64d2161855742d8fb36b41bbaef5e0e7fa"
 
 [[package]]
 name = "aiohttp"
@@ -688,12 +688,12 @@ files = [
 
 [[package]]
 name = "fsspec"
-version = "2024.6.0"
+version = "2024.6.1"
 requires_python = ">=3.8"
 summary = "File-system specification"
 files = [
-    {file = "fsspec-2024.6.0-py3-none-any.whl", hash = "sha256:58d7122eb8a1a46f7f13453187bfea4972d66bf01618d37366521b1998034cee"},
-    {file = "fsspec-2024.6.0.tar.gz", hash = "sha256:f579960a56e6d8038a9efc8f9c77279ec12e6299aa86b0769a7e9c46b94527c2"},
+    {file = "fsspec-2024.6.1-py3-none-any.whl", hash = "sha256:3cb443f8bcd2efb31295a5b9fdb02aee81d8452c80d28f97a6d0959e6cee101e"},
+    {file = "fsspec-2024.6.1.tar.gz", hash = "sha256:fad7d7e209dd4c1208e3bbfda706620e0da5142bebbd9c384afb95b07e798e49"},
 ]
 
 [[package]]
@@ -3429,7 +3429,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.20.0"
+version = "0.20.1"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
@@ -3457,8 +3457,8 @@ dependencies = [
     "singleton-decorator~=1.0.0",
 ]
 files = [
-    {file = "unstract_adapters-0.20.0-py3-none-any.whl", hash = "sha256:92029f5e6adf305ef731603eca6753b8b16b69008004b0168dc0ef9d260e0e2b"},
-    {file = "unstract_adapters-0.20.0.tar.gz", hash = "sha256:7201808ebfeda4fe1b32532e6123abb776edf0513ee23762b5ece89524493f49"},
+    {file = "unstract_adapters-0.20.1-py3-none-any.whl", hash = "sha256:e1f291016ab81f2fa46bc5ac0629905a9977198a8e5ad3077b8b188383fbd0c3"},
+    {file = "unstract_adapters-0.20.1.tar.gz", hash = "sha256:4c9b10bc5ae6f0d395088ba4f3d2b27bcfade1b2f1666ccf2611723336d33571"},
 ]
 
 [[package]]
