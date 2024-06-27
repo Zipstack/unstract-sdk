@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:3db5aee372bd137d7e2f64dab69234475aa5f5e010714b070e04fd53522201ac"
+content_hash = "sha256:d0037f13395e7385b3e94ab4a4ab605c9447a83ae150eb4dd407cdaa47d34dfb"
 
 [[package]]
 name = "aiohttp"
@@ -763,7 +763,7 @@ files = [
 
 [[package]]
 name = "google-cloud-aiplatform"
-version = "1.56.0"
+version = "1.57.0"
 requires_python = ">=3.8"
 summary = "Vertex AI API client library"
 dependencies = [
@@ -780,8 +780,8 @@ dependencies = [
     "shapely<3.0.0dev",
 ]
 files = [
-    {file = "google-cloud-aiplatform-1.56.0.tar.gz", hash = "sha256:d4cfb085427dac01142915f523949ac2955d6c7f148d95017d3286a77caf5d5e"},
-    {file = "google_cloud_aiplatform-1.56.0-py2.py3-none-any.whl", hash = "sha256:ee1ab3bd115c3caebf8ddfd3e47eeb8396a3ec2fc5f5baf1a5c295c8d64333ab"},
+    {file = "google-cloud-aiplatform-1.57.0.tar.gz", hash = "sha256:113905f100cb0a9ad744a2445a7675f92f28600233ba499614aa704d11a809b7"},
+    {file = "google_cloud_aiplatform-1.57.0-py2.py3-none-any.whl", hash = "sha256:ca5391a56e0cc8f4ed39a2beb7be02f51936ff04fd5304775a72a86c345d0e47"},
 ]
 
 [[package]]
@@ -1431,6 +1431,19 @@ dependencies = [
 files = [
     {file = "llama_index_embeddings_google-0.1.5-py3-none-any.whl", hash = "sha256:a5dda93a4452e06490e4e4da1eb3d0609b5a1c5e9d4779086fd996d661fd68a2"},
     {file = "llama_index_embeddings_google-0.1.5.tar.gz", hash = "sha256:989f87e249661a5a531972c4ae52cd587e485291b25e76c084db204f97f0087b"},
+]
+
+[[package]]
+name = "llama-index-embeddings-ollama"
+version = "0.1.2"
+requires_python = ">=3.8.1,<4.0"
+summary = "llama-index embeddings ollama integration"
+dependencies = [
+    "llama-index-core<0.11.0,>=0.10.1",
+]
+files = [
+    {file = "llama_index_embeddings_ollama-0.1.2-py3-none-any.whl", hash = "sha256:ac7afabfa1134059af351b021e05e256bf86dd15e5176ffa5ab0305bcf03b33f"},
+    {file = "llama_index_embeddings_ollama-0.1.2.tar.gz", hash = "sha256:a9e0809bddd2e4ad888f249519edc7e3d339c74e4e03fc5a40c3060dc41d47a9"},
 ]
 
 [[package]]
@@ -3416,7 +3429,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.19.1"
+version = "0.20.0"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
@@ -3425,6 +3438,7 @@ dependencies = [
     "llama-index-embeddings-azure-openai==0.1.6",
     "llama-index-embeddings-azure-openai==0.1.6",
     "llama-index-embeddings-google==0.1.5",
+    "llama-index-embeddings-ollama==0.1.2",
     "llama-index-llms-anthropic==0.1.11",
     "llama-index-llms-anyscale==0.1.3",
     "llama-index-llms-azure-openai==0.1.5",
@@ -3443,8 +3457,8 @@ dependencies = [
     "singleton-decorator~=1.0.0",
 ]
 files = [
-    {file = "unstract_adapters-0.19.1-py3-none-any.whl", hash = "sha256:700a138369230f385ed9331579770fb1e44cc8679e86c7792d7d83fc5e59dbc7"},
-    {file = "unstract_adapters-0.19.1.tar.gz", hash = "sha256:0334f3afb873ac56ee546e1fec5a2f3faa0950b3766475d188ef471fe94d6c66"},
+    {file = "unstract_adapters-0.20.0-py3-none-any.whl", hash = "sha256:92029f5e6adf305ef731603eca6753b8b16b69008004b0168dc0ef9d260e0e2b"},
+    {file = "unstract_adapters-0.20.0.tar.gz", hash = "sha256:7201808ebfeda4fe1b32532e6123abb776edf0513ee23762b5ece89524493f49"},
 ]
 
 [[package]]
