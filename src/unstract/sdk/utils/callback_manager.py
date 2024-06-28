@@ -133,18 +133,12 @@ class CallbackManager:
                 model_name: str = model.metadata.model_name
             elif isinstance(model, BaseEmbedding):
                 model_name = model.model_name
-            try:
-                tokenizer: Callable[[str], list] = tiktoken.encoding_for_model(
-                    model_name
-                ).encode
-                return tokenizer
-            except KeyError as e:
-                logger.warning(str(e))
-                tokenizer: Callable[[str], list] = tiktoken.get_encoding(
-                    model_name
-                ).encode
-                return tokenizer
-        except ValueError as e:
+
+            tokenizer: Callable[[str], list] = tiktoken.encoding_for_model(
+                model_name
+            ).encode
+            return tokenizer
+        except (KeyError, ValueError) as e:
             logger.warning(str(e))
             return fallback_tokenizer
 
