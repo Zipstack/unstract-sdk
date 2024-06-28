@@ -12,6 +12,9 @@ from llama_index.core.vector_stores import (
 )
 from typing_extensions import deprecated
 from unstract.adapters.exceptions import AdapterError
+from unstract.adapters.x2text.constants import X2TextConstants
+from unstract.adapters.x2text.dto import TextExtractionResult
+from unstract.adapters.x2text.llm_whisperer.src import LLMWhisperer
 
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
@@ -131,6 +134,7 @@ class Index:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
+        enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
     ) -> str:
         """Indexes an individual file using the passed arguments.
@@ -246,9 +250,29 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
-                    extracted_text = x2text.process(
-                        input_file_path=file_path, output_file_path=output_file_path
-                    )
+                    if enable_highlight and isinstance(
+                        x2text._x2text_instance, LLMWhisperer
+                    ):
+                        process_response: TextExtractionResult = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                            enable_highlight=enable_highlight,
+                        )
+                        whisper_hash_value = (
+                            process_response.extraction_metadata.whisper_hash
+                        )
+
+                        metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
+
+                        self.tool.update_exec_metadata(metadata)
+
+                    else:
+                        process_response: TextExtractionResult = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                        )
+
+                    extracted_text = process_response.extracted_text
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
                 raise IndexingError(str(e)) from e
