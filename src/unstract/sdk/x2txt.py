@@ -5,6 +5,7 @@ from typing_extensions import deprecated
 from unstract.adapters.constants import Common
 from unstract.adapters.x2text import adapters
 from unstract.adapters.x2text.constants import X2TextConstants
+from unstract.adapters.x2text.dto import TextExtractionResult
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.adapters import ToolAdapter
@@ -67,7 +68,7 @@ class X2Text(metaclass=ABCMeta):
         input_file_path: str,
         output_file_path: Optional[str] = None,
         **kwargs: dict[Any, Any],
-    ) -> str:
+    ) -> TextExtractionResult:
         return self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs
         )
