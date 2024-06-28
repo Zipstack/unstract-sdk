@@ -138,7 +138,7 @@ class CallbackManager:
                 model_name
             ).encode
             return tokenizer
-        except ValueError as e:
+        except (KeyError, ValueError) as e:
             logger.warning(str(e))
             return fallback_tokenizer
 
