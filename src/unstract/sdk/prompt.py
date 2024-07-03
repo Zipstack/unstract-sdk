@@ -33,17 +33,25 @@ class PromptTool:
     def answer_prompt(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
-        return self._post_call("answer-prompt", payload, params)
+        return self._post_call(
+            url_path="answer-prompt",
+            payload=payload,
+            params=params,
+        )
 
     def single_pass_extraction(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
-        return self._post_call("single-pass-extraction", payload, params)
+        return self._post_call(
+            url_path="single-pass-extraction",
+            payload=payload,
+            params=params,
+        )
 
     def summarize(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
-        return self._post_call("summarize", payload, params)
+        return self._post_call(url_path="summarize", payload=payload, params=params)
 
     def _post_call(
         self,
