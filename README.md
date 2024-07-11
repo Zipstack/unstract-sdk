@@ -1,5 +1,5 @@
 <div align="center">
-<img src="docs/assets/unstract_u_logo.png" style="height: 120px">
+<img src="https://raw.githubusercontent.com/Zipstack/unstract-sdk/main/docs/assets/unstract_u_logo.png" style="height: 120px">
 
 # Unstract
 
@@ -68,4 +68,4 @@ Index Version **0.9.28** as on January 14th, 2024
 
 ### Documentation generation
 
-Follow [this README.md](docs/README.md) for generating documentation.
+Follow [this README.md](https://github.com/Zipstack/unstract-sdk/blob/main/docs/README.md) for generating documentation.
