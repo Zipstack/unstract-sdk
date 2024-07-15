@@ -11,13 +11,48 @@ dependencies = [
     "jsonschema~=4.18.2",
     "python-magic~=0.4.27",
     "python-dotenv==1.0.0",
-    # LLM Triad
-    "unstract-adapters~=0.20.1",
     "llama-index==0.10.38",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
     # Error handling, remove after moving it to adapters
-    "openai~=1.21.2"
+    "openai~=1.21.2",
+    "llama-index-embeddings-google==0.1.5",
+    "llama-index-embeddings-azure-openai==0.1.6",
+    # llama-index itself has a dependency on open-ai.
+    # Hence, not explicitly pinning any version
+    #        "llama-index-embeddings-openai==0.1.7",
+    # Disabling Hugging Face & FastEmbed to
+    # keep the image size under check
+    #        "llama-index-embeddings-huggingface==0.2.0",
+    # Disabling fast embed due to high processing power
+    #        "llama-index-embeddings-fastembed==0.1.4",
+    "llama-index-embeddings-azure-openai==0.1.6",
+    "llama-index-embeddings-ollama==0.1.2",
+    "llama-index-vector-stores-postgres==0.1.3",
+    # Including Supabase conflicts with postgres on pg-vector.
+    # Hence, commenting it out at the moment
+    #        "llama-index-vector-stores-supabase==0.1.3",
+    "llama-index-vector-stores-milvus==0.1.18",
+    "llama-index-vector-stores-weaviate==0.1.4",
+    "llama-index-vector-stores-pinecone==0.1.4",
+    "llama-index-vector-stores-qdrant==0.2.8",
+    "llama-index-llms-palm==0.1.5",
+    "llama-index-llms-mistralai==0.1.10",
+    "llama-index-llms-anyscale==0.1.3",
+    "llama-index-llms-anthropic==0.1.11",
+    # Llama-index 0.10.x implcitly includes openai for LLM
+    "llama-index-llms-azure-openai==0.1.5",
+    "llama-index-llms-vertex==0.1.8",
+    "llama-index-llms-replicate==0.1.3",
+    "llama-index-llms-ollama==0.1.3",
+    # OCR
+    "filetype~=1.2.0",
+    # Others
+    # For singleton classes
+    "singleton-decorator~=1.0.0",
+    # For Llama Parse X2Text
+    "llama-parse==0.4.1",
+    "httpx>=0.25.2",
 ]
 readme = "README.md"
 urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }
