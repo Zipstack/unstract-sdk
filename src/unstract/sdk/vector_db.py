@@ -1,4 +1,5 @@
 import logging
+import json
 from collections.abc import Sequence
 from typing import Any, Optional, Union
 
@@ -16,7 +17,7 @@ from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv
+from unstract.sdk.constants import LogLevel, ToolEnv, SPSKeys
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError
 from unstract.sdk.platform import PlatformHelper
@@ -41,19 +42,21 @@ class VectorDB:
         tool: BaseTool,
         adapter_instance_id: Optional[str] = None,
         embedding: Optional[Embedding] = None,
+        is_public_call: bool = False,
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
         self._vector_db_instance = None
         self._embedding_instance = None
         self._embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
+        self._is_public_call = is_public_call
         self._initialise(embedding)
 
     def _initialise(self, embedding: Optional[Embedding] = None):
         if embedding:
             self._embedding_instance = embedding._embedding_instance
             self._embedding_dimension = embedding._length
-        if self._adapter_instance_id:
+        if self._adapter_instance_id or self._is_public_call:
             self._vector_db_instance: Union[
                 BasePydanticVectorStore, VectorStore
             ] = self._get_vector_db()
@@ -79,13 +82,18 @@ class VectorDB:
             Union[BasePydanticVectorStore, VectorStore]: Vector store instance
         """
         try:
-            if not self._adapter_instance_id:
+            if not self._adapter_instance_id and not self._is_public_call:
                 raise VectorDBError(
                     "Adapter instance ID not set. Initialisation failed"
                 )
-            vector_db_config = ToolAdapter.get_adapter_config(
-                self._tool, self._adapter_instance_id
-            )
+            
+            if self._is_public_call:
+                sps_vector_db_config = self._tool.get_env_or_die(SPSKeys.SPS_VECTOR_DB_CONFIG)
+                vector_db_config = json.loads(sps_vector_db_config)
+            else:   
+                vector_db_config = ToolAdapter.get_adapter_config(
+                    self._tool, self._adapter_instance_id
+                )
             vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
             if vector_db_adapter_id not in self.vector_db_adapters:
                 raise SdkError(
@@ -96,10 +104,11 @@ class VectorDB:
                 Common.METADATA
             ][Common.ADAPTER]
             vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
-            org = self._get_org_id()
             # Adding the collection prefix and embedding type
             # to the metadata
-            vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
+            if not self._is_public_call:
+                org = self._get_org_id()
+                vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
             vector_db_metadata[
                 VectorDbConstants.EMBEDDING_DIMENSION
             ] = self._embedding_dimension

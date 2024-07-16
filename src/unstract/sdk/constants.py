@@ -151,3 +151,8 @@ class ToolSettingsKey:
     RUN_ID = "run_id"
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
+
+class SPSKeys:
+    SPS_EMBEDDING_CONFIG = "SPS_EMBEDDING_CONFIG"
+    SPS_VECTOR_DB_CONFIG = "SPS_VECTOR_DB_CONFIG"
+    SPS_X2TEXT_CONFIG = "SPS_X2TEXT_CONFIG"

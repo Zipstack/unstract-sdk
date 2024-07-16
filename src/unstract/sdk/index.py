@@ -125,17 +125,18 @@ class Index:
     def index(
         self,
         tool_id: str,
-        embedding_instance_id: str,
-        vector_db_instance_id: str,
-        x2text_instance_id: str,
         file_path: str,
         chunk_size: int,
         chunk_overlap: int,
+        embedding_instance_id: str = None,
+        vector_db_instance_id: str = None,
+        x2text_instance_id: str = None,
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
+        is_public_call: bool = False,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -168,6 +169,7 @@ class Index:
             chunk_overlap=str(chunk_overlap),
             file_path=file_path,
             file_hash=file_hash,
+            is_public_call=is_public_call,
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
@@ -176,6 +178,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
+                is_public_call=is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -188,6 +191,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=vector_db_instance_id,
                 embedding=embedding,
+                is_public_call=is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -248,7 +252,9 @@ class Index:
                         extracted_text = file.read()
                 else:
                     x2text = X2Text(
-                        tool=self.tool, adapter_instance_id=x2text_instance_id
+                        tool=self.tool,
+                        adapter_instance_id=x2text_instance_id,
+                        is_public_call=is_public_call
                     )
                     if enable_highlight and isinstance(
                         x2text._x2text_instance, LLMWhisperer
@@ -358,6 +364,7 @@ class Index:
         chunk_overlap: str,
         file_path: Optional[str] = None,
         file_hash: Optional[str] = None,
+        is_public_call: bool = False
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
 
@@ -388,14 +395,19 @@ class Index:
         index_key = {
             "tool_id": tool_id,
             "file_hash": file_hash,
-            "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
-            "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
-            "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
             # Typed and hashed as strings since the final hash is persisted
             # and this is required to be backward compatible
             "chunk_size": str(chunk_size),
             "chunk_overlap": str(chunk_overlap),
         }
+
+        if not is_public_call:
+            index_key.update({
+                "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
+                "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
+                "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
+            })
+
         # JSON keys are sorted to ensure that the same key gets hashed even in
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))

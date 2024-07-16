@@ -1,3 +1,5 @@
+import json
+
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -9,32 +11,43 @@ from unstract.adapters.x2text.dto import TextExtractionResult
 from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel
+from unstract.sdk.constants import LogLevel, SPSKeys
 from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.tool.base import BaseTool
 
 
 class X2Text(metaclass=ABCMeta):
-    def __init__(self, tool: BaseTool, adapter_instance_id: Optional[str] = None):
+    def __init__(
+            self,
+            tool: BaseTool,
+            adapter_instance_id: Optional[str] = None, 
+            is_public_call: bool = False,
+        ):
         self._tool = tool
         self._x2text_adapters = adapters
         self._adapter_instance_id = adapter_instance_id
         self._x2text_instance: X2TextAdapter = None
+        self._is_public_call = is_public_call
         self._initialise()
 
     def _initialise(self):
-        if self._adapter_instance_id:
+        if self._adapter_instance_id or self._is_public_call:
             self._x2text_instance = self._get_x2text()
 
     def _get_x2text(self) -> X2TextAdapter:
         try:
-            if not self._adapter_instance_id:
+            if not self._adapter_instance_id and not self._is_public_call:
                 raise X2TextError(
                     "Adapter instance ID not set. " "Initialisation failed"
                 )
-            x2text_config = ToolAdapter.get_adapter_config(
-                self._tool, self._adapter_instance_id
-            )
+
+            if self._is_public_call:
+                sps_x2text_config = self._tool.get_env_or_die(SPSKeys.SPS_X2TEXT_CONFIG)
+                x2text_config = json.loads(sps_x2text_config)
+            else:
+                x2text_config = ToolAdapter.get_adapter_config(
+                    self._tool, self._adapter_instance_id
+                )
             x2text_adapter_id = x2text_config.get(Common.ADAPTER_ID)
             if x2text_adapter_id in self._x2text_adapters:
                 x2text_adapter = self._x2text_adapters[x2text_adapter_id][
@@ -48,9 +61,11 @@ class X2Text(metaclass=ABCMeta):
                 x2text_metadata[
                     X2TextConstants.X2TEXT_PORT
                 ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
-                x2text_metadata[
-                    X2TextConstants.PLATFORM_SERVICE_API_KEY
-                ] = self._tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
+                
+                if not self._is_public_call:
+                    x2text_metadata[
+                        X2TextConstants.PLATFORM_SERVICE_API_KEY
+                    ] = self._tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
 
                 self._x2text_instance = x2text_adapter(x2text_metadata)
 
