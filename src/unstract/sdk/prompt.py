@@ -19,6 +19,7 @@ class PromptTool:
         tool: BaseTool,
         prompt_host: str,
         prompt_port: str,
+        is_public_call: bool = False,
     ) -> None:
         """
         Args:
@@ -28,13 +29,19 @@ class PromptTool:
         """
         self.tool = tool
         self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
-        self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+        self.is_public_call = is_public_call
+        if not is_public_call:
+            self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+
 
     def answer_prompt(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
+        url_path = "answer-prompt"
+        if self.is_public_call:
+            url_path = "answer-prompt-sps"
         return self._post_call(
-            url_path="answer-prompt",
+            url_path=url_path,
             payload=payload,
             params=params,
         )
@@ -85,14 +92,16 @@ class PromptTool:
             "structure_output": "",
         }
         url: str = f"{self.base_url}/{url_path}"
-        headers: dict[str, str] = {"Authorization": f"Bearer {self.bearer_token}"}
+        headers: dict[str, str] = {}
+        if not self.is_public_call:
+            headers = {"Authorization": f"Bearer {self.bearer_token}"}
         response: Response = Response()
         try:
             response = requests.post(
                 url=url,
                 json=payload,
-                headers=headers,
                 params=params,
+                headers=headers
             )
             response.raise_for_status()
             result["status"] = "OK"

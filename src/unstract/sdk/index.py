@@ -31,9 +31,10 @@ class Constants:
 
 
 class Index:
-    def __init__(self, tool: BaseTool):
+    def __init__(self, tool: BaseTool, is_public_call: bool = False):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
+        self.is_public_call = is_public_call
 
     def query_index(
         self,
@@ -47,6 +48,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
+                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(embedding_instance_id)
@@ -57,6 +59,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=vector_db_instance_id,
                 embedding=embedding,
+                is_public_call=self.is_public_call
             )
 
         except SdkError as e:
@@ -136,7 +139,6 @@ class Index:
         output_file_path: Optional[str] = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
-        is_public_call: bool = False,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -169,7 +171,6 @@ class Index:
             chunk_overlap=str(chunk_overlap),
             file_path=file_path,
             file_hash=file_hash,
-            is_public_call=is_public_call,
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
@@ -178,7 +179,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
-                is_public_call=is_public_call
+                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -191,7 +192,7 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=vector_db_instance_id,
                 embedding=embedding,
-                is_public_call=is_public_call
+                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -254,7 +255,7 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool,
                         adapter_instance_id=x2text_instance_id,
-                        is_public_call=is_public_call
+                        is_public_call=self.is_public_call
                     )
                     if enable_highlight and isinstance(
                         x2text._x2text_instance, LLMWhisperer
@@ -364,7 +365,6 @@ class Index:
         chunk_overlap: str,
         file_path: Optional[str] = None,
         file_hash: Optional[str] = None,
-        is_public_call: bool = False
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
 
@@ -401,7 +401,7 @@ class Index:
             "chunk_overlap": str(chunk_overlap),
         }
 
-        if not is_public_call:
+        if not self.is_public_call:
             index_key.update({
                 "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
                 "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
