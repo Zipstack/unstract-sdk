@@ -1,6 +1,6 @@
+import json
 import logging
 import re
-import json
 from typing import Any, Optional
 
 from llama_index.core.llms import LLM as LlamaIndexLLM
@@ -13,7 +13,7 @@ from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv, SPSKeys
+from unstract.sdk.constants import LogLevel, SPSKeys, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
@@ -57,7 +57,7 @@ class LLM:
         if self._adapter_instance_id or self._is_public_call:
             self._llm_instance = self._get_llm(self._adapter_instance_id)
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
-        
+
         if self._adapter_instance_id and not self._is_public_call:
             platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
             CallbackManager.set_callback(
@@ -99,15 +99,15 @@ class LLM:
         try:
             if not self._adapter_instance_id and not self._is_public_call:
                 raise LLMError("Adapter instance ID not set. " "Initialisation failed")
-            
+
             if self._is_public_call:
                 sps_llm_config = self._tool.get_env_or_die(SPSKeys.SPS_LLM_CONFIG)
                 llm_config_data = json.loads(sps_llm_config)
-            else:      
+            else:
                 llm_config_data = ToolAdapter.get_adapter_config(
                     self._tool, self._adapter_instance_id
                 )
-            
+
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
             if llm_adapter_id not in self.llm_adapters:
                 raise SdkError(f"LLM adapter not supported : " f"{llm_adapter_id}")

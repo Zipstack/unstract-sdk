@@ -8,7 +8,7 @@ from unstract.adapters.constants import Common
 from unstract.adapters.embedding import adapters
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv, SPSKeys
+from unstract.sdk.constants import LogLevel, SPSKeys, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
@@ -61,7 +61,7 @@ class Embedding:
                 raise EmbeddingError(
                     "Adapter instance ID not set. " "Initialisation failed"
                 )
-            
+
             if self._is_public_call:
                 sps_embedding_config = self._tool.get_env_or_die(SPSKeys.SPS_EMBEDDING_CONFIG)
                 embedding_config_data = json.loads(sps_embedding_config)

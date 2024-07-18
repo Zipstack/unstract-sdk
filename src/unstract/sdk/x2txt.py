@@ -1,5 +1,4 @@
 import json
-
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -20,7 +19,7 @@ class X2Text(metaclass=ABCMeta):
     def __init__(
             self,
             tool: BaseTool,
-            adapter_instance_id: Optional[str] = None, 
+            adapter_instance_id: Optional[str] = None,
             is_public_call: bool = False,
         ):
         self._tool = tool
@@ -61,7 +60,7 @@ class X2Text(metaclass=ABCMeta):
                 x2text_metadata[
                     X2TextConstants.X2TEXT_PORT
                 ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
-                
+
                 if not self._is_public_call:
                     x2text_metadata[
                         X2TextConstants.PLATFORM_SERVICE_API_KEY

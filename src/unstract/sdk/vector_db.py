@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 from collections.abc import Sequence
 from typing import Any, Optional, Union
 
@@ -17,7 +17,7 @@ from unstract.adapters.vectordb import adapters
 from unstract.adapters.vectordb.constants import VectorDbConstants
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, ToolEnv, SPSKeys
+from unstract.sdk.constants import LogLevel, SPSKeys, ToolEnv
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError
 from unstract.sdk.platform import PlatformHelper
@@ -86,11 +86,11 @@ class VectorDB:
                 raise VectorDBError(
                     "Adapter instance ID not set. Initialisation failed"
                 )
-            
+
             if self._is_public_call:
                 sps_vector_db_config = self._tool.get_env_or_die(SPSKeys.SPS_VECTOR_DB_CONFIG)
                 vector_db_config = json.loads(sps_vector_db_config)
-            else:   
+            else:
                 vector_db_config = ToolAdapter.get_adapter_config(
                     self._tool, self._adapter_instance_id
                 )
