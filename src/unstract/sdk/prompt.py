@@ -33,9 +33,8 @@ class PromptTool:
         if not is_public_call:
             self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
-
     def answer_prompt(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self, payload: dict[str, Any],params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
         url_path = "answer-prompt"
         if self.is_public_call:

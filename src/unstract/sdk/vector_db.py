@@ -88,7 +88,9 @@ class VectorDB:
                 )
 
             if self._is_public_call:
-                sps_vector_db_config = self._tool.get_env_or_die(SPSKeys.SPS_VECTOR_DB_CONFIG)
+                sps_vector_db_config = self._tool.get_env_or_die(
+                    SPSKeys.SPS_VECTOR_DB_CONFIG
+                )
                 vector_db_config = json.loads(sps_vector_db_config)
             else:
                 vector_db_config = ToolAdapter.get_adapter_config(

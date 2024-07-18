@@ -403,9 +403,15 @@ class Index:
 
         if not self.is_public_call:
             index_key.update({
-                "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
-                "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
-                "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
+                "vector_db_config": ToolAdapter.get_adapter_config(
+                    self.tool, vector_db
+                ),
+                "embedding_config": ToolAdapter.get_adapter_config(
+                    self.tool, embedding
+                ),
+                "x2text_config": ToolAdapter.get_adapter_config(
+                    self.tool, x2text
+                ),
             })
 
         # JSON keys are sorted to ensure that the same key gets hashed even in

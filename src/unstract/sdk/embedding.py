@@ -63,7 +63,9 @@ class Embedding:
                 )
 
             if self._is_public_call:
-                sps_embedding_config = self._tool.get_env_or_die(SPSKeys.SPS_EMBEDDING_CONFIG)
+                sps_embedding_config = self._tool.get_env_or_die(
+                    SPSKeys.SPS_EMBEDDING_CONFIG
+                )
                 embedding_config_data = json.loads(sps_embedding_config)
             else:
                 embedding_config_data = ToolAdapter.get_adapter_config(

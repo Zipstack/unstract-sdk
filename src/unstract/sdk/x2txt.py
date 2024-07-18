@@ -22,12 +22,12 @@ class X2Text(metaclass=ABCMeta):
             adapter_instance_id: Optional[str] = None,
             is_public_call: bool = False,
         ):
-        self._tool = tool
-        self._x2text_adapters = adapters
-        self._adapter_instance_id = adapter_instance_id
-        self._x2text_instance: X2TextAdapter = None
-        self._is_public_call = is_public_call
-        self._initialise()
+            self._tool = tool
+            self._x2text_adapters = adapters
+            self._adapter_instance_id = adapter_instance_id
+            self._x2text_instance: X2TextAdapter = None
+            self._is_public_call = is_public_call
+            self._initialise()
 
     def _initialise(self):
         if self._adapter_instance_id or self._is_public_call:
@@ -64,7 +64,9 @@ class X2Text(metaclass=ABCMeta):
                 if not self._is_public_call:
                     x2text_metadata[
                         X2TextConstants.PLATFORM_SERVICE_API_KEY
-                    ] = self._tool.get_env_or_die(X2TextConstants.PLATFORM_SERVICE_API_KEY)
+                    ] = self._tool.get_env_or_die(
+                        X2TextConstants.PLATFORM_SERVICE_API_KEY
+                    )
 
                 self._x2text_instance = x2text_adapter(x2text_metadata)
 

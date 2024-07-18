@@ -152,6 +152,7 @@ class ToolSettingsKey:
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
 
+
 class SPSKeys:
     SPS_LLM_CONFIG = "SPS_LLM_CONFIG"
     SPS_EMBEDDING_CONFIG = "SPS_EMBEDDING_CONFIG"
