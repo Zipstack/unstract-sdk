@@ -69,6 +69,7 @@ class Audit(StreamMixin):
         execution_id = kwargs.get("execution_id", "")
         adapter_instance_id = kwargs.get("adapter_instance_id", "")
         run_id = kwargs.get("run_id", "")
+        provider = kwargs.get("provider", "")
         llm_usage_reason = ""
         if event_type == "llm":
             llm_usage_reason = kwargs.get("llm_usage_reason", "")
@@ -80,6 +81,7 @@ class Audit(StreamMixin):
             "usage_type": event_type,
             "llm_usage_reason": llm_usage_reason,
             "model_name": model_name,
+            "provider": provider,
             "embedding_tokens": token_counter.total_embedding_token_count,
             "prompt_tokens": token_counter.prompt_llm_token_count,
             "completion_tokens": token_counter.completion_llm_token_count,

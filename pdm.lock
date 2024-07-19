@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:edec106befa0b63c2236d429b7ffb3a573c8cea2dff0b46f7cd8d4efb74a4e4c"
+content_hash = "sha256:4801a2394ada2b69049a40a0d522e8c53662b9262b7f8090d47e7db5d162dba0"
 
 [[package]]
 name = "aiohttp"
@@ -3433,7 +3433,7 @@ files = [
 
 [[package]]
 name = "unstract-adapters"
-version = "0.21.0"
+version = "0.22.0"
 requires_python = "<3.12,>=3.9"
 summary = "Unstract interface for LLMs, Embeddings and VectorDBs"
 dependencies = [
@@ -3461,8 +3461,8 @@ dependencies = [
     "singleton-decorator~=1.0.0",
 ]
 files = [
-    {file = "unstract_adapters-0.21.0-py3-none-any.whl", hash = "sha256:6c4f597602f55b80ba176a29a930755abd3494ff1c085f406536e7463902d655"},
-    {file = "unstract_adapters-0.21.0.tar.gz", hash = "sha256:ebb8f80b7f26f04874bb5466fe0be8c3e1b51d44ed85c4e62289a7751c996af6"},
+    {file = "unstract_adapters-0.22.0-py3-none-any.whl", hash = "sha256:0c0c4fe262ee1e3c98858ac4911c9c5accad52f92d7408e5eddef958168f786f"},
+    {file = "unstract_adapters-0.22.0.tar.gz", hash = "sha256:f8ca322a1ec50e0fe257b1bb4ad6da4f6f5ca3016114437fe9119fe374e3a44b"},
 ]
 
 [[package]]
