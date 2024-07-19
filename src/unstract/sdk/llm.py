@@ -106,6 +106,7 @@ class LLM:
             ]
             llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
             llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
+            self._usage_kwargs["provider"] = llm_adapter_class.get_provider()
             llm_instance: LLM = llm_adapter_class.get_llm_instance()
             return llm_instance
         except Exception as e:
