@@ -82,6 +82,7 @@ class Embedding:
             ][Common.ADAPTER]
             embedding_metadata = embedding_config_data.get(Common.ADAPTER_METADATA)
             embedding_adapter_class = embedding_adapter(embedding_metadata)
+            self._usage_kwargs["provider"] = embedding_adapter_class.get_provider()
             return embedding_adapter_class.get_embedding_instance()
         except Exception as e:
             self._tool.stream_log(
