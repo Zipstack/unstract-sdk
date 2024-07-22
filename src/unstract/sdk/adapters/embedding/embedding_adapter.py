@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any
 
 from llama_index.core import MockEmbedding
@@ -26,6 +26,11 @@ class EmbeddingAdapter(Adapter, ABC):
         return ""
 
     @staticmethod
+    @abstractmethod
+    def get_provider() -> str:
+        pass
+
+    @staticmethod
     def get_icon() -> str:
         return ""
 
@@ -37,9 +42,7 @@ class EmbeddingAdapter(Adapter, ABC):
     def get_adapter_type() -> AdapterTypes:
         return AdapterTypes.EMBEDDING
 
-    def get_embedding_instance(
-        self, embed_config: dict[str, Any]
-    ) -> BaseEmbedding:
+    def get_embedding_instance(self, embed_config: dict[str, Any]) -> BaseEmbedding:
         """Instantiate the llama index BaseEmbedding class.
 
         Returns:

@@ -7,4 +7,3 @@ class LlamaParseConfig:
     NUM_WORKERS = "num_workers"
     VERBOSE = "verbose"
     LANGUAGE = "language"
-

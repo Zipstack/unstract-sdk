@@ -32,6 +32,10 @@ class ReplicateLLM(LLMAdapter):
         return "Replicate LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "replicate"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Replicate.png"
 

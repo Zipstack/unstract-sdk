@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any
 
@@ -22,9 +21,6 @@ class OpenAI(EmbeddingAdapter):
     def __init__(self, settings: dict[str, Any]):
         super().__init__("OpenAI")
         self.config = settings
-        self.json_credentials = json.loads(
-            settings.get("json_credentials", "{}")
-        )
 
     @staticmethod
     def get_id() -> str:
@@ -37,6 +33,10 @@ class OpenAI(EmbeddingAdapter):
     @staticmethod
     def get_description() -> str:
         return "OpenAI LLM"
+
+    @staticmethod
+    def get_provider() -> str:
+        return "openai"
 
     @staticmethod
     def get_icon() -> str:
@@ -54,9 +54,7 @@ class OpenAI(EmbeddingAdapter):
             embedding: BaseEmbedding = OpenAIEmbedding(
                 api_key=str(self.config.get(Constants.API_KEY)),
                 api_base=str(
-                    self.config.get(
-                        Constants.API_BASE_KEY, Constants.API_BASE_VALUE
-                    )
+                    self.config.get(Constants.API_BASE_KEY, Constants.API_BASE_VALUE)
                 ),
                 api_type=Constants.API_TYPE,
             )

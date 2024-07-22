@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any
 
@@ -20,7 +19,6 @@ class Ollama(EmbeddingAdapter):
     def __init__(self, settings: dict[str, Any]):
         super().__init__("Ollama")
         self.config = settings
-        self.json_credentials = json.loads(settings.get("json_credentials", "{}"))
 
     @staticmethod
     def get_id() -> str:
@@ -33,6 +31,10 @@ class Ollama(EmbeddingAdapter):
     @staticmethod
     def get_description() -> str:
         return "Ollama Embedding"
+
+    @staticmethod
+    def get_provider() -> str:
+        return "ollama"
 
     @staticmethod
     def get_icon() -> str:

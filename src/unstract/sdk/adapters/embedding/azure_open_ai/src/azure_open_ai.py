@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any
 
@@ -24,9 +23,6 @@ class AzureOpenAI(EmbeddingAdapter):
     def __init__(self, settings: dict[str, Any]):
         super().__init__("AzureOpenAIEmbedding")
         self.config = settings
-        self.json_credentials = json.loads(
-            settings.get("json_credentials", "{}")
-        )
 
     @staticmethod
     def get_id() -> str:
@@ -39,6 +35,10 @@ class AzureOpenAI(EmbeddingAdapter):
     @staticmethod
     def get_description() -> str:
         return "AzureOpenAI Embedding"
+
+    @staticmethod
+    def get_provider() -> str:
+        return "azure"
 
     @staticmethod
     def get_icon() -> str:

@@ -1,5 +1,5 @@
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Any
 
 from llama_index.core.llms import LLM, MockLLM
@@ -26,6 +26,11 @@ class LLMAdapter(Adapter, ABC):
     @staticmethod
     def get_description() -> str:
         return ""
+
+    @staticmethod
+    @abstractmethod
+    def get_provider() -> str:
+        pass
 
     @staticmethod
     def get_icon() -> str:

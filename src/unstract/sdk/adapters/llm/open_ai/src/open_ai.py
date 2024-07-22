@@ -38,6 +38,10 @@ class OpenAILLM(LLMAdapter):
         return "OpenAI LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "openai"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/OpenAI.png"
 
@@ -56,9 +60,7 @@ class OpenAILLM(LLMAdapter):
                 api_base=str(self.config.get(Constants.API_BASE)),
                 api_version=str(self.config.get(Constants.API_VERSION)),
                 max_retries=int(
-                    self.config.get(
-                        Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES
-                    )
+                    self.config.get(Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 api_type="openai",
                 temperature=0,

@@ -35,6 +35,10 @@ class AnthropicLLM(LLMAdapter):
         return "Anthropic LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "anthropic"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Anthropic.png"
 
@@ -54,9 +58,7 @@ class AnthropicLLM(LLMAdapter):
                     self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
                 ),
                 max_retries=int(
-                    self.config.get(
-                        Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES
-                    )
+                    self.config.get(Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 temperature=0,
             )

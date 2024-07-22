@@ -3,8 +3,6 @@ import logging
 import os
 from typing import Any
 
-
-
 from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials
 from llama_index.core.llms import LLM
@@ -14,6 +12,7 @@ from vertexai.generative_models._generative_models import (
     HarmCategory,
 )
 
+from unstract.sdk.adapters.exceptions import LLMError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -41,7 +40,7 @@ class SafetySettingsConstants:
 
 
 UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING: dict[str, HarmBlockThreshold] = {
-    "HARM_BLOCK_THRESHOLD_UNSPECIFIED": HarmBlockThreshold.HARM_BLOCK_THRESHOLD_UNSPECIFIED,
+    "HARM_BLOCK_THRESHOLD_UNSPECIFIED": HarmBlockThreshold.HARM_BLOCK_THRESHOLD_UNSPECIFIED,  # noqa: E501
     "BLOCK_LOW_AND_ABOVE": HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
     "BLOCK_MEDIUM_AND_ABOVE": HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
     "BLOCK_ONLY_HIGH": HarmBlockThreshold.BLOCK_ONLY_HIGH,
@@ -67,6 +66,10 @@ class VertexAILLM(LLMAdapter):
         return "Vertex Gemini LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "vertex_ai"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/VertexAI.png"
 
@@ -78,19 +81,20 @@ class VertexAILLM(LLMAdapter):
         return schema
 
     def get_llm_instance(self) -> LLM:
-        input_credentials = self.config.get(Constants.JSON_CREDENTIALS)
-        if not input_credentials:
-            input_credentials = "{}"
+        input_credentials = self.config.get(Constants.JSON_CREDENTIALS, "{}")
         try:
             json_credentials = json.loads(input_credentials)
-            credentials = Credentials.from_service_account_info(
-                info=json_credentials,
-                scopes=["https://www.googleapis.com/auth/cloud-platform"],
-            )  # type: ignore
-            credentials.refresh(google_requests.Request())  # type: ignore
-        except Exception as e:
-            credentials = input_credentials
-            logger.info("Credentials is not JSON")
+        except json.JSONDecodeError:
+            raise LLMError(
+                "Credentials is not a valid service account JSON, "
+                "please provide a valid JSON."
+            )
+
+        credentials = Credentials.from_service_account_info(
+            info=json_credentials,
+            scopes=["https://www.googleapis.com/auth/cloud-platform"],
+        )  # type: ignore
+        credentials.refresh(google_requests.Request())  # type: ignore
         max_retries = int(
             self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
         )
@@ -110,9 +114,9 @@ class VertexAILLM(LLMAdapter):
             safety_settings_default_config,
         )
 
-        vertex_safety_settings: dict[HarmCategory, HarmBlockThreshold] = (
-            self._get_vertex_safety_settings(safety_settings_user_config)
-        )
+        vertex_safety_settings: dict[
+            HarmCategory, HarmBlockThreshold
+        ] = self._get_vertex_safety_settings(safety_settings_user_config)
 
         llm: LLM = Vertex(
             project=str(self.config.get(Constants.PROJECT)),
@@ -129,58 +133,61 @@ class VertexAILLM(LLMAdapter):
         self, safety_settings_user_config: dict[str, str]
     ) -> dict[HarmCategory, HarmBlockThreshold]:
         vertex_safety_settings: dict[HarmCategory, HarmBlockThreshold] = dict()
-        vertex_safety_settings[HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT] = (
-            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-                (
-                    safety_settings_user_config.get(
-                        SafetySettingsConstants.DANGEROUS_CONTENT,
-                        Constants.BLOCK_ONLY_HIGH,
-                    )
+        vertex_safety_settings[
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT
+        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+            (
+                safety_settings_user_config.get(
+                    SafetySettingsConstants.DANGEROUS_CONTENT,
+                    Constants.BLOCK_ONLY_HIGH,
                 )
-            ]
-        )
-        vertex_safety_settings[HarmCategory.HARM_CATEGORY_HATE_SPEECH] = (
-            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-                (
-                    safety_settings_user_config.get(
-                        SafetySettingsConstants.HATE_SPEECH,
-                        Constants.BLOCK_ONLY_HIGH,
-                    )
+            )
+        ]
+        vertex_safety_settings[
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH
+        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+            (
+                safety_settings_user_config.get(
+                    SafetySettingsConstants.HATE_SPEECH,
+                    Constants.BLOCK_ONLY_HIGH,
                 )
-            ]
-        )
-        vertex_safety_settings[HarmCategory.HARM_CATEGORY_HARASSMENT] = (
-            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-                (
-                    safety_settings_user_config.get(
-                        SafetySettingsConstants.HARASSMENT,
-                        Constants.BLOCK_ONLY_HIGH,
-                    )
+            )
+        ]
+        vertex_safety_settings[
+            HarmCategory.HARM_CATEGORY_HARASSMENT
+        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+            (
+                safety_settings_user_config.get(
+                    SafetySettingsConstants.HARASSMENT,
+                    Constants.BLOCK_ONLY_HIGH,
                 )
-            ]
-        )
-        vertex_safety_settings[HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT] = (
-            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-                (
-                    safety_settings_user_config.get(
-                        SafetySettingsConstants.SEXUAL_CONTENT,
-                        Constants.BLOCK_ONLY_HIGH,
-                    )
+            )
+        ]
+        vertex_safety_settings[
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT
+        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+            (
+                safety_settings_user_config.get(
+                    SafetySettingsConstants.SEXUAL_CONTENT,
+                    Constants.BLOCK_ONLY_HIGH,
                 )
-            ]
-        )
-        vertex_safety_settings[HarmCategory.HARM_CATEGORY_UNSPECIFIED] = (
-            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-                (
-                    safety_settings_user_config.get(
-                        SafetySettingsConstants.OTHER, Constants.BLOCK_ONLY_HIGH
-                    )
+            )
+        ]
+        vertex_safety_settings[
+            HarmCategory.HARM_CATEGORY_UNSPECIFIED
+        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+            (
+                safety_settings_user_config.get(
+                    SafetySettingsConstants.OTHER, Constants.BLOCK_ONLY_HIGH
                 )
-            ]
-        )
+            )
+        ]
         return vertex_safety_settings
 
     def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
+        try:
+            llm = self.get_llm_instance()
+            test_result: bool = LLMHelper.test_llm_instance(llm=llm)
+        except Exception as e:
+            raise LLMError(f"Error while testing connection for VertexAI: {str(e)}")
         return test_result

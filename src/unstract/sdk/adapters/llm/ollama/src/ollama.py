@@ -42,6 +42,10 @@ class OllamaLLM(LLMAdapter):
         return "Ollama AI LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "ollama"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/ollama.png"
 

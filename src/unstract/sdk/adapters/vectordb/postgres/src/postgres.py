@@ -1,6 +1,6 @@
 import os
-from urllib.parse import quote_plus
 from typing import Any, Optional
+from urllib.parse import quote_plus
 
 import psycopg2
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
@@ -59,9 +59,7 @@ class Postgres(VectorDBAdapter):
 
     def _get_vector_db_instance(self) -> BasePydanticVectorStore:
         try:
-            encoded_password = quote_plus(
-                str(self._config.get(Constants.PASSWORD))
-            )
+            encoded_password = quote_plus(str(self._config.get(Constants.PASSWORD)))
             dimension = self._config.get(
                 VectorDbConstants.EMBEDDING_DIMENSION,
                 VectorDbConstants.DEFAULT_EMBEDDING_SIZE,

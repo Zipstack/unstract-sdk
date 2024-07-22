@@ -35,6 +35,10 @@ class PaLMLLM(LLMAdapter):
         return "Palm LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "palm"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/PaLM.png"
 

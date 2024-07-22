@@ -1,6 +1,7 @@
 import os
 from typing import Any, Optional
 from urllib.parse import quote_plus
+
 from llama_index.core.vector_stores.types import VectorStore
 from llama_index.vector_stores.supabase import SupabaseVectorStore
 from vecs import Client
@@ -56,7 +57,6 @@ class Supabase(VectorDBAdapter):
 
     def _get_vector_db_instance(self) -> VectorStore:
         try:
-
             dimension = self._config.get(
                 VectorDbConstants.EMBEDDING_DIMENSION,
                 VectorDbConstants.DEFAULT_EMBEDDING_SIZE,
@@ -70,9 +70,7 @@ class Supabase(VectorDBAdapter):
             )
             user = str(self._config.get(Constants.USER))
             password = str(self._config.get(Constants.PASSWORD))
-            encoded_password = quote_plus(
-                str(password)
-            )
+            encoded_password = quote_plus(str(password))
             host = str(self._config.get(Constants.HOST))
             port = str(self._config.get(Constants.PORT))
             db_name = str(self._config.get(Constants.DATABASE))

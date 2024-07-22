@@ -36,6 +36,10 @@ class AnyScaleLLM(LLMAdapter):
         return "AnyScale LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "anyscale"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/anyscale.png"
 
@@ -54,9 +58,7 @@ class AnyScaleLLM(LLMAdapter):
                 api_base=str(self.config.get(Constants.API_BASE)),
                 additional_kwargs=self.config.get(Constants.ADDITIONAL_KWARGS),
                 max_retries=int(
-                    self.config.get(
-                        Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES
-                    )
+                    self.config.get(Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 temperature=0,
             )

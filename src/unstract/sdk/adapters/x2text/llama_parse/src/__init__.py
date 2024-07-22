@@ -1,6 +1,5 @@
 from .llama_parse import LlamaParseAdapter
 
-
 metadata = {
     "name": LlamaParseAdapter.__name__,
     "version": "1.0.0",

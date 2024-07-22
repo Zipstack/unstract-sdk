@@ -35,6 +35,10 @@ class MistralLLM(LLMAdapter):
         return "Mistral AI LLM"
 
     @staticmethod
+    def get_provider() -> str:
+        return "mistral"
+
+    @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Mistral%20AI.png"
 
