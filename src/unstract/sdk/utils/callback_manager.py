@@ -8,7 +8,7 @@ from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
 from typing_extensions import deprecated
 
-from unstract.sdk.core.utils.usage_handler import UsageHandler
+from unstract.sdk.utils.usage_handler import UsageHandler
 
 logger = logging.getLogger(__name__)
 

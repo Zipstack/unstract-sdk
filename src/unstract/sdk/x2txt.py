@@ -8,10 +8,10 @@ from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 
-from unstract.sdk.core.adapters import ToolAdapter
-from unstract.sdk.core.constants import LogLevel
-from unstract.sdk.core.exceptions import X2TextError
-from unstract.sdk.core.tool.base import BaseTool
+from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.constants import LogLevel
+from unstract.sdk.exceptions import X2TextError
+from unstract.sdk.tool.base import BaseTool
 
 
 class X2Text(metaclass=ABCMeta):

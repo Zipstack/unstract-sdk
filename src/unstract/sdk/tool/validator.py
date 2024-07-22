@@ -5,10 +5,10 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, ValidationError, validators
 
-from unstract.sdk.core.constants import MetadataKey, PropKey
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.tool.mime_types import EXT_MIME_MAP
-from unstract.sdk.core.utils import ToolUtils
+from unstract.sdk.constants import MetadataKey, PropKey
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.tool.mime_types import EXT_MIME_MAP
+from unstract.sdk.utils import ToolUtils
 
 
 def extend_with_default(validator_class: Any) -> Any:

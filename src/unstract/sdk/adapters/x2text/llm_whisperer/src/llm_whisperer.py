@@ -155,6 +155,10 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.HORIZONTAL_STRETCH_FACTOR,
                 WhispererDefaults.HORIZONTAL_STRETCH_FACTOR,
             ),
+            WhispererConfig.PAGES_TO_EXTRACT: self.config.get(
+                WhispererConfig.PAGES_TO_EXTRACT,
+                WhispererDefaults.PAGES_TO_EXTRACT,
+            ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(
@@ -338,7 +342,8 @@ class LLMWhisperer(X2TextAdapter):
         """
 
         response: requests.Response = self._send_whisper_request(
-            input_file_path, bool(kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False))
+            input_file_path,
+            bool(kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)),
         )
 
         metadata = TextExtractionMetadata(

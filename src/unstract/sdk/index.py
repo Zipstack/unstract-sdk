@@ -16,14 +16,14 @@ from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 
-from unstract.sdk.core.adapters import ToolAdapter
-from unstract.sdk.core.constants import LogLevel
-from unstract.sdk.core.embedding import Embedding
-from unstract.sdk.core.exceptions import IndexingError, SdkError
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.utils import ToolUtils
-from unstract.sdk.core.vector_db import VectorDB
-from unstract.sdk.core.x2txt import X2Text
+from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.constants import LogLevel
+from unstract.sdk.embedding import Embedding
+from unstract.sdk.exceptions import IndexingError, SdkError
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils import ToolUtils
+from unstract.sdk.vector_db import VectorDB
+from unstract.sdk.x2txt import X2Text
 
 
 class Constants:

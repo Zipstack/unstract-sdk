@@ -3,7 +3,7 @@ from typing import Optional
 
 from dotenv import find_dotenv, load_dotenv
 
-from unstract.sdk.core.constants import LogLevel
+from unstract.sdk.constants import LogLevel
 
 
 class ToolArgsParser:

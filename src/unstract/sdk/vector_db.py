@@ -15,12 +15,12 @@ from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.vectordb import adapters
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 
-from unstract.sdk.core.adapters import ToolAdapter
-from unstract.sdk.core.constants import LogLevel, ToolEnv
-from unstract.sdk.core.embedding import Embedding
-from unstract.sdk.core.exceptions import SdkError, VectorDBError
-from unstract.sdk.core.platform import PlatformHelper
-from unstract.sdk.core.tool.base import BaseTool
+from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.constants import LogLevel, ToolEnv
+from unstract.sdk.embedding import Embedding
+from unstract.sdk.exceptions import SdkError, VectorDBError
+from unstract.sdk.platform import PlatformHelper
+from unstract.sdk.tool.base import BaseTool
 
 logger = logging.getLogger(__name__)
 

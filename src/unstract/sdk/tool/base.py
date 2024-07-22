@@ -5,7 +5,7 @@ from json import JSONDecodeError, loads
 from pathlib import Path
 from typing import Any, Union
 
-from unstract.sdk.core.constants import (
+from unstract.sdk.constants import (
     Command,
     LogLevel,
     MetadataKey,
@@ -13,10 +13,10 @@ from unstract.sdk.core.constants import (
     ToolEnv,
     ToolExecKey,
 )
-from unstract.sdk.core.tool.mixin import ToolConfigHelper
-from unstract.sdk.core.tool.parser import ToolArgsParser
-from unstract.sdk.core.tool.stream import StreamMixin
-from unstract.sdk.core.utils import ToolUtils
+from unstract.sdk.tool.mixin import ToolConfigHelper
+from unstract.sdk.tool.parser import ToolArgsParser
+from unstract.sdk.tool.stream import StreamMixin
+from unstract.sdk.utils import ToolUtils
 
 
 class BaseTool(ABC, StreamMixin):

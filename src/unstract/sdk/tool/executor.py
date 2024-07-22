@@ -4,12 +4,10 @@ from json import loads
 from pathlib import Path
 from typing import Any
 
-from unstract.sdk.adapters import get_adapter_version
-
 from unstract.sdk import get_sdk_version
-from unstract.sdk.core.constants import Command
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.tool.validator import ToolValidator
+from unstract.sdk.constants import Command
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.tool.validator import ToolValidator
 
 
 class ToolExecutor:
@@ -60,7 +58,6 @@ class ToolExecutor:
             f"Workflow ID: {self.tool.workflow_id}, "
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}, "
-            f"adapter Version: {get_adapter_version()}"
         )
         self.tool.run(
             settings=settings,

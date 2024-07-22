@@ -1,8 +1,8 @@
 import sys
 from typing import Any
 
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.tool.entrypoint import ToolEntrypoint
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.tool.entrypoint import ToolEntrypoint
 
 
 # TODO: Rename tool's class

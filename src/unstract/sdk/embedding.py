@@ -6,11 +6,11 @@ from typing_extensions import deprecated
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.embedding import adapters
 
-from unstract.sdk.core.adapters import ToolAdapter
-from unstract.sdk.core.constants import LogLevel, ToolEnv
-from unstract.sdk.core.exceptions import EmbeddingError, SdkError
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.utils.callback_manager import CallbackManager
+from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.constants import LogLevel, ToolEnv
+from unstract.sdk.exceptions import EmbeddingError, SdkError
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.callback_manager import CallbackManager
 
 
 class Embedding:

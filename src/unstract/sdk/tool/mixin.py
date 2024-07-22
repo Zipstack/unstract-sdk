@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from unstract.sdk.core.utils import ToolUtils
+from unstract.sdk.utils import ToolUtils
 
 logger = logging.getLogger(__name__)
 

@@ -57,18 +57,18 @@
       "type": "integer",
       "title": "Median Filter Size",
       "default": 0,
-      "description": "The size of the median filter to use for pre-processing the image during OCR based extraction. Useful to eliminate scanning artifacts and low quality JPEG artifacts. Default is 0 if the value is not explicitly set."
+      "description": "The size of the median filter to use for pre-processing the image during OCR based extraction. Useful to eliminate scanning artifacts and low quality JPEG artifacts. Default is 0 if the value is not explicitly set. Available only in the Enterprise version."
     },
     "gaussian_blur_radius": {
       "type": "number",
       "title": "Gaussian Blur Radius",
       "default": 0.0,
-      "description": "The radius of the gaussian blur to use for pre-processing the image during OCR based extraction. Useful to eliminate noise from the image. Default is 0.0 if the value is not explicitly set."
+      "description": "The radius of the gaussian blur to use for pre-processing the image during OCR based extraction. Useful to eliminate noise from the image. Default is 0.0 if the value is not explicitly set. Available only in the Enterprise version."
     },
     "line_splitter_tolerance": {
       "type": "number",
       "title": "Line Splitter Tolerance",
-      "default": 0.75,
+      "default": 0.4,
       "description": "Reduce this value to split lines less often, increase to split lines more often. Useful when PDFs have multi column layout with text in each column that is not aligned."
     },
     "horizontal_stretch_factor": {
@@ -76,6 +76,13 @@
       "title": "Horizontal Stretch Factor",
       "default": 1.0,
       "description": "Increase this value to stretch text horizontally, decrease to compress text horizontally. Useful when multi column text merge with each other."
+    },
+    "pages_to_extract": {
+      "type": "string",
+      "title": "Page number(s) or range to extract",
+      "default": "",
+      "pattern": "^(\\s|\\d+)[\\d\\-,\\s]*",
+      "description": "Specify the range of pages to extract (e.g., 1-5, 7, 10-12, 50-). Leave it empty to extract all pages."
     }
   },
   "if": {

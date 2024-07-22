@@ -2,9 +2,9 @@ from typing import Any, Optional
 
 import requests
 
-from unstract.sdk.core.constants import LogLevel
-from unstract.sdk.core.platform import PlatformBase
-from unstract.sdk.core.tool.base import BaseTool
+from unstract.sdk.constants import LogLevel
+from unstract.sdk.platform import PlatformBase
+from unstract.sdk.tool.base import BaseTool
 
 
 class ToolCache(PlatformBase):

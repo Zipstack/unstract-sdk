@@ -59,6 +59,7 @@ class WhispererConfig:
     FORCE_TEXT_PROCESSING = "force_text_processing"
     LINE_SPLITTER_TOLERANCE = "line_splitter_tolerance"
     HORIZONTAL_STRETCH_FACTOR = "horizontal_stretch_factor"
+    PAGES_TO_EXTRACT = "pages_to_extract"
     STORE_METADATA_FOR_HIGHLIGHTING = "store_metadata_for_highlighting"
 
 
@@ -84,3 +85,4 @@ class WhispererDefaults:
     HORIZONTAL_STRETCH_FACTOR = 1.0
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
+    PAGES_TO_EXTRACT = ""

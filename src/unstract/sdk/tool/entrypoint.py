@@ -1,9 +1,9 @@
 import os
 
-from unstract.sdk.core.constants import ToolEnv
-from unstract.sdk.core.tool.base import BaseTool
-from unstract.sdk.core.tool.executor import ToolExecutor
-from unstract.sdk.core.tool.parser import ToolArgsParser
+from unstract.sdk.constants import ToolEnv
+from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.tool.executor import ToolExecutor
+from unstract.sdk.tool.parser import ToolArgsParser
 
 
 class ToolEntrypoint:

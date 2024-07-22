@@ -6,10 +6,10 @@ from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.ocr import adapters
 from unstract.sdk.adapters.ocr.ocr_adapter import OCRAdapter
 
-from unstract.sdk.core.adapters import ToolAdapter
-from unstract.sdk.core.constants import LogLevel
-from unstract.sdk.core.exceptions import OCRError
-from unstract.sdk.core.tool.base import BaseTool
+from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.constants import LogLevel
+from unstract.sdk.exceptions import OCRError
+from unstract.sdk.tool.base import BaseTool
 
 
 class OCR(metaclass=ABCMeta):
