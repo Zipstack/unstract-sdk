@@ -45,9 +45,7 @@ class ToolExecutor:
             args (argparse.Namespace): Parsed arguments to execute with
         """
         if args.settings is None:
-            self.tool.stream_error_and_exit(
-                "--settings are required for RUN command"
-            )
+            self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
         self._setup_for_run()
@@ -62,9 +60,13 @@ class ToolExecutor:
             f"SDK Version: {get_sdk_version()}, "
             f"adapter Version: {get_adapter_version()}"
         )
-        self.tool.run(
-            settings=settings,
-            input_file=self.tool.get_input_file(),
-            output_dir=self.tool.get_output_dir(),
-        )
+        try:
+            self.tool.run(
+                settings=settings,
+                input_file=self.tool.get_input_file(),
+                output_dir=self.tool.get_output_dir(),
+            )
+        except Exception as e:
+            self.tool.stream_error_and_exit(f"Error while running tool: {str(e)}")
+
         # TODO: Call tool method to validate if output was written
