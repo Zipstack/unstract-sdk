@@ -1,4 +1,3 @@
-import json
 from typing import Any, Optional
 
 from llama_index.core.base.embeddings.base import Embedding
@@ -8,10 +7,11 @@ from unstract.adapters.constants import Common
 from unstract.adapters.embedding import adapters
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, SPSKeys, ToolEnv
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
+from unstract.sdk.helper import SdkHelper
 
 
 class Embedding:
@@ -24,28 +24,30 @@ class Embedding:
         tool: BaseTool,
         adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
-        is_public_call: bool = False
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
         self._embedding_instance: BaseEmbedding = None
         self._length: int = None
         self._usage_kwargs = usage_kwargs
-        self._is_public_call = is_public_call
         self._initialise()
 
     def _initialise(self):
-        if self._adapter_instance_id or self._is_public_call:
+        if self._adapter_instance_id:
             self._embedding_instance = self._get_embedding()
             self._length: int = self._get_embedding_length()
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
-        if self._adapter_instance_id and not self._is_public_call:
-            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-            CallbackManager.set_callback(
-                platform_api_key=platform_api_key,
-                model=self._embedding_instance,
-                kwargs=self._usage_kwargs,
+            
+            is_public_adapter = SdkHelper.is_public_adapter(
+                adapter_id=self._adapter_instance_id
             )
+            if not is_public_adapter:
+                platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+                CallbackManager.set_callback(
+                    platform_api_key=platform_api_key,
+                    model=self._embedding_instance,
+                    kwargs=self._usage_kwargs,
+                )
 
     def _get_embedding(self) -> BaseEmbedding:
         """Gets an instance of LlamaIndex's embedding object.
@@ -57,20 +59,14 @@ class Embedding:
             BaseEmbedding: Embedding instance
         """
         try:
-            if not self._adapter_instance_id and not self._is_public_call:
+            if not self._adapter_instance_id:
                 raise EmbeddingError(
                     "Adapter instance ID not set. " "Initialisation failed"
                 )
 
-            if self._is_public_call:
-                sps_embedding_config = self._tool.get_env_or_die(
-                    SPSKeys.SPS_EMBEDDING_CONFIG
-                )
-                embedding_config_data = json.loads(sps_embedding_config)
-            else:
-                embedding_config_data = ToolAdapter.get_adapter_config(
-                    self._tool, self._adapter_instance_id
-                )
+            embedding_config_data = ToolAdapter.get_adapter_config(
+                self._tool, self._adapter_instance_id
+            )
             embedding_adapter_id = embedding_config_data.get(Common.ADAPTER_ID)
             if embedding_adapter_id not in self.embedding_adapters:
                 raise SdkError(

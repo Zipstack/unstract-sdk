@@ -13,10 +13,11 @@ from unstract.adapters.llm import adapters
 from unstract.adapters.llm.llm_adapter import LLMAdapter
 
 from unstract.sdk.adapters import ToolAdapter
-from unstract.sdk.constants import LogLevel, SPSKeys, ToolEnv
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
+from unstract.sdk.helper import SdkHelper
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,6 @@ class LLM:
         tool: BaseTool,
         adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
-        is_public_call: bool = False
     ):
         """
 
@@ -50,21 +50,23 @@ class LLM:
         self._adapter_instance_id = adapter_instance_id
         self._llm_instance: LlamaIndexLLM = None
         self._usage_kwargs = usage_kwargs
-        self._is_public_call = is_public_call
         self._initialise()
 
     def _initialise(self):
-        if self._adapter_instance_id or self._is_public_call:
+        if self._adapter_instance_id:
             self._llm_instance = self._get_llm(self._adapter_instance_id)
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
 
-        if self._adapter_instance_id and not self._is_public_call:
-            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-            CallbackManager.set_callback(
-                platform_api_key=platform_api_key,
-                model=self._llm_instance,
-                kwargs=self._usage_kwargs,
+            is_public_adapter = SdkHelper.is_public_adapter(
+                adapter_id=self._adapter_instance_id
             )
+            if not is_public_adapter:
+                platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+                CallbackManager.set_callback(
+                    platform_api_key=platform_api_key,
+                    model=self._llm_instance,
+                    kwargs=self._usage_kwargs,
+                )
 
     def complete(
         self,
@@ -97,16 +99,12 @@ class LLM:
             (llama_index.llms.base.LLM)
         """
         try:
-            if not self._adapter_instance_id and not self._is_public_call:
+            if not self._adapter_instance_id:
                 raise LLMError("Adapter instance ID not set. " "Initialisation failed")
 
-            if self._is_public_call:
-                sps_llm_config = self._tool.get_env_or_die(SPSKeys.SPS_LLM_CONFIG)
-                llm_config_data = json.loads(sps_llm_config)
-            else:
-                llm_config_data = ToolAdapter.get_adapter_config(
-                    self._tool, self._adapter_instance_id
-                )
+            llm_config_data = ToolAdapter.get_adapter_config(
+                self._tool, self._adapter_instance_id
+            )
 
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
             if llm_adapter_id not in self.llm_adapters:

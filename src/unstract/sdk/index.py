@@ -31,10 +31,9 @@ class Constants:
 
 
 class Index:
-    def __init__(self, tool: BaseTool, is_public_call: bool = False):
+    def __init__(self, tool: BaseTool):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
-        self.is_public_call = is_public_call
 
     def query_index(
         self,
@@ -48,7 +47,6 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
-                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(embedding_instance_id)
@@ -59,7 +57,6 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=vector_db_instance_id,
                 embedding=embedding,
-                is_public_call=self.is_public_call
             )
 
         except SdkError as e:
@@ -179,7 +176,6 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=embedding_instance_id,
                 usage_kwargs=usage_kwargs,
-                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -192,7 +188,6 @@ class Index:
                 tool=self.tool,
                 adapter_instance_id=vector_db_instance_id,
                 embedding=embedding,
-                is_public_call=self.is_public_call
             )
         except SdkError as e:
             self.tool.stream_log(
@@ -255,7 +250,6 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool,
                         adapter_instance_id=x2text_instance_id,
-                        is_public_call=self.is_public_call
                     )
                     if enable_highlight and isinstance(
                         x2text._x2text_instance, LLMWhisperer
@@ -395,24 +389,14 @@ class Index:
         index_key = {
             "tool_id": tool_id,
             "file_hash": file_hash,
+            "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
+            "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
+            "x2text_config": ToolAdapter.get_adapter_config(self.tool, x2text),
             # Typed and hashed as strings since the final hash is persisted
             # and this is required to be backward compatible
             "chunk_size": str(chunk_size),
             "chunk_overlap": str(chunk_overlap),
         }
-
-        if not self.is_public_call:
-            index_key.update({
-                "vector_db_config": ToolAdapter.get_adapter_config(
-                    self.tool, vector_db
-                ),
-                "embedding_config": ToolAdapter.get_adapter_config(
-                    self.tool, embedding
-                ),
-                "x2text_config": ToolAdapter.get_adapter_config(
-                    self.tool, x2text
-                ),
-            })
 
         # JSON keys are sorted to ensure that the same key gets hashed even in
         # case where the fields are reordered.

@@ -1,10 +1,12 @@
 from typing import Any, Optional
 
 import requests
+import json
 
-from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
+from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv, PublicAdapterKeys
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.helper import SdkHelper
 
 
 class ToolAdapter(PlatformBase):
@@ -88,6 +90,11 @@ class ToolAdapter(PlatformBase):
     ) -> Optional[dict[str, Any]]:
         """Get adapter spec by the help of unstract DB tool.
 
+        This method first checks if the adapter_instance_id matches
+        any of the public adapter keys. If it matches, the configuration
+        is fetched from environment variables. Otherwise, it connects to the
+        platform service to retrieve the configuration.
+
         Args:
             adapter_instance_id (str): ID of the adapter instance
             tool (AbstractTool): Instance of AbstractTool
@@ -97,6 +104,16 @@ class ToolAdapter(PlatformBase):
         Returns:
             Any: engine
         """
+        # Check if the adapter ID matches any public adapter keys
+        is_public_adapter = SdkHelper.is_public_adapter(
+            adapter_id=adapter_instance_id
+        )
+        if is_public_adapter:
+            adapter_metadata_config = tool.get_env_or_die(
+                getattr(PublicAdapterKeys, adapter_instance_id)
+            )
+            adapter_metadata = json.loads(adapter_metadata_config)
+            return adapter_metadata
         platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
 
