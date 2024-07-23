@@ -1,4 +1,5 @@
 import argparse
+import logging
 import shutil
 from json import loads
 from pathlib import Path
@@ -10,6 +11,8 @@ from unstract.sdk import get_sdk_version
 from unstract.sdk.constants import Command
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.validator import ToolValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ToolExecutor:
@@ -67,6 +70,9 @@ class ToolExecutor:
                 output_dir=self.tool.get_output_dir(),
             )
         except Exception as e:
+            logger.error(
+                f"Failed to run docker container: {e}", stack_info=True, exc_info=True
+            )
             self.tool.stream_error_and_exit(f"Error while running tool: {str(e)}")
 
         # TODO: Call tool method to validate if output was written
