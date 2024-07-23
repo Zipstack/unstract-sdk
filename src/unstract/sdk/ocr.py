@@ -2,11 +2,11 @@ from abc import ABCMeta
 from typing import Optional
 
 from typing_extensions import deprecated
+
+from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.ocr import adapters
 from unstract.sdk.adapters.ocr.ocr_adapter import OCRAdapter
-
-from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.exceptions import OCRError
 from unstract.sdk.tool.base import BaseTool

@@ -3,10 +3,10 @@ from typing import Any, Optional
 from llama_index.core.base.embeddings.base import Embedding
 from llama_index.core.embeddings import BaseEmbedding
 from typing_extensions import deprecated
+
+from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.embedding import adapters
-
-from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
 from unstract.sdk.tool.base import BaseTool
