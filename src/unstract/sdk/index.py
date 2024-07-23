@@ -125,12 +125,12 @@ class Index:
     def index(
         self,
         tool_id: str,
+        embedding_instance_id: str,
+        vector_db_instance_id: str,
+        x2text_instance_id: str,
         file_path: str,
         chunk_size: int,
         chunk_overlap: int,
-        embedding_instance_id: str = None,
-        vector_db_instance_id: str = None,
-        x2text_instance_id: str = None,
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
@@ -248,8 +248,7 @@ class Index:
                         extracted_text = file.read()
                 else:
                     x2text = X2Text(
-                        tool=self.tool,
-                        adapter_instance_id=x2text_instance_id,
+                        tool=self.tool,adapter_instance_id=x2text_instance_id
                     )
                     if enable_highlight and isinstance(
                         x2text._x2text_instance, LLMWhisperer
@@ -397,7 +396,6 @@ class Index:
             "chunk_size": str(chunk_size),
             "chunk_overlap": str(chunk_overlap),
         }
-
         # JSON keys are sorted to ensure that the same key gets hashed even in
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
