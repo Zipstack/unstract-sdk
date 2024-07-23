@@ -1,4 +1,3 @@
-import json
 import logging
 from collections.abc import Sequence
 from typing import Any, Optional, Union
@@ -20,9 +19,9 @@ from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.helper import SdkHelper
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +101,7 @@ class VectorDB:
             vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
             # Adding the collection prefix and embedding type
             # to the metadata
-            
+
             is_public_adapter = SdkHelper.is_public_adapter(
                 adapter_id=vector_db_adapter_id
             )

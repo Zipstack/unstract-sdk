@@ -248,7 +248,7 @@ class Index:
                         extracted_text = file.read()
                 else:
                     x2text = X2Text(
-                        tool=self.tool,adapter_instance_id=x2text_instance_id
+                        tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
                     if enable_highlight and isinstance(
                         x2text._x2text_instance, LLMWhisperer

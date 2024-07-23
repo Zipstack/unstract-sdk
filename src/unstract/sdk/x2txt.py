@@ -1,4 +1,3 @@
-import json
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -12,8 +11,8 @@ from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.exceptions import X2TextError
-from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.helper import SdkHelper
+from unstract.sdk.tool.base import BaseTool
 
 
 class X2Text(metaclass=ABCMeta):

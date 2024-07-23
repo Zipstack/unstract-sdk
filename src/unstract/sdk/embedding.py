@@ -9,9 +9,9 @@ from unstract.adapters.embedding import adapters
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
-from unstract.sdk.helper import SdkHelper
 
 
 class Embedding:
@@ -37,7 +37,7 @@ class Embedding:
             self._embedding_instance = self._get_embedding()
             self._length: int = self._get_embedding_length()
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
-            
+
             is_public_adapter = SdkHelper.is_public_adapter(
                 adapter_id=self._adapter_instance_id
             )
