@@ -1,4 +1,5 @@
 import argparse
+import logging
 import shutil
 from json import loads
 from pathlib import Path
@@ -8,6 +9,8 @@ from unstract.sdk import get_sdk_version
 from unstract.sdk.constants import Command
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.validator import ToolValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ToolExecutor:
@@ -43,9 +46,7 @@ class ToolExecutor:
             args (argparse.Namespace): Parsed arguments to execute with
         """
         if args.settings is None:
-            self.tool.stream_error_and_exit(
-                "--settings are required for RUN command"
-            )
+            self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
         self._setup_for_run()
@@ -59,9 +60,14 @@ class ToolExecutor:
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}, "
         )
-        self.tool.run(
-            settings=settings,
-            input_file=self.tool.get_input_file(),
-            output_dir=self.tool.get_output_dir(),
-        )
+        try:
+            self.tool.run(
+                settings=settings,
+                input_file=self.tool.get_input_file(),
+                output_dir=self.tool.get_output_dir(),
+            )
+        except Exception as e:
+            logger.error(f"Error while tool run: {e}", stack_info=True, exc_info=True)
+            self.tool.stream_error_and_exit(f"Error while running tool: {str(e)}")
+
         # TODO: Call tool method to validate if output was written
