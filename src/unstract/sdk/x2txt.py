@@ -17,15 +17,15 @@ from unstract.sdk.tool.base import BaseTool
 
 class X2Text(metaclass=ABCMeta):
     def __init__(
-            self,
-            tool: BaseTool,
-            adapter_instance_id: Optional[str] = None,
-        ):
-            self._tool = tool
-            self._x2text_adapters = adapters
-            self._adapter_instance_id = adapter_instance_id
-            self._x2text_instance: X2TextAdapter = None
-            self._initialise()
+        self, 
+        tool: BaseTool, 
+        adapter_instance_id: Optional[str] = None
+    ):
+        self._tool = tool
+        self._x2text_adapters = adapters
+        self._adapter_instance_id = adapter_instance_id
+        self._x2text_instance: X2TextAdapter = None
+        self._initialise()
 
     def _initialise(self):
         if self._adapter_instance_id:
@@ -56,7 +56,9 @@ class X2Text(metaclass=ABCMeta):
                     X2TextConstants.X2TEXT_PORT
                 ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
 
-                if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
+                if not SdkHelper.is_public_adapter(
+                    adapter_id=self._adapter_instance_id
+                ):
                     x2text_metadata[
                         X2TextConstants.PLATFORM_SERVICE_API_KEY
                     ] = self._tool.get_env_or_die(

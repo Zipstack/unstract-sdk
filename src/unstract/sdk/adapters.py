@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 import requests
 
-from unstract.sdk.constants import AdapterKeys, LogLevel, PublicAdapterKeys, ToolEnv
+from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
@@ -105,7 +105,9 @@ class ToolAdapter(PlatformBase):
             Any: engine
         """
         # Check if the adapter ID matches any public adapter keys
-        if SdkHelper.is_public_adapter(adapter_id=adapter_instance_id):
+        if SdkHelper.is_public_adapter(
+            adapter_id=adapter_instance_id
+        ):
             adapter_metadata_config = tool.get_env_or_die(
                 adapter_instance_id
             )

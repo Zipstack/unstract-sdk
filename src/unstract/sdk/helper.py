@@ -32,11 +32,15 @@ class SdkHelper:
             adapter_id (str): The ID of the adapter to check.
 
         Returns:
-            bool: True if the adapter_id matches any public adapter key, False otherwise.
+            bool: True if the adapter_id matches any public adapter key,
+            False otherwise.
         """
         try:
             # Retrieve all attribute values from the PublicAdapterKeys class
-            public_adapter_keys = {value for key, value in PublicAdapterKeys.__dict__.items() if not key.startswith('__')}
+            public_adapter_keys = {
+                value for key, value in PublicAdapterKeys.__dict__.items()
+                if not key.startswith('__')
+            }
             # Check if the adapter_id is in the set of public adapter keys
             return adapter_id in public_adapter_keys
         except Exception:

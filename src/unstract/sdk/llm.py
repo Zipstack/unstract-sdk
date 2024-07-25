@@ -56,7 +56,9 @@ class LLM:
             self._llm_instance = self._get_llm(self._adapter_instance_id)
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
 
-            if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
+            if not SdkHelper.is_public_adapter(
+                adapter_id=self._adapter_instance_id
+            ):
                 platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
                 CallbackManager.set_callback(
                     platform_api_key=platform_api_key,
