@@ -105,12 +105,9 @@ class ToolAdapter(PlatformBase):
             Any: engine
         """
         # Check if the adapter ID matches any public adapter keys
-        is_public_adapter = SdkHelper.is_public_adapter(
-            adapter_id=adapter_instance_id
-        )
-        if is_public_adapter:
+        if SdkHelper.is_public_adapter(adapter_id=adapter_instance_id):
             adapter_metadata_config = tool.get_env_or_die(
-                getattr(PublicAdapterKeys, adapter_instance_id)
+                adapter_instance_id
             )
             adapter_metadata = json.loads(adapter_metadata_config)
             return adapter_metadata

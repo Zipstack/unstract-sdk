@@ -22,7 +22,8 @@ class SdkHelper:
 
     @staticmethod
     def is_public_adapter(adapter_id: str) -> bool:
-        """Check if the given adapter_id is one of the public adapter keys.
+        """
+        Check if the given adapter_id is one of the public adapter keys.
 
         This method iterates over the attributes of the PublicAdapterKeys class
         and checks if the provided adapter_id matches any of the attribute values.
@@ -34,9 +35,10 @@ class SdkHelper:
             bool: True if the adapter_id matches any public adapter key, False otherwise.
         """
         try:
-            # Retrieve all attribute names from the PublicAdapterKeys class
-            attributes = dir(PublicAdapterKeys)
-            public_adapter_keys = {getattr(PublicAdapterKeys, attr) for attr in attributes}
+            # Retrieve all attribute values from the PublicAdapterKeys class
+            public_adapter_keys = {value for key, value in PublicAdapterKeys.__dict__.items() if not key.startswith('__')}
+            # Check if the adapter_id is in the set of public adapter keys
             return adapter_id in public_adapter_keys
         except Exception:
             return False
+

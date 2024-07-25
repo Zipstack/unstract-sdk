@@ -38,7 +38,7 @@ class PromptTool:
     ) -> dict[str, Any]:
         url_path = "answer-prompt"
         if self.is_public_call:
-            url_path = "answer-prompt-sps"
+            url_path = "answer-prompt-public"
         return self._post_call(
             url_path=url_path,
             payload=payload,

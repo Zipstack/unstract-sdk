@@ -102,10 +102,7 @@ class VectorDB:
             # Adding the collection prefix and embedding type
             # to the metadata
 
-            is_public_adapter = SdkHelper.is_public_adapter(
-                adapter_id=vector_db_adapter_id
-            )
-            if not is_public_adapter:
+            if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
                 org = self._get_org_id()
                 vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
 

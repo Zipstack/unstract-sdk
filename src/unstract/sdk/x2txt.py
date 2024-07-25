@@ -56,10 +56,7 @@ class X2Text(metaclass=ABCMeta):
                     X2TextConstants.X2TEXT_PORT
                 ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
 
-                is_public_adapter = SdkHelper.is_public_adapter(
-                    adapter_id=x2text_adapter_id
-                )
-                if not is_public_adapter:
+                if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
                     x2text_metadata[
                         X2TextConstants.PLATFORM_SERVICE_API_KEY
                     ] = self._tool.get_env_or_die(
