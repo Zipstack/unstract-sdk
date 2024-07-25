@@ -81,7 +81,7 @@
       "type": "string",
       "title": "Page number(s) or range to extract",
       "default": "",
-      "pattern": "^(\\s|\\d+)[\\d\\-,\\s]*",
+      "pattern": "^(\\s*\\d+-\\d+|\\s*\\d+-|\\s*\\d+|^$)(,\\d+-\\d+|,\\d+-|,\\d+)*$",
       "description": "Specify the range of pages to extract (e.g., 1-5, 7, 10-12, 50-). Leave it empty to extract all pages."
     }
   },
