@@ -9,6 +9,7 @@ from unstract.adapters.embedding import adapters
 from unstract.sdk.adapters import ToolAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import EmbeddingError, SdkError
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
 
@@ -36,12 +37,16 @@ class Embedding:
             self._embedding_instance = self._get_embedding()
             self._length: int = self._get_embedding_length()
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
-            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-            CallbackManager.set_callback(
-                platform_api_key=platform_api_key,
-                model=self._embedding_instance,
-                kwargs=self._usage_kwargs,
-            )
+
+            if not SdkHelper.is_public_adapter(
+                adapter_id=self._adapter_instance_id
+            ):
+                platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+                CallbackManager.set_callback(
+                    platform_api_key=platform_api_key,
+                    model=self._embedding_instance,
+                    kwargs=self._usage_kwargs,
+                )
 
     def _get_embedding(self) -> BaseEmbedding:
         """Gets an instance of LlamaIndex's embedding object.
@@ -57,6 +62,7 @@ class Embedding:
                 raise EmbeddingError(
                     "Adapter instance ID not set. " "Initialisation failed"
                 )
+
             embedding_config_data = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
