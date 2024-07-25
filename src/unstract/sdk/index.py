@@ -11,12 +11,12 @@ from llama_index.core.vector_stores import (
     VectorStoreQueryResult,
 )
 from typing_extensions import deprecated
-from unstract.adapters.exceptions import AdapterError
-from unstract.adapters.x2text.constants import X2TextConstants
-from unstract.adapters.x2text.dto import TextExtractionResult
-from unstract.adapters.x2text.llm_whisperer.src import LLMWhisperer
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.exceptions import AdapterError
+from unstract.sdk.adapters.x2text.constants import X2TextConstants
+from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError

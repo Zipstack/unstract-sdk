@@ -2,13 +2,13 @@ from abc import ABCMeta
 from typing import Any, Optional
 
 from typing_extensions import deprecated
-from unstract.adapters.constants import Common
-from unstract.adapters.x2text import adapters
-from unstract.adapters.x2text.constants import X2TextConstants
-from unstract.adapters.x2text.dto import TextExtractionResult
-from unstract.adapters.x2text.x2text_adapter import X2TextAdapter
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.constants import Common
+from unstract.sdk.adapters.x2text import adapters
+from unstract.sdk.adapters.x2text.constants import X2TextConstants
+from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.helper import SdkHelper

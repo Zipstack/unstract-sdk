@@ -7,11 +7,11 @@ from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
 from typing_extensions import deprecated
-from unstract.adapters.constants import Common
-from unstract.adapters.llm import adapters
-from unstract.adapters.llm.llm_adapter import LLMAdapter
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.constants import Common
+from unstract.sdk.adapters.llm import adapters
+from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.helper import SdkHelper

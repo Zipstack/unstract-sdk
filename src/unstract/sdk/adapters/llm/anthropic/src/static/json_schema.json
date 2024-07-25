@@ -1,0 +1,47 @@
+{
+  "title": "Anthropic LLM",
+  "type": "object",
+  "required": [
+    "api_key",
+    "model",
+    "adapter_name"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: anthropic-group-1"
+    },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "default": "claude-instant-1.2",
+      "description": "Model name. Refer to Anthropic's documentation for the list of available models."
+    },
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 900,
+      "description": "Timeout in seconds"
+    },
+    "max_retries": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max Retries",
+      "default": 3,
+      "format": "number",
+      "description": "Maximum number of retries"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "default": "",
+      "description": "API Key",
+      "format": "password"
+    }
+  }
+}

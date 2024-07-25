@@ -11,11 +11,11 @@ from llama_index.core.vector_stores.types import (
     VectorStoreQueryResult,
 )
 from typing_extensions import deprecated
-from unstract.adapters.constants import Common
-from unstract.adapters.vectordb import adapters
-from unstract.adapters.vectordb.constants import VectorDbConstants
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.constants import Common
+from unstract.sdk.adapters.vectordb import adapters
+from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError

@@ -1,0 +1,28 @@
+{
+  "title": "Replicate LLM",
+  "type": "object",
+  "required": [
+    "adapter_name",
+    "api_key"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: replicate-group-1"
+    },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "default": "mistralai/mistral-7b-instruct-v0.1:83b6a56e7c828e667f21fd596c338fd4f0039b46bcfa18d973e8e70e455fda70",
+      "description": "Provide the model name. Example: mistralai/mistral-7b-instruct-v0.1:83b6a56e7c828e667f21fd596c338fd4f0039b46bcfa18d973e8e70e455fda70"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "format": "password",
+      "description": "Provide the API key for the model."
+    }
+  }
+}

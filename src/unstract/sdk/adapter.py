@@ -67,8 +67,7 @@ class ToolAdapter(PlatformBase):
 
         elif response.status_code == 404:
             self.tool.stream_log(
-                f"adapter not found for: for adapter instance"
-                f"{adapter_instance_id}",
+                f"adapter not found for: for adapter instance" f"{adapter_instance_id}",
                 level=LogLevel.ERROR,
             )
             return None
@@ -127,7 +126,6 @@ class ToolAdapter(PlatformBase):
         ] = tool_adapter.get_adapter_configuration(adapter_instance_id)
         if not adapter_metadata:
             tool.stream_error_and_exit(
-                f"Adapter not found for "
-                f"adapter instance: {adapter_instance_id}"
+                f"Adapter not found for " f"adapter instance: {adapter_instance_id}"
             )
         return adapter_metadata

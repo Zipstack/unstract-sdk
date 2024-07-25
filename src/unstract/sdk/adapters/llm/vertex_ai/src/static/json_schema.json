@@ -1,0 +1,124 @@
+{
+  "title": "Vertex AI LLM",
+  "type": "object",
+  "required": [
+    "adapter_name",
+    "project",
+    "json_credentials",
+    "model"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: vectorai-group-1"
+    },
+    "json_credentials": {
+      "type": "string",
+      "title": "Credentials",
+      "default": "",
+      "description": "You can download credentials from Google Clouds's iam-admin/serviceaccounts/Keys. Click on Add keys."
+    },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "default": "",
+      "description": "Provide the name of the model you defined for vectorai"
+    },
+    "project": {
+      "type": "string",
+      "title": "Project",
+      "default": "",
+      "description": "Provide the name of the deployment or project you defined for vectorai"
+    },
+    "max_retries": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max Retries",
+      "default": 5,
+      "description": "Maximum number of retries to attempt when a request fails."
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max output tokens",
+      "default": 2048,
+      "description": "Maximum number of output tokens to generate. This is limited by the maximum supported by the model and will vary from model to model."
+    },
+    "safety_settings": {
+      "type": "object",
+      "title": "Safety Settings",
+      "properties": {
+        "type": "string",
+        "dangerous_content": {
+          "type": "string",
+          "title": "Dangerous Content",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "default": "BLOCK_ONLY_HIGH",
+          "description": "Settings for HARM_CATEGORY_DANGEROUS_CONTENT"
+        },
+        "hate_speech": {
+          "type": "string",
+          "title": "Hate Speech",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "default": "BLOCK_ONLY_HIGH",
+          "description": "Settings for HARM_CATEGORY_HATE_SPEECH"
+        },
+        "harassment": {
+          "type": "string",
+          "title": "Harassment",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "default": "BLOCK_ONLY_HIGH",
+          "description": "Settings for HARM_CATEGORY_HARASSMENT"
+        },
+        "sexual_content": {
+          "type": "string",
+          "title": "Sexual Content",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "default": "BLOCK_ONLY_HIGH",
+          "description": "Settings for HARM_CATEGORY_SEXUAL_CONTENT"
+        },
+        "other": {
+          "type": "string",
+          "title": "Other",
+          "enum": [
+            "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+            "BLOCK_LOW_AND_ABOVE",
+            "BLOCK_MEDIUM_AND_ABOVE",
+            "BLOCK_ONLY_HIGH",
+            "BLOCK_NONE"
+          ],
+          "default": "BLOCK_ONLY_HIGH",
+          "description": "Settings for HARM_CATEGORY_OTHER"
+        }
+      }
+    }
+  }
+}
