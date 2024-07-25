@@ -22,8 +22,7 @@ class SdkHelper:
 
     @staticmethod
     def is_public_adapter(adapter_id: str) -> bool:
-        """
-        Check if the given adapter_id is one of the public adapter keys.
+        """Check if the given adapter_id is one of the public adapter keys.
 
         This method iterates over the attributes of the PublicAdapterKeys class
         and checks if the provided adapter_id matches any of the attribute values.
@@ -45,4 +44,3 @@ class SdkHelper:
             return adapter_id in public_adapter_keys
         except Exception:
             return False
-
