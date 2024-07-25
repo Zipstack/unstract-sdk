@@ -13,6 +13,9 @@ dependencies = [
     "python-dotenv==1.0.0",
     # Adapter changes
     "llama-index==0.10.38",
+    # Temporary hack to get out of llama-index issues
+    # To be removed once llama-index version is upgraded
+    "llama-index-core==0.10.56",
     "tiktoken~=0.4.0",
     "transformers==4.37.0",
     "llama-index-embeddings-google==0.1.5",
