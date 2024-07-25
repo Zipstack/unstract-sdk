@@ -1,5 +1,8 @@
+import logging
+
 from unstract.sdk.constants import PublicAdapterKeys
 
+logger = logging.getLogger(__name__)
 
 class SdkHelper:
     def __init__(self) -> None:
@@ -35,12 +38,13 @@ class SdkHelper:
             False otherwise.
         """
         try:
-            # Retrieve all attribute values from the PublicAdapterKeys class
-            public_adapter_keys = {
-                value for key, value in PublicAdapterKeys.__dict__.items()
-                if not key.startswith('__')
-            }
-            # Check if the adapter_id is in the set of public adapter keys
-            return adapter_id in public_adapter_keys
-        except Exception:
+            for attr in dir(PublicAdapterKeys):
+                if getattr(PublicAdapterKeys, attr) == adapter_id:
+                    return True
+            return False
+        except Exception as e:
+            logger.warning(
+                f"Unable to determine if adapter_id: {adapter_id}"
+                f"is public or not: {str(e)}"
+            )
             return False
