@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Any, Optional
 from urllib.parse import quote_plus
@@ -22,9 +21,6 @@ class Constants:
     USER = "user"
     SCHEMA = "schema"
     ENABLE_SSL = "enable_ssl"
-
-
-logger = logging.getLogger(__name__)
 
 
 class Postgres(VectorDBAdapter):
