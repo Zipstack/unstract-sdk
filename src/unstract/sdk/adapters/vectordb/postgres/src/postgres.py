@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Any, Optional
 from urllib.parse import quote_plus
@@ -20,6 +21,10 @@ class Constants:
     PORT = "port"
     USER = "user"
     SCHEMA = "schema"
+    ENABLE_SSL = "enable_ssl"
+
+
+logger = logging.getLogger(__name__)
 
 
 class Postgres(VectorDBAdapter):
@@ -82,12 +87,17 @@ class Postgres(VectorDBAdapter):
                 table_name=self._collection_name,
                 embed_dim=dimension,
             )
+            if self._config.get(Constants.ENABLE_SSL, True):
+                ssl_mode = "require"
+            else:
+                ssl_mode = "disable"
             self._client = psycopg2.connect(
                 database=self._config.get(Constants.DATABASE),
                 host=self._config.get(Constants.HOST),
                 user=self._config.get(Constants.USER),
                 password=self._config.get(Constants.PASSWORD),
                 port=str(self._config.get(Constants.PORT)),
+                sslmode=ssl_mode,
             )
 
             return vector_db

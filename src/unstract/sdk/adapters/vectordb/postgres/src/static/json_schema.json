@@ -41,6 +41,11 @@
       "title": "Password",
       "format": "password",
       "default": ""
+    },
+    "enable_ssl": {
+      "type": "boolean",
+      "title": "Enable SSL",
+      "default": true
     }
   }
 }
