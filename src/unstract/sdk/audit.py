@@ -113,3 +113,39 @@ class Audit(StreamMixin):
         finally:
             if isinstance(token_counter, TokenCountingHandler):
                 token_counter.reset_counts()
+
+    def push_page_usage_data(
+        self,
+        platform_api_key: str,
+        page_count: int,
+        file_name: str,
+        kwargs: dict[Any, Any] = None,
+    ) -> None:
+        platform_host = self.get_env_or_die(ToolEnv.PLATFORM_HOST)
+        platform_port = self.get_env_or_die(ToolEnv.PLATFORM_PORT)
+
+        base_url = SdkHelper.get_platform_base_url(
+            platform_host=platform_host, platform_port=platform_port
+        )
+        bearer_token = platform_api_key
+        url = f"{base_url}/page-usage"
+        headers = {"Authorization": f"Bearer {bearer_token}"}
+
+        try:
+            response = requests.post(url, headers=headers, json={}, timeout=30)
+            if response.status_code != 200:
+                self.stream_log(
+                    log=(
+                        "Error while pushing page usage details: "
+                        f"{response.status_code} {response.reason}",
+                    ),
+                    level=LogLevel.ERROR,
+                )
+            else:
+                self.stream_log("Successfully pushed page usage details")
+
+        except requests.RequestException as e:
+            self.stream_log(
+                log=f"Error while pushing page usage details: {e}",
+                level=LogLevel.ERROR,
+            )

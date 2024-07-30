@@ -9,18 +9,16 @@ from unstract.sdk.adapters.x2text import adapters
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.sdk.constants import LogLevel
+from unstract.sdk.audit import Audit
+from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils import ToolUtils
 
 
 class X2Text(metaclass=ABCMeta):
-    def __init__(
-        self,
-        tool: BaseTool,
-        adapter_instance_id: Optional[str] = None
-    ):
+    def __init__(self, tool: BaseTool, adapter_instance_id: Optional[str] = None):
         self._tool = tool
         self._x2text_adapters = adapters
         self._adapter_instance_id = adapter_instance_id
@@ -82,6 +80,13 @@ class X2Text(metaclass=ABCMeta):
         output_file_path: Optional[str] = None,
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
+        mime_type = ToolUtils.get_file_mime_type(input_file_path)
+        print(mime_type)
+        Audit().push_page_usage_data(
+            platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+            file_name="test",
+            page_count=2,
+        )
         return self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs
         )
