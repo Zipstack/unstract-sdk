@@ -100,3 +100,20 @@ class ToolUtils:
             input_file_mime = magic.from_buffer(sample_contents, mime=True)
             input_file_obj.seek(0)
         return input_file_mime
+
+    @staticmethod
+    def get_file_size(input_file: Path) -> int:
+        """Gets the file size in bytes for an input file.
+        Args:
+            input_file (Path): Path object of the input file
+
+        Returns:
+            str: MIME type of the file
+        """
+        with open(input_file, mode="rb") as input_file_obj:
+            input_file_obj.seek(0, 2)  # Move the cursor to the end of the file
+            file_length = (
+                input_file_obj.tell()
+            )  # Get the current position of the cursor, which is the file length
+            input_file_obj.seek(0)
+        return file_length

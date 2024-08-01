@@ -119,6 +119,8 @@ class Audit(StreamMixin):
         platform_api_key: str,
         page_count: int,
         file_name: str,
+        file_size: int,
+        file_type: str,
         kwargs: dict[Any, Any] = None,
     ) -> None:
         platform_host = self.get_env_or_die(ToolEnv.PLATFORM_HOST)
@@ -131,8 +133,15 @@ class Audit(StreamMixin):
         url = f"{base_url}/page-usage"
         headers = {"Authorization": f"Bearer {bearer_token}"}
 
+        data = {
+            "page_count": page_count,
+            "file_name": file_name,
+            "file_size": file_size,
+            "file_type": file_type,
+        }
+
         try:
-            response = requests.post(url, headers=headers, json={}, timeout=30)
+            response = requests.post(url, headers=headers, json=data, timeout=30)
             if response.status_code != 200:
                 self.stream_log(
                     log=(

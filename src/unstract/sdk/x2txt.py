@@ -1,6 +1,8 @@
+import os
 from abc import ABCMeta
 from typing import Any, Optional
 
+import pdfplumber
 from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
@@ -10,7 +12,7 @@ from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.audit import Audit
-from unstract.sdk.constants import LogLevel, ToolEnv
+from unstract.sdk.constants import LogLevel, MimeType, ToolEnv
 from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
@@ -80,13 +82,9 @@ class X2Text(metaclass=ABCMeta):
         output_file_path: Optional[str] = None,
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-        mime_type = ToolUtils.get_file_mime_type(input_file_path)
-        print(mime_type)
-        Audit().push_page_usage_data(
-            platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-            file_name="test",
-            page_count=2,
-        )
+        # The will be executed each and every time text extraction takes place
+        self.push_usage_details(input_file_path)
+
         return self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs
         )
@@ -97,3 +95,46 @@ class X2Text(metaclass=ABCMeta):
             self._adapter_instance_id = adapter_instance_id
             self._initialise()
         return self._x2text_instance
+
+    def push_usage_details(self, input_file_path: str) -> None:
+        file_name = os.path.basename(input_file_path)
+
+        mime_type = ToolUtils.get_file_mime_type(input_file_path)
+        file_size = ToolUtils.get_file_size(input_file_path)
+        if mime_type == MimeType.TEXT:
+            # We will consider it as single page
+            Audit().push_page_usage_data(
+                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                file_name=file_name,
+                file_size=file_size,
+                file_type=mime_type,
+                page_count=1,
+            )
+
+            with open(input_file_path, encoding="utf-8") as file:
+                extracted_text = file.read()
+            return TextExtractionResult(
+                extracted_text=extracted_text, extraction_metadata=None
+            )
+        elif mime_type == MimeType.PDF:
+            with pdfplumber.open(input_file_path) as pdf:
+                # calculate the number of pages
+                max_pages = len(pdf.pages)
+            Audit().push_page_usage_data(
+                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                file_name=file_name,
+                file_size=file_size,
+                file_type=mime_type,
+                page_count=max_pages,
+            )
+
+        else:
+            # We are allowing certain image types as of now will consider them as single
+            # page dcouments
+            Audit().push_page_usage_data(
+                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                file_name=file_name,
+                file_size=file_size,
+                file_type=mime_type,
+                page_count=1,
+            )
