@@ -41,6 +41,12 @@
       "title": "Password",
       "format": "password",
       "default": ""
+    },
+    "enable_ssl": {
+      "type": "boolean",
+      "title": "Enable SSL",
+      "description": "On selecting the checkbox, data encryption using SSL is enabled",
+      "default": true
     }
   }
 }
