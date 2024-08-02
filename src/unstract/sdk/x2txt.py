@@ -20,11 +20,17 @@ from unstract.sdk.utils import ToolUtils
 
 
 class X2Text(metaclass=ABCMeta):
-    def __init__(self, tool: BaseTool, adapter_instance_id: Optional[str] = None):
+    def __init__(
+        self,
+        tool: BaseTool,
+        adapter_instance_id: Optional[str] = None,
+        usage_kwargs: dict[Any, Any] = {},
+    ):
         self._tool = tool
         self._x2text_adapters = adapters
         self._adapter_instance_id = adapter_instance_id
         self._x2text_instance: X2TextAdapter = None
+        self._usage_kwargs = usage_kwargs
         self._initialise()
 
     def _initialise(self):
@@ -83,7 +89,15 @@ class X2Text(metaclass=ABCMeta):
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         # The will be executed each and every time text extraction takes place
-        self.push_usage_details(input_file_path)
+        mime_type = ToolUtils.get_file_mime_type(input_file_path)
+        self.push_usage_details(input_file_path, mime_type)
+
+        if mime_type == MimeType.TEXT:
+            with open(input_file_path, encoding="utf-8") as file:
+                extracted_text = file.read()
+                return TextExtractionResult(
+                    extracted_text=extracted_text, extraction_metadata=None
+                )
 
         return self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs
@@ -96,27 +110,12 @@ class X2Text(metaclass=ABCMeta):
             self._initialise()
         return self._x2text_instance
 
-    def push_usage_details(self, input_file_path: str) -> None:
+    def push_usage_details(self, input_file_path: str, mime_type: str) -> None:
         file_name = os.path.basename(input_file_path)
 
-        mime_type = ToolUtils.get_file_mime_type(input_file_path)
         file_size = ToolUtils.get_file_size(input_file_path)
-        if mime_type == MimeType.TEXT:
-            # We will consider it as single page
-            Audit().push_page_usage_data(
-                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-                file_name=file_name,
-                file_size=file_size,
-                file_type=mime_type,
-                page_count=1,
-            )
 
-            with open(input_file_path, encoding="utf-8") as file:
-                extracted_text = file.read()
-            return TextExtractionResult(
-                extracted_text=extracted_text, extraction_metadata=None
-            )
-        elif mime_type == MimeType.PDF:
+        if mime_type == MimeType.PDF:
             with pdfplumber.open(input_file_path) as pdf:
                 # calculate the number of pages
                 max_pages = len(pdf.pages)
@@ -126,15 +125,16 @@ class X2Text(metaclass=ABCMeta):
                 file_size=file_size,
                 file_type=mime_type,
                 page_count=max_pages,
+                kwargs=self._usage_kwargs,
             )
-
         else:
-            # We are allowing certain image types as of now will consider them as single
-            # page dcouments
+            # We are allowing certain image types,and raw texts. We will consider them
+            # as single page documents as there in no concept of page numbers.
             Audit().push_page_usage_data(
                 platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
                 file_name=file_name,
                 file_size=file_size,
                 file_type=mime_type,
                 page_count=1,
+                kwargs=self._usage_kwargs,
             )

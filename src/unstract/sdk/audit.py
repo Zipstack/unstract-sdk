@@ -125,7 +125,7 @@ class Audit(StreamMixin):
     ) -> None:
         platform_host = self.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = self.get_env_or_die(ToolEnv.PLATFORM_PORT)
-
+        run_id = kwargs.get("run_id", "")
         base_url = SdkHelper.get_platform_base_url(
             platform_host=platform_host, platform_port=platform_port
         )
@@ -138,6 +138,7 @@ class Audit(StreamMixin):
             "file_name": file_name,
             "file_size": file_size,
             "file_type": file_type,
+            "run_id": run_id,
         }
 
         try:

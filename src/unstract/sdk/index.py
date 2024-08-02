@@ -242,7 +242,11 @@ class Index:
             full_text = []
             extracted_text = ""
             try:
-                x2text = X2Text(tool=self.tool, adapter_instance_id=x2text_instance_id)
+                x2text = X2Text(
+                    tool=self.tool,
+                    adapter_instance_id=x2text_instance_id,
+                    usage_kwargs=usage_kwargs,
+                )
                 if enable_highlight and isinstance(
                     x2text._x2text_instance, LLMWhisperer
                 ):
