@@ -337,7 +337,8 @@ class LLMWhisperer(X2TextAdapter):
                 # Define the directory of the output file and metadata paths
                 output_dir = output_file_path.parent
                 metadata_dir = output_dir / "metadata"
-                metadata_file_path = metadata_dir / "file.json"
+                metadata_file_name = output_file_path.with_suffix(".json").name
+                metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
                 metadata_dir.mkdir(parents=True, exist_ok=True)
                 # Remove the "text" key from the metadata
