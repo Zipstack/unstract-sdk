@@ -1,5 +1,6 @@
 import json
-from typing import Any, Optional
+import logging
+from typing import Any, Callable, Optional
 
 from llama_index.core import Document
 from llama_index.core.node_parser import SimpleNodeParser
@@ -24,6 +25,8 @@ from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
 from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
+
+logger = logging.getLogger(__name__)
 
 
 class Constants:
@@ -101,27 +104,6 @@ class Index:
         finally:
             vector_db.close()
 
-    def _cleanup_text(self, full_text):
-        # Remove text which is not required
-        full_text_lines = full_text.split("\n")
-        new_context_lines = []
-        empty_line_count = 0
-        for line in full_text_lines:
-            if line.strip() == "":
-                empty_line_count += 1
-            else:
-                if empty_line_count >= 3:
-                    empty_line_count = 3
-                for i in range(empty_line_count):
-                    new_context_lines.append("")
-                empty_line_count = 0
-                new_context_lines.append(line.rstrip())
-        self.tool.stream_log(
-            f"Old context length: {len(full_text_lines)}, "
-            f"New context length: {len(new_context_lines)}"
-        )
-        return "\n".join(new_context_lines)
-
     def index(
         self,
         tool_id: str,
@@ -136,6 +118,7 @@ class Index:
         output_file_path: Optional[str] = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
+        process_text: Optional[Callable[[str], str]] = None,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -276,10 +259,17 @@ class Index:
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
                 raise IndexingError(str(e)) from e
+            if process_text:
+                try:
+                    result = process_text(extracted_text)
+                    if isinstance(result, str):
+                        extracted_text = result
+                except Exception as e:
+                    logger.error(f"Error occured inside function 'process_text': {e}")
             full_text.append(
                 {
                     "section": "full",
-                    "text_contents": self._cleanup_text(extracted_text),
+                    "text_contents": extracted_text,
                 }
             )
 

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
@@ -56,9 +56,7 @@ class LLM:
             self._llm_instance = self._get_llm(self._adapter_instance_id)
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
 
-            if not SdkHelper.is_public_adapter(
-                adapter_id=self._adapter_instance_id
-            ):
+            if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
                 platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
                 CallbackManager.set_callback(
                     platform_api_key=platform_api_key,
@@ -69,15 +67,24 @@ class LLM:
     def complete(
         self,
         prompt: str,
-        retries: int = 3,
+        process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
+            process_text_output = {}
+            if process_text:
+                try:
+                    process_text_output = process_text(response, LLM.json_regex)
+                    if not isinstance(process_text_output, dict):
+                        process_text_output = {}
+                except Exception as e:
+                    logger.error(f"Error occured inside function 'process_text': {e}")
+                    process_text_output = {}
             match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
-            return {LLM.RESPONSE: response}
+            return {LLM.RESPONSE: response, **process_text_output}
         # TODO: Handle for all LLM providers
         except OpenAIAPIError as e:
             msg = "OpenAI error: "
