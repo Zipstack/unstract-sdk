@@ -39,7 +39,7 @@ class TokenCounter:
         if EventPayload.PROMPT in payload:
             completion_raw = payload.get(EventPayload.COMPLETION).raw
             if completion_raw:
-                if completion_raw.get(Constants.KEY_USAGE):
+                if hasattr(completion_raw, Constants.KEY_USAGE):
                     token_counts: dict[
                         str, int
                     ] = TokenCounter._get_prompt_completion_tokens(completion_raw)
@@ -47,14 +47,12 @@ class TokenCounter:
                         input_tokens=token_counts[Constants.PROMPT_TOKENS],
                         output_tokens=token_counts[Constants.COMPLETION_TOKENS],
                     )
-                elif completion_raw.get(Constants.KEY_RAW_RESPONSE):
+                elif hasattr(completion_raw, Constants.KEY_RAW_RESPONSE):
                     if hasattr(
-                        completion_raw.get(Constants.KEY_RAW_RESPONSE),
+                        completion_raw._raw_response,
                         Constants.KEY_USAGE_METADATA,
                     ):
-                        usage = completion_raw.get(
-                            Constants.KEY_RAW_RESPONSE
-                        ).usage_metadata
+                        usage = completion_raw._raw_response.usage_metadata
                         token_counter = TokenCounter(
                             input_tokens=usage.prompt_token_count,
                             output_tokens=usage.candidates_token_count,
@@ -62,12 +60,10 @@ class TokenCounter:
                 else:
                     prompt_tokens = Constants.DEFAULT_TOKEN_COUNT
                     completion_tokens = Constants.DEFAULT_TOKEN_COUNT
-                    if completion_raw.get(Constants.KEY_PROMPT_EVAL_COUNT):
-                        prompt_tokens = completion_raw.get(
-                            Constants.KEY_PROMPT_EVAL_COUNT
-                        )
-                    if completion_raw.get(Constants.KEY_EVAL_COUNT):
-                        completion_tokens = completion_raw.get(Constants.KEY_EVAL_COUNT)
+                    if hasattr(completion_raw, Constants.KEY_PROMPT_EVAL_COUNT):
+                        prompt_tokens = completion_raw.prompt_eval_count
+                    if hasattr(completion_raw, Constants.KEY_EVAL_COUNT):
+                        completion_tokens = completion_raw.eval_count
                     token_counter = TokenCounter(
                         input_tokens=prompt_tokens,
                         output_tokens=completion_tokens,
@@ -90,8 +86,8 @@ class TokenCounter:
         prompt_tokens = Constants.DEFAULT_TOKEN_COUNT
         completion_tokens = Constants.DEFAULT_TOKEN_COUNT
 
-        usage = response.get(Constants.KEY_USAGE)
-        if usage:
+        if hasattr(response, Constants.KEY_USAGE):
+            usage = response.usage
             if hasattr(usage, Constants.INPUT_TOKENS):
                 prompt_tokens = usage.input_tokens
             elif hasattr(usage, Constants.PROMPT_TOKENS):
