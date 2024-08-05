@@ -5,7 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:147e1b2304da936e35ec6f07ad09ac257699abcf8bdc56281dcabf72c0e891eb"
+content_hash = "sha256:c4cb2641c971f94a4213d58b7c6f9f90dfc3555b44ea59ae89bdb35f7cd4c365"
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -17,7 +17,6 @@ files = [
     {file = "aiohappyeyeballs-2.3.4-py3-none-any.whl", hash = "sha256:40a16ceffcf1fc9e142fd488123b2e218abc4188cf12ac20c67200e1579baa42"},
     {file = "aiohappyeyeballs-2.3.4.tar.gz", hash = "sha256:7e1ae8399c320a8adec76f6c919ed5ceae6edd4c3672f4d9eae2b27e37c80ff6"},
 ]
-
 
 [[package]]
 name = "aiohttp"
@@ -3408,8 +3407,8 @@ requires_python = ">=3.7"
 summary = "Database Abstraction Library"
 groups = ["default"]
 dependencies = [
-    "SQLAlchemy==2.0.31",
     "greenlet!=0.4.17",
+    "sqlalchemy==2.0.31",
 ]
 files = [
     {file = "SQLAlchemy-2.0.31-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:f2a213c1b699d3f5768a7272de720387ae0122f1becf0901ed6eaa1abd1baf6c"},
