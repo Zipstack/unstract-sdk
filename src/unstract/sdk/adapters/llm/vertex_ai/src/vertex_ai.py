@@ -214,46 +214,41 @@ class VertexAILLM(LLMAdapter):
         candidates: list["Candidate"] = resp.candidates
         if not candidates:
             msg = str(resp.prompt_feedback)
+    else:
+        reason_messages = {
+            FinishReason.MAX_TOKENS: (
+                "The maximum number of tokens for the LLM has been reached. Please "
+                "either tweak your prompts or try using another LLM."
+            ),
+            FinishReason.STOP: (
+                "The LLM stopped generating a response due to the natural stop "
+                "point of the model or a provided stop sequence."
+            ),
+            FinishReason.SAFETY: "The LLM response was flagged for safety reasons.",
+            FinishReason.RECITATION: "The LLM response was flagged for recitation reasons.",
+            FinishReason.LANGUAGE: (
+                "The LLM response was flagged for using an unsupported language."
+            ),
+            FinishReason.BLOCKLIST: (
+                "The LLM response generation was stopped because it "
+                "contains forbidden terms."
+            ),
+            FinishReason.PROHIBITED_CONTENT: (
+                "The LLM response generation was stopped because it "
+                "potentially contains prohibited content."
+            ),
+            FinishReason.SPII: (
+                "The LLM response generation was stopped because it potentially "
+                "contains Sensitive Personally Identifiable Information."
+            ),
+        }
+
         err_list = []
         for candidate in candidates:
             reason: FinishReason = candidate.finish_reason
             if candidate.finish_message:
                 err_msg = candidate.finish_message
-            elif reason == FinishReason.MAX_TOKENS:
-                err_msg = (
-                    "The maximum number of tokens for the LLM has reached. Please "
-                    "either tweak your prompts or try using another LLM."
-                )
-            elif reason == FinishReason.STOP:
-                err_msg = (
-                    "The LLM stopped generating response due to the natural stop "
-                    "point of the model or a provided stop sequence."
-                )
-            elif reason == FinishReason.SAFETY:
-                err_msg = "The LLM response was flagged for safety reasons."
-            elif reason == FinishReason.RECITATION:
-                err_msg = "The LLM response was flagged for recitation reasons."
-            elif reason == FinishReason.LANGUAGE:
-                err_msg = (
-                    "The LLM response was flagged for using an unsupported language."
-                )
-            elif reason == FinishReason.BLOCKLIST:
-                err_msg = (
-                    "The LLM response generation was stopped because it "
-                    "contains forbidden terms."
-                )
-            elif reason == FinishReason.PROHIBITED_CONTENT:
-                err_msg = (
-                    "The LLM response generation was stopped because it "
-                    "potentially contains prohibited content."
-                )
-            elif reason == FinishReason.SPII:
-                err_msg = (
-                    "The LLM response generation was stopped because it potentially "
-                    "contains Sensitive Personally Identifiable Information."
-                )
             else:
-                err_msg = str(candidate)
-            err_list.append(err_msg)
+                err_msg = reason_messages.get(reason, str(candidate))
         msg = "\n\nAnother error: \n".join(err_list)
         return LLMError(msg)
