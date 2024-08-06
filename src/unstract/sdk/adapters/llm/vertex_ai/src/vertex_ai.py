@@ -214,7 +214,6 @@ class VertexAILLM(LLMAdapter):
         candidates: list["Candidate"] = resp.candidates
         if not candidates:
             msg = str(resp.prompt_feedback)
-    else:
         reason_messages = {
             FinishReason.MAX_TOKENS: (
                 "The maximum number of tokens for the LLM has been reached. Please "
@@ -225,9 +224,8 @@ class VertexAILLM(LLMAdapter):
                 "point of the model or a provided stop sequence."
             ),
             FinishReason.SAFETY: "The LLM response was flagged for safety reasons.",
-            FinishReason.RECITATION: "The LLM response was flagged for recitation reasons.",
-            FinishReason.LANGUAGE: (
-                "The LLM response was flagged for using an unsupported language."
+            FinishReason.RECITATION: (
+                "The LLM response was flagged for recitation reasons."
             ),
             FinishReason.BLOCKLIST: (
                 "The LLM response generation was stopped because it "
@@ -250,5 +248,6 @@ class VertexAILLM(LLMAdapter):
                 err_msg = candidate.finish_message
             else:
                 err_msg = reason_messages.get(reason, str(candidate))
+            err_list.append(err_msg)
         msg = "\n\nAnother error: \n".join(err_list)
         return LLMError(msg)
