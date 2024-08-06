@@ -88,7 +88,7 @@
       "type": "string",
       "title": "Page separator",
       "default": "<<< >>>",
-      "description": "Specify how the pages to separate (e.g. << {{page_no}} >>, << >>). Leave the {{page_no}} empty if you don't want the page number as page separator."
+      "description": "Specify a pattern to separate the pages in the document (e.g., <<< {{page_no}} >>>, <<< >>>). This pattern will be inserted at the end of every page. Omit {{page_no}} if you don't want to include the page number in the separator."
     }
   },
   "if": {
