@@ -7,6 +7,7 @@ from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials
 from llama_index.core.llms import LLM
 from llama_index.llms.vertex import Vertex
+from vertexai.generative_models import Candidate, FinishReason, ResponseValidationError
 from vertexai.generative_models._generative_models import (
     HarmBlockThreshold,
     HarmCategory,
@@ -191,3 +192,62 @@ class VertexAILLM(LLMAdapter):
         except Exception as e:
             raise LLMError(f"Error while testing connection for VertexAI: {str(e)}")
         return test_result
+
+    @staticmethod
+    def parse_llm_err(e: ResponseValidationError) -> LLMError:
+        """Parse the error from Vertex AI.
+
+        Helps parse and raise errors from Vertex AI.
+        https://ai.google.dev/api/generate-content#generatecontentresponse
+
+        Args:
+            e (ResponseValidationError): Exception from Vertex AI
+
+        Returns:
+            LLMError: Error to be sent to the user
+        """
+        assert len(e.responses) == 1, (
+            "Expected e.responses to contain a single element "
+            "since its a completion call and not chat."
+        )
+        resp = e.responses[0]
+        candidates: list["Candidate"] = resp.candidates
+        if not candidates:
+            msg = str(resp.prompt_feedback)
+        reason_messages = {
+            FinishReason.MAX_TOKENS: (
+                "The maximum number of tokens for the LLM has been reached. Please "
+                "either tweak your prompts or try using another LLM."
+            ),
+            FinishReason.STOP: (
+                "The LLM stopped generating a response due to the natural stop "
+                "point of the model or a provided stop sequence."
+            ),
+            FinishReason.SAFETY: "The LLM response was flagged for safety reasons.",
+            FinishReason.RECITATION: (
+                "The LLM response was flagged for recitation reasons."
+            ),
+            FinishReason.BLOCKLIST: (
+                "The LLM response generation was stopped because it "
+                "contains forbidden terms."
+            ),
+            FinishReason.PROHIBITED_CONTENT: (
+                "The LLM response generation was stopped because it "
+                "potentially contains prohibited content."
+            ),
+            FinishReason.SPII: (
+                "The LLM response generation was stopped because it potentially "
+                "contains Sensitive Personally Identifiable Information."
+            ),
+        }
+
+        err_list = []
+        for candidate in candidates:
+            reason: FinishReason = candidate.finish_reason
+            if candidate.finish_message:
+                err_msg = candidate.finish_message
+            else:
+                err_msg = reason_messages.get(reason, str(candidate))
+            err_list.append(err_msg)
+        msg = "\n\nAnother error: \n".join(err_list)
+        return LLMError(msg)
