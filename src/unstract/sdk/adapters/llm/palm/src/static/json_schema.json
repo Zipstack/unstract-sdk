@@ -1,0 +1,35 @@
+{
+  "title": "Pa LLM",
+  "type": "object",
+  "required": [
+    "adapter_name",
+    "api_key"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: palm-group-1"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "format": "password",
+      "description": "Your API key for the Palm API"
+    },
+    "model_name": {
+      "type": "string",
+      "title": "Model Name",
+      "default": "",
+      "description": "The name of the model to use for this adapter instance. Refer to https://ai.google.dev/models/palm Leave it empty to use the default model."
+    },
+    "num_output": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max output tokens",
+      "description": "The number of tokens to generate. The higher the number, the longer the response will be. Leave it empty to use the default value."
+    }
+  }
+}

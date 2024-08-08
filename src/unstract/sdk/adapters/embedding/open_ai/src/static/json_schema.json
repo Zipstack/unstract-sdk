@@ -1,0 +1,35 @@
+{
+  "title": "Open AI Embedding",
+  "type": "object",
+  "required": [
+    "adapter_name",
+    "api_key"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: openai-emb-1"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "default": "",
+      "format": "password"
+    },
+    "embed_batch_size": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Embed Batch Size",
+      "default": 10
+    },
+    "api_base": {
+      "type": "string",
+      "title": "API Base",
+      "format": "uri",
+      "default": "https://api.openai.com/v1/"
+    }
+  }
+}

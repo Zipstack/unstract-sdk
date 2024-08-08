@@ -1,8 +1,10 @@
+import json
 from typing import Any, Optional
 
 import requests
 
 from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
 
@@ -56,6 +58,7 @@ class ToolAdapter(PlatformBase):
         if response.status_code == 200:
             adapter_data: dict[str, Any] = response.json()
 
+            # TODO: Print config after redacting sensitive information
             self.tool.stream_log(
                 "Successfully retrieved adapter config "
                 f"for adapter: {adapter_instance_id}"
@@ -65,8 +68,7 @@ class ToolAdapter(PlatformBase):
 
         elif response.status_code == 404:
             self.tool.stream_log(
-                f"adapter not found for: for adapter instance"
-                f"{adapter_instance_id}",
+                f"adapter not found for: for adapter instance" f"{adapter_instance_id}",
                 level=LogLevel.ERROR,
             )
             return None
@@ -88,6 +90,11 @@ class ToolAdapter(PlatformBase):
     ) -> Optional[dict[str, Any]]:
         """Get adapter spec by the help of unstract DB tool.
 
+        This method first checks if the adapter_instance_id matches
+        any of the public adapter keys. If it matches, the configuration
+        is fetched from environment variables. Otherwise, it connects to the
+        platform service to retrieve the configuration.
+
         Args:
             adapter_instance_id (str): ID of the adapter instance
             tool (AbstractTool): Instance of AbstractTool
@@ -97,10 +104,17 @@ class ToolAdapter(PlatformBase):
         Returns:
             Any: engine
         """
+        # Check if the adapter ID matches any public adapter keys
+        if SdkHelper.is_public_adapter(adapter_id=adapter_instance_id):
+            adapter_metadata_config = tool.get_env_or_die(adapter_instance_id)
+            adapter_metadata = json.loads(adapter_metadata_config)
+            return adapter_metadata
         platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
 
-        tool.stream_log("Connecting to DB and getting table metadata")
+        tool.stream_log(
+            f"Connecting to DB and getting table metadata for {adapter_instance_id}"
+        )
         tool_adapter = ToolAdapter(
             tool=tool,
             platform_host=platform_host,
@@ -111,7 +125,6 @@ class ToolAdapter(PlatformBase):
         ] = tool_adapter.get_adapter_configuration(adapter_instance_id)
         if not adapter_metadata:
             tool.stream_error_and_exit(
-                f"Adapter not found for "
-                f"adapter instance: {adapter_instance_id}"
+                f"Adapter not found for " f"adapter instance: {adapter_instance_id}"
             )
         return adapter_metadata

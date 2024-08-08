@@ -6,7 +6,6 @@ from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackMana
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
-from transformers import AutoTokenizer
 from typing_extensions import deprecated
 
 from unstract.sdk.utils.usage_handler import UsageHandler
@@ -77,24 +76,35 @@ class CallbackManager:
         platform_api_key: str,
         kwargs,
     ) -> LlamaIndexCallbackManager:
-        tokenizer = CallbackManager.get_tokenizer(model)
-        token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
         llm = None
         embedding = None
+        handler_list = []
         if isinstance(model, LLM):
             llm = model
+            usage_handler = UsageHandler(
+                platform_api_key=platform_api_key,
+                llm_model=llm,
+                embed_model=embedding,
+                kwargs=kwargs,
+            )
+            handler_list.append(usage_handler)
         elif isinstance(model, BaseEmbedding):
             embedding = model
-        usage_handler = UsageHandler(
-            token_counter=token_counter,
-            platform_api_key=platform_api_key,
-            llm_model=llm,
-            embed_model=embedding,
-            kwargs=kwargs,
-        )
+            # Get a tokenizer
+            tokenizer = CallbackManager.get_tokenizer(model)
+            token_counter = TokenCountingHandler(tokenizer=tokenizer, verbose=True)
+            usage_handler = UsageHandler(
+                token_counter=token_counter,
+                platform_api_key=platform_api_key,
+                llm_model=llm,
+                embed_model=embedding,
+                kwargs=kwargs,
+            )
+            handler_list.append(token_counter)
+            handler_list.append(usage_handler)
 
         callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager(
-            handlers=[token_counter, usage_handler]
+            handlers=handler_list
         )
         return callback_manager
 
@@ -124,11 +134,11 @@ class CallbackManager:
             elif isinstance(model, BaseEmbedding):
                 model_name = model.model_name
 
-            tokenizer: Callable[[str], list] = AutoTokenizer.from_pretrained(
+            tokenizer: Callable[[str], list] = tiktoken.encoding_for_model(
                 model_name
             ).encode
             return tokenizer
-        except OSError as e:
+        except (KeyError, ValueError) as e:
             logger.warning(str(e))
             return fallback_tokenizer
 
@@ -145,8 +155,6 @@ class CallbackManager:
             CallbackManager.set_callback(platform_api_key, model=llm, **kwargs)
             callback_manager = llm.callback_manager
         if embedding:
-            CallbackManager.set_callback_manager(
-                platform_api_key, model=embedding, **kwargs
-            )
+            CallbackManager.set_callback(platform_api_key, model=embedding, **kwargs)
             callback_manager = embedding.callback_manager
         return callback_manager

@@ -1,15 +1,16 @@
 import argparse
+import logging
 import shutil
 from json import loads
 from pathlib import Path
 from typing import Any
 
-from unstract.adapters import get_adapter_version
-
 from unstract.sdk import get_sdk_version
 from unstract.sdk.constants import Command
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.validator import ToolValidator
+
+logger = logging.getLogger(__name__)
 
 
 class ToolExecutor:
@@ -45,26 +46,33 @@ class ToolExecutor:
             args (argparse.Namespace): Parsed arguments to execute with
         """
         if args.settings is None:
-            self.tool.stream_error_and_exit(
-                "--settings are required for RUN command"
-            )
+            self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
-        self._setup_for_run()
+        self.tool.stream_log(
+            f"Running tool with "
+            f"Workflow ID: {self.tool.workflow_id}, "
+            f"Execution ID: {self.tool.execution_id}, "
+            f"SDK Version: {get_sdk_version()}"
+        )
 
+        self._setup_for_run()
         validator = ToolValidator(self.tool)
         settings = validator.validate_pre_execution(settings=settings)
 
         self.tool.stream_log(
-            f"Running tool for "
-            f"Workflow ID: {self.tool.workflow_id}, "
-            f"Execution ID: {self.tool.execution_id}, "
-            f"SDK Version: {get_sdk_version()}, "
-            f"adapter Version: {get_adapter_version()}"
+            f"Executing for file: {self.tool.get_exec_metadata['source_name']}, "
+            f"with tool settings: {settings}"
         )
-        self.tool.run(
-            settings=settings,
-            input_file=self.tool.get_input_file(),
-            output_dir=self.tool.get_output_dir(),
-        )
+
+        try:
+            self.tool.run(
+                settings=settings,
+                input_file=self.tool.get_input_file(),
+                output_dir=self.tool.get_output_dir(),
+            )
+        except Exception as e:
+            logger.error(f"Error while tool run: {e}", stack_info=True, exc_info=True)
+            self.tool.stream_error_and_exit(f"Error while running tool: {str(e)}")
+
         # TODO: Call tool method to validate if output was written

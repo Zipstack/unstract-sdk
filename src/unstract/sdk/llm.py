@@ -7,13 +7,15 @@ from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
 from typing_extensions import deprecated
-from unstract.adapters.constants import Common
-from unstract.adapters.llm import adapters
-from unstract.adapters.llm.llm_adapter import LLMAdapter
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.constants import Common
+from unstract.sdk.adapters.llm import adapters
+from unstract.sdk.adapters.llm.exceptions import parse_llm_err
+from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
 
@@ -54,12 +56,14 @@ class LLM:
         if self._adapter_instance_id:
             self._llm_instance = self._get_llm(self._adapter_instance_id)
             self._usage_kwargs["adapter_instance_id"] = self._adapter_instance_id
-            platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-            CallbackManager.set_callback(
-                platform_api_key=platform_api_key,
-                model=self._llm_instance,
-                kwargs=self._usage_kwargs,
-            )
+
+            if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
+                platform_api_key = self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
+                CallbackManager.set_callback(
+                    platform_api_key=platform_api_key,
+                    model=self._llm_instance,
+                    kwargs=self._usage_kwargs,
+                )
 
     def complete(
         self,
@@ -73,16 +77,8 @@ class LLM:
             if match:
                 response.text = match.group(0)
             return {LLM.RESPONSE: response}
-        # TODO: Handle for all LLM providers
-        except OpenAIAPIError as e:
-            msg = "OpenAI error: "
-            if hasattr(e, "body") and "message" in e.body:
-                msg += e.body["message"]
-            else:
-                msg += e.message
-            if isinstance(e, OpenAIRateLimitError):
-                raise RateLimitError(msg)
-            raise LLMError(msg) from e
+        except Exception as e:
+            raise parse_llm_err(e) from e
 
     def _get_llm(self, adapter_instance_id: str) -> LlamaIndexLLM:
         """Returns the LLM object for the tool.
@@ -94,9 +90,11 @@ class LLM:
         try:
             if not self._adapter_instance_id:
                 raise LLMError("Adapter instance ID not set. " "Initialisation failed")
+
             llm_config_data = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
+
             llm_adapter_id = llm_config_data.get(Common.ADAPTER_ID)
             if llm_adapter_id not in self.llm_adapters:
                 raise SdkError(f"LLM adapter not supported : " f"{llm_adapter_id}")
@@ -106,6 +104,7 @@ class LLM:
             ]
             llm_metadata = llm_config_data.get(Common.ADAPTER_METADATA)
             llm_adapter_class: LLMAdapter = llm_adapter(llm_metadata)
+            self._usage_kwargs["provider"] = llm_adapter_class.get_provider()
             llm_instance: LLM = llm_adapter_class.get_llm_instance()
             return llm_instance
         except Exception as e:

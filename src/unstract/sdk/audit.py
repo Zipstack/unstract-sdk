@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 import requests
 from llama_index.core.callbacks import CBEventType, TokenCountingHandler
@@ -6,6 +6,7 @@ from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.stream import StreamMixin
+from unstract.sdk.utils.token_counter import TokenCounter
 
 
 class Audit(StreamMixin):
@@ -25,7 +26,7 @@ class Audit(StreamMixin):
     def push_usage_data(
         self,
         platform_api_key: str,
-        token_counter: TokenCountingHandler = None,
+        token_counter: Union[TokenCountingHandler, TokenCounter] = None,
         model_name: str = "",
         event_type: CBEventType = None,
         kwargs: dict[Any, Any] = None,
@@ -68,14 +69,19 @@ class Audit(StreamMixin):
         execution_id = kwargs.get("execution_id", "")
         adapter_instance_id = kwargs.get("adapter_instance_id", "")
         run_id = kwargs.get("run_id", "")
-
+        provider = kwargs.get("provider", "")
+        llm_usage_reason = ""
+        if event_type == "llm":
+            llm_usage_reason = kwargs.get("llm_usage_reason", "")
         data = {
             "workflow_id": workflow_id,
             "execution_id": execution_id,
             "adapter_instance_id": adapter_instance_id,
             "run_id": run_id,
             "usage_type": event_type,
+            "llm_usage_reason": llm_usage_reason,
             "model_name": model_name,
+            "provider": provider,
             "embedding_tokens": token_counter.total_embedding_token_count,
             "prompt_tokens": token_counter.prompt_llm_token_count,
             "completion_tokens": token_counter.completion_llm_token_count,
@@ -105,4 +111,5 @@ class Audit(StreamMixin):
             )
 
         finally:
-            token_counter.reset_counts()
+            if isinstance(token_counter, TokenCountingHandler):
+                token_counter.reset_counts()

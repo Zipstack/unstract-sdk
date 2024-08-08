@@ -11,14 +11,15 @@ from llama_index.core.vector_stores.types import (
     VectorStoreQueryResult,
 )
 from typing_extensions import deprecated
-from unstract.adapters.constants import Common
-from unstract.adapters.vectordb import adapters
-from unstract.adapters.vectordb.constants import VectorDbConstants
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.constants import Common
+from unstract.sdk.adapters.vectordb import adapters
+from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError
+from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
 
@@ -83,9 +84,11 @@ class VectorDB:
                 raise VectorDBError(
                     "Adapter instance ID not set. Initialisation failed"
                 )
+
             vector_db_config = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
             )
+
             vector_db_adapter_id = vector_db_config.get(Common.ADAPTER_ID)
             if vector_db_adapter_id not in self.vector_db_adapters:
                 raise SdkError(
@@ -96,10 +99,13 @@ class VectorDB:
                 Common.METADATA
             ][Common.ADAPTER]
             vector_db_metadata = vector_db_config.get(Common.ADAPTER_METADATA)
-            org = self._get_org_id()
             # Adding the collection prefix and embedding type
             # to the metadata
-            vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
+
+            if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
+                org = self._get_org_id()
+                vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
+
             vector_db_metadata[
                 VectorDbConstants.EMBEDDING_DIMENSION
             ] = self._embedding_dimension

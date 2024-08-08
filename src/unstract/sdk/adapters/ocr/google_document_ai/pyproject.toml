@@ -1,0 +1,26 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[project]
+name = "unstract-googledocumentai-ocr"
+version = "0.0.1"
+description = "Google Document AI OCR"
+authors = [
+    {name = "Zipstack Inc.", email = "devsupport@zipstack.com"},
+]
+dependencies = [
+
+]
+requires-python = ">=3.9"
+readme = "README.md"
+classifiers = [
+  "Programming Language :: Python"
+]
+license = {text = "MIT"}
+
+[tool.pdm.build]
+includes = ["src"]
+package-dir = "src"
+# source-includes = ["tests"]

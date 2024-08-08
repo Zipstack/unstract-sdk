@@ -6,6 +6,7 @@ from typing import Any
 from deprecated import deprecated
 
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
+from unstract.sdk.utils import ToolUtils
 
 
 class StreamMixin:
@@ -26,7 +27,7 @@ class StreamMixin:
 
         """
         self.log_level = log_level
-        self._exec_by_tool = bool(
+        self._exec_by_tool = ToolUtils.str_to_bool(
             os.environ.get(ToolEnv.EXECUTION_BY_TOOL, "False")
         )
         super().__init__(**kwargs)
@@ -78,9 +79,7 @@ class StreamMixin:
         if self._exec_by_tool:
             exit(1)
         else:
-            raise RuntimeError(
-                "RuntimeError from SDK, check the above log for details"
-            )
+            raise RuntimeError("RuntimeError from SDK, check the above log for details")
 
     def get_env_or_die(self, env_key: str) -> str:
         """Returns the value of an env variable.
@@ -232,9 +231,7 @@ class StreamMixin:
         print(json.dumps(record))
 
     @staticmethod
-    @deprecated(
-        version="0.4.4", reason="Use `BaseTool.write_to_result()` instead"
-    )
+    @deprecated(version="0.4.4", reason="Use `BaseTool.write_to_result()` instead")
     def stream_result(result: dict[Any, Any], **kwargs: Any) -> None:
         """Streams the result of the tool using the Unstract protocol RESULT to
         stdout.

@@ -11,9 +11,12 @@ from llama_index.core.vector_stores import (
     VectorStoreQueryResult,
 )
 from typing_extensions import deprecated
-from unstract.adapters.exceptions import AdapterError
 
-from unstract.sdk.adapters import ToolAdapter
+from unstract.sdk.adapter import ToolAdapter
+from unstract.sdk.adapters.exceptions import AdapterError
+from unstract.sdk.adapters.x2text.constants import X2TextConstants
+from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError
@@ -21,6 +24,10 @@ from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
 from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
+
+
+class Constants:
+    TOP_K = 5
 
 
 class Index:
@@ -73,7 +80,7 @@ class Index:
                     query_embedding=embedding.get_query_embedding(" "),
                     doc_ids=[doc_id],
                     filters=filters,
-                    similarity_top_k=10000,
+                    similarity_top_k=Constants.TOP_K,
                 )
             except Exception as e:
                 self.tool.stream_log(
@@ -127,6 +134,7 @@ class Index:
         reindex: bool = False,
         file_hash: Optional[str] = None,
         output_file_path: Optional[str] = None,
+        enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
     ) -> str:
         """Indexes an individual file using the passed arguments.
@@ -242,9 +250,29 @@ class Index:
                     x2text = X2Text(
                         tool=self.tool, adapter_instance_id=x2text_instance_id
                     )
-                    extracted_text = x2text.process(
-                        input_file_path=file_path, output_file_path=output_file_path
-                    )
+                    if enable_highlight and isinstance(
+                        x2text._x2text_instance, LLMWhisperer
+                    ):
+                        process_response: TextExtractionResult = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                            enable_highlight=enable_highlight,
+                        )
+                        whisper_hash_value = (
+                            process_response.extraction_metadata.whisper_hash
+                        )
+
+                        metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
+
+                        self.tool.update_exec_metadata(metadata)
+
+                    else:
+                        process_response: TextExtractionResult = x2text.process(
+                            input_file_path=file_path,
+                            output_file_path=output_file_path,
+                        )
+
+                    extracted_text = process_response.extracted_text
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
                 raise IndexingError(str(e)) from e
@@ -400,9 +428,7 @@ class Index:
             output_file_path=output_file_path,
         )
 
-    @deprecated(
-        "Deprecated class and method. Use Index and query_index() instead"
-    )
+    @deprecated("Deprecated class and method. Use Index and query_index() instead")
     def get_text_from_index(
         self, embedding_type: str, vector_db: str, doc_id: str
     ) -> Optional[str]:
