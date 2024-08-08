@@ -2,8 +2,11 @@ import json
 from typing import Any, Optional
 
 import requests
+from requests.exceptions import ConnectionError, HTTPError
 
-from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
+from unstract.sdk.adapters.utils import AdapterUtils
+from unstract.sdk.constants import AdapterKeys, ToolEnv
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
@@ -40,7 +43,7 @@ class ToolAdapter(PlatformBase):
     def get_adapter_configuration(
         self,
         adapter_instance_id: str,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any]:
         """Get Adapter
             1. Get the adapter config from platform service
             using the adapter_instance_id
@@ -54,35 +57,29 @@ class ToolAdapter(PlatformBase):
         url = f"{self.base_url}/adapter_instance"
         query_params = {AdapterKeys.ADAPTER_INSTANCE_ID: adapter_instance_id}
         headers = {"Authorization": f"Bearer {self.bearer_token}"}
-        response = requests.get(url, headers=headers, params=query_params)
-        if response.status_code == 200:
+        try:
+            response = requests.get(url, headers=headers, params=query_params)
+            response.raise_for_status()
             adapter_data: dict[str, Any] = response.json()
 
             # TODO: Print config after redacting sensitive information
             self.tool.stream_log(
-                "Successfully retrieved adapter config "
-                f"for adapter: {adapter_instance_id}"
+                "Successfully retrieved config "
+                f"for adapter instance {adapter_instance_id}"
             )
-
-            return adapter_data
-
-        elif response.status_code == 404:
-            self.tool.stream_log(
-                f"adapter not found for: for adapter instance" f"{adapter_instance_id}",
-                level=LogLevel.ERROR,
+        except ConnectionError:
+            raise SdkError(
+                "Unable to connect to platform service, please contact the admin."
             )
-            return None
-
-        else:
-            self.tool.stream_log(
-                (
-                    f"Error while retrieving adapter "
-                    "for adapter instance: "
-                    f"{adapter_instance_id} / {response.reason}"
-                ),
-                level=LogLevel.ERROR,
+        except HTTPError as e:
+            default_err = (
+                "Error while calling the platform service, please contact the admin."
             )
-            return None
+            msg = AdapterUtils.get_msg_from_request_exc(
+                err=e, message_key="error", default_err=default_err
+            )
+            raise SdkError(f"Error while retrieving adapter. {msg}")
+        return adapter_data
 
     @staticmethod
     def get_adapter_config(
@@ -120,11 +117,4 @@ class ToolAdapter(PlatformBase):
             platform_host=platform_host,
             platform_port=platform_port,
         )
-        adapter_metadata: Optional[
-            dict[str, Any]
-        ] = tool_adapter.get_adapter_configuration(adapter_instance_id)
-        if not adapter_metadata:
-            tool.stream_error_and_exit(
-                f"Adapter not found for " f"adapter instance: {adapter_instance_id}"
-            )
-        return adapter_metadata
+        return tool_adapter.get_adapter_configuration(adapter_instance_id)
