@@ -155,6 +155,8 @@ class ToolUtils:
         Returns:
             int: Total count of individual pages extracted from the input string
         """
+        if not pages_string:
+            return max_page
         pages_list: list[int] = []
         parts = pages_string.split(",")
         for part in parts:
