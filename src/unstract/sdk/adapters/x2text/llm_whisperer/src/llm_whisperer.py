@@ -321,7 +321,7 @@ class LLMWhisperer(X2TextAdapter):
         if response.status_code == 200:
             output_json = response.json()
         elif response.status_code == 202:
-            whisper_hash = response.json().get("WhisperStatus.WHISPER_HASH")
+            whisper_hash = response.json().get(WhisperStatus.WHISPER_HASH)
             output_json = self._extract_async(whisper_hash=whisper_hash)
         else:
             raise ExtractorError("Couldn't extract text from file")
