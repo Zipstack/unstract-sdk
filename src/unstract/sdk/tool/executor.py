@@ -49,17 +49,22 @@ class ToolExecutor:
             self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
-        self._setup_for_run()
+        self.tool.stream_log(
+            f"Running tool with "
+            f"Workflow ID: {self.tool.workflow_id}, "
+            f"Execution ID: {self.tool.execution_id}, "
+            f"SDK Version: {get_sdk_version()}"
+        )
 
+        self._setup_for_run()
         validator = ToolValidator(self.tool)
         settings = validator.validate_pre_execution(settings=settings)
 
         self.tool.stream_log(
-            f"Running tool for "
-            f"Workflow ID: {self.tool.workflow_id}, "
-            f"Execution ID: {self.tool.execution_id}, "
-            f"SDK Version: {get_sdk_version()}, "
+            f"Executing for file: {self.tool.get_exec_metadata['source_name']}, "
+            f"with tool settings: {settings}"
         )
+
         try:
             self.tool.run(
                 settings=settings,

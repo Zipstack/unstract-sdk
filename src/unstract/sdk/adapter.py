@@ -58,6 +58,7 @@ class ToolAdapter(PlatformBase):
         if response.status_code == 200:
             adapter_data: dict[str, Any] = response.json()
 
+            # TODO: Print config after redacting sensitive information
             self.tool.stream_log(
                 "Successfully retrieved adapter config "
                 f"for adapter: {adapter_instance_id}"
@@ -104,18 +105,16 @@ class ToolAdapter(PlatformBase):
             Any: engine
         """
         # Check if the adapter ID matches any public adapter keys
-        if SdkHelper.is_public_adapter(
-            adapter_id=adapter_instance_id
-        ):
-            adapter_metadata_config = tool.get_env_or_die(
-                adapter_instance_id
-            )
+        if SdkHelper.is_public_adapter(adapter_id=adapter_instance_id):
+            adapter_metadata_config = tool.get_env_or_die(adapter_instance_id)
             adapter_metadata = json.loads(adapter_metadata_config)
             return adapter_metadata
         platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
 
-        tool.stream_log("Connecting to DB and getting table metadata")
+        tool.stream_log(
+            f"Connecting to DB and getting table metadata for {adapter_instance_id}"
+        )
         tool_adapter = ToolAdapter(
             tool=tool,
             platform_host=platform_host,

@@ -10,7 +10,10 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
-from unstract.sdk.adapters.x2text.dto import TextExtractionMetadata, TextExtractionResult
+from unstract.sdk.adapters.x2text.dto import (
+    TextExtractionMetadata,
+    TextExtractionResult,
+)
 from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     HTTPMethod,
     OutputModes,
@@ -158,6 +161,10 @@ class LLMWhisperer(X2TextAdapter):
             WhispererConfig.PAGES_TO_EXTRACT: self.config.get(
                 WhispererConfig.PAGES_TO_EXTRACT,
                 WhispererDefaults.PAGES_TO_EXTRACT,
+            ),
+            WhispererConfig.PAGE_SEPARATOR: self.config.get(
+                WhispererConfig.PAGE_SEPARATOR,
+                WhispererDefaults.PAGE_SEPARATOR,
             ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:

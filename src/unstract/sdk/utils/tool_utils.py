@@ -117,3 +117,18 @@ class ToolUtils:
             )  # Get the current position of the cursor, which is the file length
             input_file_obj.seek(0)
         return file_length
+
+    @staticmethod
+    def str_to_bool(string: str) -> bool:
+        """String value of boolean to boolean.
+
+        Useful while parsing envs to bool.
+
+        Args:
+            string (str): value like "true", "True" etc..
+
+        Returns:
+            bool
+        """
+        return string.lower() == "true"
+

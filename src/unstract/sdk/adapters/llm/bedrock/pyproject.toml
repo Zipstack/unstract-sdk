@@ -1,0 +1,25 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[project]
+name = "unstract-bedrock-llm"
+version = "0.0.1"
+description = "Bedrock LLM"
+authors = [
+    {name = "Zipstack Inc.", email = "devsupport@zipstack.com"},
+]
+dependencies = [
+]
+requires-python = ">=3.9"
+readme = "README.md"
+classifiers = [
+  "Programming Language :: Python"
+]
+license = {text = "MIT"}
+
+[tool.pdm.build]
+includes = ["src"]
+package-dir = "src"
+# source-includes = ["tests"]
