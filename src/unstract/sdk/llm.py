@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Any, Optional
 
+from llama_index.core.base.llms.types import CompletionResponseGen
 from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
@@ -77,6 +78,19 @@ class LLM:
             if match:
                 response.text = match.group(0)
             return {LLM.RESPONSE: response}
+        except Exception as e:
+            raise parse_llm_err(e) from e
+
+    def stream_complete(
+        self,
+        prompt: str,
+        **kwargs: Any,
+    ) -> CompletionResponseGen:
+        try:
+            response: CompletionResponseGen = self._llm_instance.stream_complete(
+                prompt, **kwargs
+            )
+            return response
         except Exception as e:
             raise parse_llm_err(e) from e
 
