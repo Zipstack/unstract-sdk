@@ -118,7 +118,6 @@ class Audit(StreamMixin):
         self,
         platform_api_key: str,
         page_count: int,
-        file_name: str,
         file_size: int,
         file_type: str,
         kwargs: dict[Any, Any] = None,
@@ -126,6 +125,7 @@ class Audit(StreamMixin):
         platform_host = self.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = self.get_env_or_die(ToolEnv.PLATFORM_PORT)
         run_id = kwargs.get("run_id", "")
+        file_name = kwargs.get("file_name", "")
         base_url = SdkHelper.get_platform_base_url(
             platform_host=platform_host, platform_port=platform_port
         )

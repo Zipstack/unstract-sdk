@@ -1,4 +1,3 @@
-import os
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -113,8 +112,6 @@ class X2Text(metaclass=ABCMeta):
         return self._x2text_instance
 
     def push_usage_details(self, input_file_path: str, mime_type: str) -> None:
-        file_name = os.path.basename(input_file_path)
-
         file_size = ToolUtils.get_file_size(input_file_path)
 
         self._x2text_instance
@@ -131,7 +128,6 @@ class X2Text(metaclass=ABCMeta):
                 )
             Audit().push_page_usage_data(
                 platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-                file_name=file_name,
                 file_size=file_size,
                 file_type=mime_type,
                 page_count=page_count,
@@ -142,7 +138,6 @@ class X2Text(metaclass=ABCMeta):
             # as single page documents as there in no concept of page numbers.
             Audit().push_page_usage_data(
                 platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
-                file_name=file_name,
                 file_size=file_size,
                 file_type=mime_type,
                 page_count=1,
