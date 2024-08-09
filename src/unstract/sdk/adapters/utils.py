@@ -31,7 +31,7 @@ class AdapterUtils:
                 if message_key in err_json:
                     return str(err_json[message_key])
             elif err_response.headers["Content-Type"] == "text/plain":
-                return err.response.text  # type: ignore
+                return err_response.text  # type: ignore
         return default_err
 
     @staticmethod

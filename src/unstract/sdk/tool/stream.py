@@ -94,7 +94,7 @@ class StreamMixin:
         """
         env_value = os.environ.get(env_key)
         if env_value is None or env_value == "":
-            self.stream_error_and_exit(f"Env variable {env_key} is required")
+            self.stream_error_and_exit(f"Env variable '{env_key}' is required")
         return env_value
 
     @staticmethod

@@ -1,7 +1,8 @@
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
+from llama_index.core.base.llms.types import CompletionResponseGen
 from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
@@ -68,15 +69,54 @@ class LLM:
     def complete(
         self,
         prompt: str,
-        retries: int = 3,
+        process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
+        """Generates a completion response for the given prompt.
+
+        Args:
+            prompt (str): The input text prompt for generating the completion.
+            process_text (Optional[Callable[[str], str]], optional): A callable that
+                processes the generated text and extracts specific information.
+                Defaults to None.
+            **kwargs (Any): Additional arguments passed to the completion function.
+
+        Returns:
+            Optional[dict[str, Any]]: A dictionary containing the result of the
+                completion and processed output or None if the completion fails.
+
+        Raises:
+            Any: If an error occurs during the completion process, it will be
+                raised after being processed by `parse_llm_err`.
+        """
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
+            process_text_output = {}
+            if process_text:
+                try:
+                    process_text_output = process_text(response, LLM.json_regex)
+                    if not isinstance(process_text_output, dict):
+                        process_text_output = {}
+                except Exception as e:
+                    logger.error(f"Error occured inside function 'process_text': {e}")
+                    process_text_output = {}
             match = LLM.json_regex.search(response.text)
             if match:
                 response.text = match.group(0)
-            return {LLM.RESPONSE: response}
+            return {LLM.RESPONSE: response, **process_text_output}
+        except Exception as e:
+            raise parse_llm_err(e) from e
+
+    def stream_complete(
+        self,
+        prompt: str,
+        **kwargs: Any,
+    ) -> CompletionResponseGen:
+        try:
+            response: CompletionResponseGen = self._llm_instance.stream_complete(
+                prompt, **kwargs
+            )
+            return response
         except Exception as e:
             raise parse_llm_err(e) from e
 
