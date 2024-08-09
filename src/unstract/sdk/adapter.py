@@ -40,7 +40,7 @@ class ToolAdapter(PlatformBase):
             tool=tool, platform_host=platform_host, platform_port=platform_port
         )
 
-    def get_adapter_configuration(
+    def _get_adapter_configuration(
         self,
         adapter_instance_id: str,
     ) -> dict[str, Any]:
@@ -49,10 +49,10 @@ class ToolAdapter(PlatformBase):
             using the adapter_instance_id
 
         Args:
-            adapter_instance_id (str): adapter Instance Id
+            adapter_instance_id (str): Adapter instance ID
 
         Returns:
-            Any: _description_
+            dict[str, Any]: Config stored for the adapter
         """
         url = f"{self.base_url}/adapter_instance"
         query_params = {AdapterKeys.ADAPTER_INSTANCE_ID: adapter_instance_id}
@@ -93,13 +93,13 @@ class ToolAdapter(PlatformBase):
         platform service to retrieve the configuration.
 
         Args:
-            adapter_instance_id (str): ID of the adapter instance
             tool (AbstractTool): Instance of AbstractTool
+            adapter_instance_id (str): ID of the adapter instance
         Required env variables:
             PLATFORM_HOST: Host of platform service
             PLATFORM_PORT: Port of platform service
         Returns:
-            Any: engine
+            dict[str, Any]: Config stored for the adapter
         """
         # Check if the adapter ID matches any public adapter keys
         if SdkHelper.is_public_adapter(adapter_id=adapter_instance_id):
@@ -117,4 +117,4 @@ class ToolAdapter(PlatformBase):
             platform_host=platform_host,
             platform_port=platform_port,
         )
-        return tool_adapter.get_adapter_configuration(adapter_instance_id)
+        return tool_adapter._get_adapter_configuration(adapter_instance_id)
