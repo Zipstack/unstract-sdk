@@ -158,3 +158,8 @@ class PublicAdapterKeys:
     PUBLIC_EMBEDDING_CONFIG = "PUBLIC_EMBEDDING_CONFIG"
     PUBLIC_VECTOR_DB_CONFIG = "PUBLIC_VECTOR_DB_CONFIG"
     PUBLIC_X2TEXT_CONFIG = "PUBLIC_X2TEXT_CONFIG"
+
+
+class MimeType:
+    PDF = "application/pdf"
+    TEXT = "text/plain"

@@ -102,6 +102,23 @@ class ToolUtils:
         return input_file_mime
 
     @staticmethod
+    def get_file_size(input_file: Path) -> int:
+        """Gets the file size in bytes for an input file.
+        Args:
+            input_file (Path): Path object of the input file
+
+        Returns:
+            str: MIME type of the file
+        """
+        with open(input_file, mode="rb") as input_file_obj:
+            input_file_obj.seek(0, 2)  # Move the cursor to the end of the file
+            file_length = (
+                input_file_obj.tell()
+            )  # Get the current position of the cursor, which is the file length
+            input_file_obj.seek(0)
+        return file_length
+
+    @staticmethod
     def str_to_bool(string: str) -> bool:
         """String value of boolean to boolean.
 
@@ -114,3 +131,57 @@ class ToolUtils:
             bool
         """
         return string.lower() == "true"
+
+    # Used the same function from LLM Whisperer
+    @staticmethod
+    def calculate_page_count(
+        pages_string: str, max_page: int = 0, min_page: int = 1
+    ) -> int:
+        """Calculates the total number of pages based on the input string of
+        page numbers or ranges.
+
+        Parses the input 'pages_string' to extract individual page numbers or
+        ranges separated by commas.
+        Supports ranges like '1-5' or open-ended ranges like '4-'.
+        The 'max_page' parameter defines the upper limit for page numbers.
+        The 'min_page' parameter defines the lower limit for page numbers.
+
+        Args:
+            pages_string (str): String containing page numbers or ranges
+            separated by commas
+            max_page (int): Upper limit for page numbers (default is 0)
+            min_page (int): Lower limit for page numbers (default is 1)
+
+        Returns:
+            int: Total count of individual pages extracted from the input string
+        """
+        if not pages_string:
+            return max_page
+        pages_list: list[int] = []
+        parts = pages_string.split(",")
+        for part in parts:
+            part = part.strip()
+            if "-" in part:
+                if part.startswith("-"):  # e.g., "-5"
+                    end = int(part[1:])
+                    end = min(end, max_page)
+                    pages_list.extend(range(min_page, end + 1))
+                elif part.endswith("-"):  # e.g., "4-"
+                    start = int(part[:-1])
+                    if start < 0:
+                        start = 0
+                    if max_page is None:
+                        raise ValueError(
+                            "max_page must be defined for open-ended ranges like '4-'"
+                        )
+                    pages_list.extend(range(start, max_page + 1))
+                else:  # e.g., "1-5"
+                    start, end = map(int, part.split("-"))
+                    if start < 0:
+                        start = 0
+                    if end > max_page:
+                        end = max_page
+                    pages_list.extend(range(start, end + 1))
+            else:
+                pages_list.append(int(part))
+        return len(pages_list)

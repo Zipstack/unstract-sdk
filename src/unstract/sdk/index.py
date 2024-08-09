@@ -225,35 +225,32 @@ class Index:
             full_text = []
             extracted_text = ""
             try:
-                mime_type = ToolUtils.get_file_mime_type(file_path)
-                if mime_type == "text/plain":
-                    with open(file_path, encoding="utf-8") as file:
-                        extracted_text = file.read()
-                else:
-                    x2text = X2Text(
-                        tool=self.tool, adapter_instance_id=x2text_instance_id
+                x2text = X2Text(
+                    tool=self.tool,
+                    adapter_instance_id=x2text_instance_id,
+                    usage_kwargs=usage_kwargs,
+                )
+                if enable_highlight and isinstance(
+                    x2text._x2text_instance, LLMWhisperer
+                ):
+                    process_response: TextExtractionResult = x2text.process(
+                        input_file_path=file_path,
+                        output_file_path=output_file_path,
+                        enable_highlight=enable_highlight,
                     )
-                    if enable_highlight and isinstance(
-                        x2text._x2text_instance, LLMWhisperer
-                    ):
-                        process_response: TextExtractionResult = x2text.process(
-                            input_file_path=file_path,
-                            output_file_path=output_file_path,
-                            enable_highlight=enable_highlight,
-                        )
-                        whisper_hash_value = (
-                            process_response.extraction_metadata.whisper_hash
-                        )
+                    whisper_hash_value = (
+                        process_response.extraction_metadata.whisper_hash
+                    )
 
-                        metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
+                    metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
 
-                        self.tool.update_exec_metadata(metadata)
+                    self.tool.update_exec_metadata(metadata)
 
-                    else:
-                        process_response: TextExtractionResult = x2text.process(
-                            input_file_path=file_path,
-                            output_file_path=output_file_path,
-                        )
+                else:
+                    process_response: TextExtractionResult = x2text.process(
+                        input_file_path=file_path,
+                        output_file_path=output_file_path,
+                    )
 
                     extracted_text = process_response.extracted_text
             except AdapterError as e:
