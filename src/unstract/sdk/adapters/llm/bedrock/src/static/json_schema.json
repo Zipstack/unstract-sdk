@@ -1,0 +1,65 @@
+{
+  "title": "Bedrock LLM",
+  "type": "object",
+  "required": [
+    "aws_secret_access_key",
+    "region_name",
+    "aws_access_key_id",
+    "model",
+    "adapter_name"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this adapter instance. Example: Bedrock-1"
+    },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "default": "amazon.titan-text-express-v1",
+      "description": "Model name. Refer to Bedrock's documentation for the list of available models."
+    },
+    "context_size": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Context Size",
+      "description": "The maximum number of context tokens for the model. For setting default in supportied models, leave this empty."
+    },
+    "aws_access_key_id": {
+      "type": "string",
+      "title": "AWS Access Key ID",
+      "description": "Provide your AWS Access Key ID",
+      "format": "password"
+    },
+    "aws_secret_access_key": {
+      "type": "string",
+      "title": "AWS Secret Access Key",
+      "description": "Provide your AWS Secret Access Key",
+      "format": "password"
+    },
+    "region_name": {
+      "type": "string",
+      "title": "AWS Region name",
+      "description": "Provide the AWS Region name where the service is running. Eg. us-east-1"
+    },
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 900,
+      "description": "Timeout in seconds"
+    },
+    "max_retries": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max Retries",
+      "default": 5,
+      "description": "Maximum number of retries to attempt when a request fails."
+    }
+  }
+}

@@ -11,6 +11,7 @@ from typing_extensions import deprecated
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.llm import adapters
+from unstract.sdk.adapters.llm.exceptions import parse_llm_err
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
@@ -85,16 +86,8 @@ class LLM:
             if match:
                 response.text = match.group(0)
             return {LLM.RESPONSE: response, **process_text_output}
-        # TODO: Handle for all LLM providers
-        except OpenAIAPIError as e:
-            msg = "OpenAI error: "
-            if hasattr(e, "body") and "message" in e.body:
-                msg += e.body["message"]
-            else:
-                msg += e.message
-            if isinstance(e, OpenAIRateLimitError):
-                raise RateLimitError(msg)
-            raise LLMError(msg) from e
+        except Exception as e:
+            raise parse_llm_err(e) from e
 
     def _get_llm(self, adapter_instance_id: str) -> LlamaIndexLLM:
         """Returns the LLM object for the tool.

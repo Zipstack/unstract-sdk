@@ -36,12 +36,19 @@ dependencies = [
     "llama-index-llms-openai==0.1.27",
     "llama-index-llms-palm==0.1.5",
     "llama-index-llms-mistralai==0.1.19",
+    #Todo: Remove the version locking for mistralai below
+    #once the the following error is resolved from mistralai side
+    #Unable to import llm adapters : No module named 'mistralai.models.chat_completion'
+    #Looks like mistralai>0.4.2 is not backward compatible
+    "mistralai==0.4.2",
+
     "llama-index-llms-anyscale==0.1.4",
     "llama-index-llms-anthropic==0.1.16",
     "llama-index-llms-azure-openai==0.1.10",
     "llama-index-llms-vertex==0.2.2",
     "llama-index-llms-replicate==0.1.3",
     "llama-index-llms-ollama==0.2.2",
+    "llama-index-llms-bedrock==0.1.12",
     # For Llama Parse X2Text
     "llama-parse==0.4.9",
     # OCR

@@ -6,6 +6,7 @@ from llama_index.core.llms import LLM, MockLLM
 
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
+from unstract.sdk.adapters.exceptions import LLMError
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,20 @@ class LLMAdapter(Adapter, ABC):
     @staticmethod
     def get_adapter_type() -> AdapterTypes:
         return AdapterTypes.LLM
+
+    @staticmethod
+    def parse_llm_err(e: Exception) -> LLMError:
+        """Parse the error from an LLM provider.
+
+        Helps parse errors from a provider and wraps with custom exception.
+
+        Args:
+            e (Exception): Exception from LLM provider
+
+        Returns:
+            LLMError: Error to be sent to the user
+        """
+        return LLMError(str(e))
 
     def get_llm_instance(self) -> LLM:
         """Instantiate the llama index LLM class.
