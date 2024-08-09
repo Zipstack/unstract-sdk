@@ -71,6 +71,23 @@ class LLM:
         process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
     ) -> Optional[dict[str, Any]]:
+        """Generates a completion response for the given prompt.
+
+        Args:
+            prompt (str): The input text prompt for generating the completion.
+            process_text (Optional[Callable[[str], str]], optional): A callable that
+                processes the generated text and extracts specific information.
+                Defaults to None.
+            **kwargs (Any): Additional arguments passed to the completion function.
+
+        Returns:
+            Optional[dict[str, Any]]: A dictionary containing the result of the
+                completion and processed output or None if the completion fails.
+
+        Raises:
+            Any: If an error occurs during the completion process, it will be
+                raised after being processed by `parse_llm_err`.
+        """
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             process_text_output = {}
