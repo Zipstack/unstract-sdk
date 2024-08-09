@@ -5,8 +5,7 @@
 groups = ["default", "docs", "lint", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:78f89c18fa5f446783efe32514a77ab4a8e9c778128fd89330da9972d62f2b0d"
-
+content_hash = "sha256:4d41c155852fe8a3377ada09498839c9c20105dfb4adfd43ae12aa0d934a5eba"
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -2457,7 +2456,7 @@ files = [
 
 [[package]]
 name = "pdfplumber"
-version = "0.11.2"
+version = "0.11.3"
 requires_python = ">=3.8"
 summary = "Plumb a PDF for detailed information about each char, rectangle, and line."
 groups = ["default"]
@@ -2467,8 +2466,8 @@ dependencies = [
     "pypdfium2>=4.18.0",
 ]
 files = [
-    {file = "pdfplumber-0.11.2-py3-none-any.whl", hash = "sha256:024a7e0f8f4e7bbec8e1f6f694faeaa7b9fe33a0c1f9edd9d3f77298d9146b87"},
-    {file = "pdfplumber-0.11.2.tar.gz", hash = "sha256:f237ce88e9918358f3848f4bae469358ca121ca412098e370908878ec9da699a"},
+    {file = "pdfplumber-0.11.3-py3-none-any.whl", hash = "sha256:4f3e13795d18b2e53dfc4cd667a3bc2478cd6975fc9a188881376265d599c5a6"},
+    {file = "pdfplumber-0.11.3.tar.gz", hash = "sha256:43a3cac33d2135ce00ac59ad5bc3813a33afe0f513d9284c0e8cb6e447ed6e53"},
 ]
 
 [[package]]

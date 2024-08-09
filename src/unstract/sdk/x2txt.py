@@ -10,6 +10,8 @@ from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.x2text import adapters
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
+from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import WhispererConfig
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.audit import Audit
 from unstract.sdk.constants import LogLevel, MimeType, ToolEnv
@@ -115,16 +117,24 @@ class X2Text(metaclass=ABCMeta):
 
         file_size = ToolUtils.get_file_size(input_file_path)
 
+        self._x2text_instance
+
         if mime_type == MimeType.PDF:
             with pdfplumber.open(input_file_path) as pdf:
                 # calculate the number of pages
-                max_pages = len(pdf.pages)
+                page_count = len(pdf.pages)
+            if isinstance(self._x2text_instance, LLMWhisperer):
+                self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT)
+                page_count = ToolUtils.calculate_page_count(
+                    self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT),
+                    page_count,
+                )
             Audit().push_page_usage_data(
                 platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
                 file_name=file_name,
                 file_size=file_size,
                 file_type=mime_type,
-                page_count=max_pages,
+                page_count=page_count,
                 kwargs=self._usage_kwargs,
             )
         else:
