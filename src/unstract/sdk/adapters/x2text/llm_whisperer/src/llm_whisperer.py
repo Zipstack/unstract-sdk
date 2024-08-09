@@ -166,6 +166,10 @@ class LLMWhisperer(X2TextAdapter):
             ),
             WhispererConfig.ADD_LINE_NOS: WhispererDefaults.ADD_LINE_NOS,
             WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
+            WhispererConfig.PAGE_SEPARATOR: self.config.get(
+                WhispererConfig.PAGE_SEPARATOR,
+                WhispererDefaults.PAGE_SEPARATOR,
+            ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(

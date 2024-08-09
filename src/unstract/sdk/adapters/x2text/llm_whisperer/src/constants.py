@@ -63,6 +63,7 @@ class WhispererConfig:
     STORE_METADATA_FOR_HIGHLIGHTING = "store_metadata_for_highlighting"
     ADD_LINE_NOS = "add_line_nos"
     OUTPUT_JSON = "output_json"
+    PAGE_SEPARATOR = "page_seperator"
 
 
 class WhisperStatus:
@@ -90,3 +91,4 @@ class WhispererDefaults:
     PAGES_TO_EXTRACT = ""
     ADD_LINE_NOS = True
     OUTPUT_JSON = True
+    PAGE_SEPARATOR = "<<< >>>"

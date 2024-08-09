@@ -5,7 +5,8 @@ from typing import Any, Optional
 import weaviate
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
 from llama_index.vector_stores.weaviate import WeaviateVectorStore
-from weaviate import UnexpectedStatusCodeException
+from weaviate.classes.init import Auth
+from weaviate.exceptions import UnexpectedStatusCodeException
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
@@ -64,11 +65,9 @@ class Weaviate(VectorDBAdapter):
             # LLama-index throws the error if not capitalised while using
             # Weaviate
             self._collection_name = collection_name.capitalize()
-            self._client = weaviate.Client(
-                url=str(self._config.get(Constants.URL)),
-                auth_client_secret=weaviate.AuthApiKey(
-                    api_key=str(self._config.get(Constants.API_KEY))
-                ),
+            self._client = weaviate.connect_to_weaviate_cloud(
+                cluster_url=str(self._config.get(Constants.URL)),
+                auth_credentials=Auth.api_key(str(self._config.get(Constants.API_KEY))),
             )
 
             try:
@@ -78,8 +77,8 @@ class Weaviate(VectorDBAdapter):
                     "class": self._collection_name,
                     "vectorizer": "none",
                 }
-                # Add the class to the schema
-                self._client.schema.create_class(class_obj)
+                # Create the colletion
+                self._client.collections.create_from_dict(class_obj)
             except Exception as e:
                 if isinstance(e, UnexpectedStatusCodeException):
                     if "already exists" in e.message:
@@ -101,5 +100,9 @@ class Weaviate(VectorDBAdapter):
         )
         # Delete the collection that was created for testing
         if self._client is not None:
-            self._client.schema.delete_class(self._collection_name)
+            self._client.collections.delete(self._collection_name)
         return test_result
+
+    def close(self, **kwargs: Any) -> None:
+        if self._client:
+            self._client.close(**kwargs)

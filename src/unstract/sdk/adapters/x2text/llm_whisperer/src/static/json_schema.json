@@ -83,6 +83,12 @@
       "default": "",
       "pattern": "^(\\s*\\d+-\\d+|\\s*\\d+-|\\s*\\d+|^$)(,\\d+-\\d+|,\\d+-|,\\d+)*$",
       "description": "Specify the range of pages to extract (e.g., 1-5, 7, 10-12, 50-). Leave it empty to extract all pages."
+    },
+    "page_seperator": {
+      "type": "string",
+      "title": "Page separator",
+      "default": "<<< >>>",
+      "description": "Specify a pattern to separate the pages in the document (e.g., <<< {{page_no}} >>>, <<< >>>). This pattern will be inserted at the end of every page. Omit {{page_no}} if you don't want to include the page number in the separator."
     }
   },
   "if": {
