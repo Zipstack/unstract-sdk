@@ -332,7 +332,19 @@ class LLMWhisperer(X2TextAdapter):
             )
         return output_json.get("text", "")
 
-    def _write_output_to_file(self, output_json: dict, output_file_path: Path):
+    def _write_output_to_file(self, output_json: dict, output_file_path: Path) -> None:
+        """Writes the extracted text and metadata to the specified output file
+        and metadata file.
+
+        Args:
+            output_json (dict): The dictionary containing the extracted data,
+                with "text" as the key for the main content.
+            output_file_path (Path): The file path where the extracted text
+                should be written.
+
+        Raises:
+            ExtractorError: If there is an error while writing the output file.
+        """
         try:
             text_output = output_json.get("text", "")
             logger.info(f"Writing output to {output_file_path}")
