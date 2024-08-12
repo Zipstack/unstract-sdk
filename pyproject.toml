@@ -57,6 +57,7 @@ dependencies = [
     # For singleton classes
     "singleton-decorator~=1.0.0",
     "httpx>=0.25.2",
+    "pdfplumber>=0.11.2",
 ]
 readme = "README.md"
 urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }

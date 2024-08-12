@@ -1,6 +1,7 @@
 from abc import ABCMeta
 from typing import Any, Optional
 
+import pdfplumber
 from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
@@ -8,23 +9,29 @@ from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.x2text import adapters
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
+from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import WhispererConfig
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.sdk.constants import LogLevel
+from unstract.sdk.audit import Audit
+from unstract.sdk.constants import LogLevel, MimeType, ToolEnv
 from unstract.sdk.exceptions import X2TextError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils import ToolUtils
 
 
 class X2Text(metaclass=ABCMeta):
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None
+        adapter_instance_id: Optional[str] = None,
+        usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
         self._x2text_adapters = adapters
         self._adapter_instance_id = adapter_instance_id
         self._x2text_instance: X2TextAdapter = None
+        self._usage_kwargs = usage_kwargs
         self._initialise()
 
     def _initialise(self):
@@ -82,9 +89,20 @@ class X2Text(metaclass=ABCMeta):
         output_file_path: Optional[str] = None,
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-        return self._x2text_instance.process(
+        mime_type = ToolUtils.get_file_mime_type(input_file_path)
+        text_extraction_result: TextExtractionResult = None
+        if mime_type == MimeType.TEXT:
+            with open(input_file_path, encoding="utf-8") as file:
+                extracted_text = file.read()
+                text_extraction_result = TextExtractionResult(
+                    extracted_text=extracted_text, extraction_metadata=None
+                )
+        text_extraction_result = self._x2text_instance.process(
             input_file_path, output_file_path, **kwargs
         )
+        # The will be executed each and every time text extraction takes place
+        self.push_usage_details(input_file_path, mime_type)
+        return text_extraction_result
 
     @deprecated("Instantiate X2Text and call process() instead")
     def get_x2text(self, adapter_instance_id: str) -> X2TextAdapter:
@@ -92,3 +110,36 @@ class X2Text(metaclass=ABCMeta):
             self._adapter_instance_id = adapter_instance_id
             self._initialise()
         return self._x2text_instance
+
+    def push_usage_details(self, input_file_path: str, mime_type: str) -> None:
+        file_size = ToolUtils.get_file_size(input_file_path)
+
+        self._x2text_instance
+
+        if mime_type == MimeType.PDF:
+            with pdfplumber.open(input_file_path) as pdf:
+                # calculate the number of pages
+                page_count = len(pdf.pages)
+            if isinstance(self._x2text_instance, LLMWhisperer):
+                self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT)
+                page_count = ToolUtils.calculate_page_count(
+                    self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT),
+                    page_count,
+                )
+            Audit().push_page_usage_data(
+                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                file_size=file_size,
+                file_type=mime_type,
+                page_count=page_count,
+                kwargs=self._usage_kwargs,
+            )
+        else:
+            # We are allowing certain image types,and raw texts. We will consider them
+            # as single page documents as there in no concept of page numbers.
+            Audit().push_page_usage_data(
+                platform_api_key=self._tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY),
+                file_size=file_size,
+                file_type=mime_type,
+                page_count=1,
+                kwargs=self._usage_kwargs,
+            )
