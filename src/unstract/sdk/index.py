@@ -384,7 +384,7 @@ class Index:
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
 
-    @deprecated("Instantiate generate_index_key() instead")
+    @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
     def generate_file_id(
         self,
         tool_id: str,
