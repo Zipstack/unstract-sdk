@@ -2,7 +2,7 @@ from abc import ABCMeta
 from typing import Any, Optional
 
 import pdfplumber
-from typing_extensions import deprecated
+from deprecated import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
