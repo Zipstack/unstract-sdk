@@ -78,7 +78,7 @@ class ToolAdapter(PlatformBase):
             msg = AdapterUtils.get_msg_from_request_exc(
                 err=e, message_key="error", default_err=default_err
             )
-            raise SdkError(f"Error while retrieving adapter. {msg}")
+            raise SdkError(f"Error retrieving adapter. {msg}")
         return adapter_data
 
     @staticmethod

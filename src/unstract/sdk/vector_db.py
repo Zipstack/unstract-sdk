@@ -2,6 +2,7 @@ import logging
 from collections.abc import Sequence
 from typing import Any, Optional, Union
 
+from deprecated import deprecated
 from llama_index.core import StorageContext, VectorStoreIndex
 from llama_index.core.indices.base import IndexType
 from llama_index.core.schema import BaseNode, Document
@@ -10,7 +11,6 @@ from llama_index.core.vector_stores.types import (
     VectorStore,
     VectorStoreQueryResult,
 )
-from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
