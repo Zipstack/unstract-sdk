@@ -2,12 +2,12 @@ import logging
 import re
 from typing import Any, Callable, Optional
 
+from deprecated import deprecated
 from llama_index.core.base.llms.types import CompletionResponseGen
 from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
-from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common

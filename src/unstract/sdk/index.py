@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any, Callable, Optional
 
+from deprecated import deprecated
 from llama_index.core import Document
 from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.core.vector_stores import (
@@ -11,7 +12,6 @@ from llama_index.core.vector_stores import (
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
-from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
