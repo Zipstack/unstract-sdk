@@ -142,8 +142,7 @@ class Index:
         Returns:
             str: A unique ID for the file and indexing arguments combination
         """
-        doc_id = self.generate_file_id(
-            tool_id=tool_id,
+        doc_id = self.generate_index_key(
             vector_db=vector_db_instance_id,
             embedding=embedding_instance_id,
             x2text=x2text_instance_id,
@@ -335,9 +334,8 @@ class Index:
         finally:
             vector_db.close()
 
-    def generate_file_id(
+    def generate_index_key(
         self,
-        tool_id: str,
         vector_db: str,
         embedding: str,
         x2text: str,
@@ -349,7 +347,6 @@ class Index:
         """Generates a unique ID useful for identifying files during indexing.
 
         Args:
-            tool_id (str): Unique ID of the tool or workflow
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
             x2text (str): UUID of the X2Text adapter
@@ -373,7 +370,6 @@ class Index:
         # which might not be relevant to indexing. This is easier for now than
         # marking certain keys of the adapter config as necessary.
         index_key = {
-            "tool_id": tool_id,
             "file_hash": file_hash,
             "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
             "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
@@ -388,7 +384,28 @@ class Index:
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
 
-    @deprecated("Instantiate Index and call index() instead")
+    @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
+    def generate_file_id(
+        self,
+        tool_id: str,
+        vector_db: str,
+        embedding: str,
+        x2text: str,
+        chunk_size: str,
+        chunk_overlap: str,
+        file_path: Optional[str] = None,
+        file_hash: Optional[str] = None,
+    ) -> str:
+        self.generate_index_key(
+            vector_db,
+            embedding,
+            x2text,
+            chunk_size,
+            chunk_overlap,
+            file_path,
+            file_hash,
+        )
+
     def index_file(
         self,
         tool_id: str,
