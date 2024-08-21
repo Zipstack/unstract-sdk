@@ -396,7 +396,7 @@ class Index:
         file_path: Optional[str] = None,
         file_hash: Optional[str] = None,
     ) -> str:
-        self.generate_index_key(
+        return self.generate_index_key(
             vector_db,
             embedding,
             x2text,
