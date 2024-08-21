@@ -251,7 +251,7 @@ class Index:
                         output_file_path=output_file_path,
                     )
 
-                    extracted_text = process_response.extracted_text
+                extracted_text = process_response.extracted_text
             except AdapterError as e:
                 # Wrapping AdapterErrors with SdkError
                 raise IndexingError(str(e)) from e
