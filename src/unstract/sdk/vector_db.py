@@ -124,6 +124,7 @@ class VectorDB:
         documents: Sequence[Document],
         storage_context: Optional[StorageContext] = None,
         show_progress: bool = False,
+        callback_manager=None,
         **kwargs,
     ) -> IndexType:
         if not self._embedding_instance:
@@ -135,15 +136,16 @@ class VectorDB:
             show_progress=show_progress,
             embed_model=self._embedding_instance,
             node_parser=parser,
+            callback_manager=callback_manager,
         )
 
-    def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
+    def get_vector_store_index(self, **kwargs: dict[Any, Any]) -> VectorStoreIndex:
         if not self._embedding_instance:
             raise VectorDBError(self.EMBEDDING_INSTANCE_ERROR)
         return VectorStoreIndex.from_vector_store(
             vector_store=self._vector_db_instance,
             embed_model=self._embedding_instance,
-            kwargs=kwargs,
+            callback_manager=kwargs.get("callback_manager"),
         )
 
     def get_storage_context(self) -> StorageContext:
