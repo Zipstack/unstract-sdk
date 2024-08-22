@@ -139,7 +139,7 @@ class VectorDB:
             callback_manager=callback_manager,
         )
 
-    def get_vector_store_index(self, **kwargs: dict[Any, Any]) -> VectorStoreIndex:
+    def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
         if not self._embedding_instance:
             raise VectorDBError(self.EMBEDDING_INSTANCE_ERROR)
         return VectorStoreIndex.from_vector_store(

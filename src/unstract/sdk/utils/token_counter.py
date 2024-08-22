@@ -27,19 +27,17 @@ class TokenCounter:
         completion_tokens = Constants.DEFAULT_TOKEN_COUNT
         if EventPayload.PROMPT in payload:
             response = payload.get(EventPayload.COMPLETION)
-            token_counts: dict[str, int] = TokenCounter.get_tokens_from_response(
-                response
-            )
-            prompt_tokens = int(token_counts["prompt_tokens"])
-            completion_tokens = int(token_counts["completion_tokens"])
+            (
+                prompt_tokens,
+                completion_tokens,
+            ) = TokenCounter._get_tokens_from_response(response)
         elif EventPayload.MESSAGES in payload:
             response = payload.get(EventPayload.RESPONSE)
             if response:
-                token_counts: dict[str, int] = TokenCounter.get_tokens_from_response(
-                    response
-                )
-                prompt_tokens = int(token_counts["prompt_tokens"])
-                completion_tokens = int(token_counts["completion_tokens"])
+                (
+                    prompt_tokens,
+                    completion_tokens,
+                ) = TokenCounter._get_tokens_from_response(response)
 
         token_counter = TokenCounter(
             input_tokens=prompt_tokens,
@@ -48,12 +46,11 @@ class TokenCounter:
         return token_counter
 
     @staticmethod
-    def get_tokens_from_response(
+    def _get_tokens_from_response(
         response: Union[CompletionResponse, ChatResponse, dict]
-    ) -> dict[str, int]:
+    ) -> tuple[int, int]:
         """Get the token counts from a raw response."""
         prompt_tokens, completion_tokens = 0, 0
-        token_counts: dict[str, int] = dict()
         if isinstance(response, CompletionResponse) or isinstance(
             response, ChatResponse
         ):
@@ -76,9 +73,7 @@ class TokenCounter:
                     usage = completion_raw["_raw_response"].usage_metadata
                     prompt_tokens = usage.prompt_token_count
                     completion_tokens = usage.candidates_token_count
-                    token_counts["prompt_tokens"] = prompt_tokens
-                    token_counts["completion_tokens"] = completion_tokens
-                    return token_counts
+                    return prompt_tokens, completion_tokens
                 elif "inputTextTokenCount" in completion_raw:
                     prompt_tokens = completion_raw["inputTextTokenCount"]
                     if "results" in completion_raw:
@@ -87,9 +82,7 @@ class TokenCounter:
                             result: dict = result_list[0]
                             if "tokenCount" in result:
                                 completion_tokens = result.get("tokenCount", 0)
-                    token_counts["prompt_tokens"] = prompt_tokens
-                    token_counts["completion_tokens"] = completion_tokens
-                    return token_counts
+                    return prompt_tokens, completion_tokens
                 else:
                     usage = response.raw
             else:
@@ -112,15 +105,13 @@ class TokenCounter:
         prompt_tokens = 0
         for input_key in possible_input_keys:
             if input_key in usage:
-                prompt_tokens = usage[input_key]
+                prompt_tokens = int(usage[input_key])
                 break
 
         completion_tokens = 0
         for output_key in possible_output_keys:
             if output_key in usage:
-                completion_tokens = usage[output_key]
+                completion_tokens = int(usage[output_key])
                 break
 
-        token_counts["prompt_tokens"] = prompt_tokens
-        token_counts["completion_tokens"] = completion_tokens
-        return token_counts
+        return prompt_tokens, completion_tokens
