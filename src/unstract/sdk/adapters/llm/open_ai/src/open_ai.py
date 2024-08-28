@@ -8,7 +8,6 @@ from openai import RateLimitError as OpenAIRateLimitError
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.exceptions import LLMError, RateLimitError
 
@@ -16,11 +15,12 @@ from unstract.sdk.exceptions import LLMError, RateLimitError
 class Constants:
     MODEL = "model"
     API_KEY = "api_key"
-    MAX_RETIRES = "max_retries"
+    MAX_RETRIES = "max_retries"
     ADAPTER_NAME = "adapter_name"
     TIMEOUT = "timeout"
     API_BASE = "api_base"
     API_VERSION = "api_version"
+    MAX_TOKENS = "max_tokens"
 
 
 class OpenAILLM(LLMAdapter):
@@ -57,28 +57,26 @@ class OpenAILLM(LLMAdapter):
 
     def get_llm_instance(self) -> LLM:
         try:
+            max_tokens = self.config.get(Constants.MAX_TOKENS)
+            max_tokens = int(max_tokens) if max_tokens else None
             llm: LLM = OpenAI(
                 model=str(self.config.get(Constants.MODEL)),
                 api_key=str(self.config.get(Constants.API_KEY)),
                 api_base=str(self.config.get(Constants.API_BASE)),
                 api_version=str(self.config.get(Constants.API_VERSION)),
                 max_retries=int(
-                    self.config.get(Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES)
+                    self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 api_type="openai",
                 temperature=0,
                 timeout=float(
                     self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
                 ),
+                max_tokens=max_tokens,
             )
             return llm
         except Exception as e:
             raise AdapterError(str(e))
-
-    def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        return test_result
 
     @staticmethod
     def parse_llm_err(e: OpenAIAPIError) -> LLMError:
@@ -92,7 +90,7 @@ class OpenAILLM(LLMAdapter):
         Returns:
             LLMError: Error to be sent to the user
         """
-        msg = "OpenAI error: "
+        msg = "Error from OpenAI. "
         if hasattr(e, "body") and "message" in e.body:
             msg += e.body["message"]
         else:

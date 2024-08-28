@@ -1,5 +1,5 @@
 {
-  "title": "Mistral AI LLM",
+  "title": "MistralAI LLM",
   "type": "object",
   "required": [
     "adapter_name",
@@ -32,6 +32,14 @@
       "title": "Max Retries",
       "default": 5,
       "description": "Maximum number of retries to attempt when a request fails."
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "default": 512,
+      "title": "Maximum Output Tokens",
+      "description": "Maximum number of output tokens to limit LLM replies, the maximum possible differs from model to model."
     },
     "timeout": {
       "type": "number",

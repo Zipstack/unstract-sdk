@@ -28,13 +28,6 @@
       "default": "",
       "description": "Provide the name of the deployment you defined in Azure console"
     },
-    "embed_batch_size": {
-      "type": "number",
-      "minimum": 0,
-      "multipleOf": 1,
-      "title": "Embedding Batch Size",
-      "default": 5
-    },
     "api_key": {
       "type": "string",
       "title": "API Key",
@@ -53,6 +46,21 @@
       "default": "",
       "format": "uri",
       "description": "Provide the Azure endpoint. Example: https://<your-deployment>.openai.azure.com/"
+    },
+    "embed_batch_size": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Embedding Batch Size",
+      "default": 5
+    },
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 60,
+      "description": "Timeout for each request in seconds"
     }
   }
 }

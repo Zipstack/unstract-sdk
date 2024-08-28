@@ -24,13 +24,6 @@
       "default": "",
       "description": "Additional kwargs to pass to the model."
     },
-    "max_retries": {
-      "type": "number",
-      "minimum": 0,
-      "title": "Max Retries",
-      "default": 5,
-      "description": "Maximum number of retries to make when a request fails."
-    },
     "api_base": {
       "type": "string",
       "title": "API Base",
@@ -43,6 +36,22 @@
       "title": "API Key",
       "format": "password",
       "description": "API Key for the AnyScale API."
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Maximum Output Tokens",
+      "default": 256,
+      "description": "Maximum number of output tokens to limit LLM replies, maximum possible varies from model to model."
+    },
+    "max_retries": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max Retries",
+      "default": 5,
+      "description": "Maximum number of retries to attempt when a request fails."
     }
   }
 }

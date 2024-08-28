@@ -7,3 +7,5 @@ metadata = {
     "description": "VertexAI LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["VertexAILLM"]

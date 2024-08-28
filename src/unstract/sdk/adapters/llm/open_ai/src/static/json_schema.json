@@ -1,5 +1,5 @@
 {
-  "title": "Open AI LLM",
+  "title": "OpenAI LLM",
   "type": "object",
   "required": [
     "adapter_name",
@@ -37,6 +37,13 @@
       "title": "API Version",
       "default": "2023-05-15",
       "description": "Provide the API version. Refer to the documentation provided by OpenAI. Example: 2023-05-15"
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Maximum Output Tokens",
+      "description": "Maximum number of output tokens to limit LLM replies, leave it empty to use the maximum possible for the selected model."
     },
     "max_retries": {
       "type": "number",

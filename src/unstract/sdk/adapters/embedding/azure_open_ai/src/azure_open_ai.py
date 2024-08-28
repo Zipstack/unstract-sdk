@@ -17,6 +17,8 @@ class Constants:
     AZURE_ENDPOINT = "azure_endpoint"
     DEPLOYMENT_NAME = "deployment_name"
     API_TYPE = "azure"
+    TIMEOUT = "timeout"
+    DEFAULT_TIMEOUT = 60
 
 
 class AzureOpenAI(EmbeddingAdapter):
@@ -56,6 +58,7 @@ class AzureOpenAI(EmbeddingAdapter):
             embedding_batch_size = EmbeddingHelper.get_embedding_batch_size(
                 config=self.config
             )
+            timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
             embedding: BaseEmbedding = AzureOpenAIEmbedding(
                 model=str(self.config.get(Constants.MODEL)),
                 deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
@@ -64,6 +67,7 @@ class AzureOpenAI(EmbeddingAdapter):
                 azure_endpoint=str(self.config.get(Constants.AZURE_ENDPOINT)),
                 embed_batch_size=embedding_batch_size,
                 api_type=Constants.API_TYPE,
+                timeout=timeout,
             )
             return embedding
         except Exception as e:

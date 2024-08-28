@@ -15,6 +15,8 @@ class Constants:
     API_BASE_KEY = "api_base"
     ADAPTER_NAME = "adapter_name"
     API_TYPE = "openai"
+    TIMEOUT = "timeout"
+    DEFAULT_TIMEOUT = 60
 
 
 class OpenAI(EmbeddingAdapter):
@@ -51,12 +53,14 @@ class OpenAI(EmbeddingAdapter):
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
+            timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
             embedding: BaseEmbedding = OpenAIEmbedding(
                 api_key=str(self.config.get(Constants.API_KEY)),
                 api_base=str(
                     self.config.get(Constants.API_BASE_KEY, Constants.API_BASE_VALUE)
                 ),
                 api_type=Constants.API_TYPE,
+                timeout=timeout,
             )
             return embedding
         except Exception as e:

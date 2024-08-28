@@ -7,3 +7,5 @@ metadata = {
     "description": "Palm LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["PaLMLLM"]
