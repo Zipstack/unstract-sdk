@@ -136,7 +136,7 @@ class VectorDB:
             show_progress=show_progress,
             embed_model=self._embedding_instance,
             node_parser=parser,
-            callback_manager=callback_manager,
+            callback_manager=self._embedding_instance.callback_manager,
         )
 
     def get_vector_store_index(self, **kwargs: Any) -> VectorStoreIndex:
@@ -145,7 +145,7 @@ class VectorDB:
         return VectorStoreIndex.from_vector_store(
             vector_store=self._vector_db_instance,
             embed_model=self._embedding_instance,
-            callback_manager=kwargs.get("callback_manager"),
+            callback_manager=self._embedding_instance.callback_manager,
         )
 
     def get_storage_context(self) -> StorageContext:
