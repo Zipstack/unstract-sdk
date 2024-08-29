@@ -289,7 +289,9 @@ class Index:
             try:
                 if chunk_size == 0:
                     parser = SimpleNodeParser.from_defaults(
-                        chunk_size=len(documents[0].text) + 10, chunk_overlap=0
+                        chunk_size=len(documents[0].text) + 10,
+                        chunk_overlap=0,
+                        callback_manager=embedding.get_callback_manager(),
                     )
                     nodes = parser.get_nodes_from_documents(
                         documents, show_progress=True
@@ -301,7 +303,9 @@ class Index:
                 else:
                     storage_context = vector_db.get_storage_context()
                     parser = SimpleNodeParser.from_defaults(
-                        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+                        chunk_size=chunk_size,
+                        chunk_overlap=chunk_overlap,
+                        callback_manager=embedding.get_callback_manager(),
                     )
                     self.tool.stream_log("Adding nodes to vector db...")
                     # TODO: Phase 2:
@@ -320,6 +324,7 @@ class Index:
                         show_progress=True,
                         embed_model=embedding,
                         node_parser=parser,
+                        callback_manager=embedding.get_callback_manager(),
                     )
             except Exception as e:
                 self.tool.stream_log(

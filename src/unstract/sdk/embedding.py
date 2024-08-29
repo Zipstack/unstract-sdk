@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 from deprecated import deprecated
 from llama_index.core.base.embeddings.base import Embedding
+from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackManager
 from llama_index.core.embeddings import BaseEmbedding
 
 from unstract.sdk.adapter import ToolAdapter
@@ -103,6 +104,17 @@ class Embedding:
                 Class name
         """
         return self._embedding_instance.class_name()
+
+    def get_callback_manager(self) -> LlamaIndexCallbackManager:
+        """Gets the llama-index callback manager set on the model.
+
+        Args:
+            NA
+
+            Returns:
+                llama-index callback manager
+        """
+        return self._embedding_instance.callback_manager
 
     @deprecated("Use Embedding instead of ToolEmbedding")
     def get_embedding_length(self, embedding: BaseEmbedding) -> int:
