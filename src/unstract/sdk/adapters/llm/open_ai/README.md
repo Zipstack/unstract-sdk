@@ -1,1 +1,1 @@
-# Unstract Open AI LLM Adapter
+# Unstract OpenAI LLM Adapter

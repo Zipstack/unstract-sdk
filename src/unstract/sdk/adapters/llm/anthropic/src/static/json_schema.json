@@ -19,13 +19,20 @@
       "default": "claude-instant-1.2",
       "description": "Model name. Refer to Anthropic's documentation for the list of available models."
     },
-    "timeout": {
+    "api_key": {
+      "type": "string",
+      "title": "API Key",
+      "default": "",
+      "description": "API Key",
+      "format": "password"
+    },
+    "max_tokens": {
       "type": "number",
       "minimum": 0,
       "multipleOf": 1,
-      "title": "Timeout",
-      "default": 900,
-      "description": "Timeout in seconds"
+      "default": 512,
+      "title": "Maximum Output Tokens",
+      "description": "Maximum number of output tokens to limit LLM replies, the maximum possible differs from model to model."
     },
     "max_retries": {
       "type": "number",
@@ -36,12 +43,13 @@
       "format": "number",
       "description": "Maximum number of retries"
     },
-    "api_key": {
-      "type": "string",
-      "title": "API Key",
-      "default": "",
-      "description": "API Key",
-      "format": "password"
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 900,
+      "description": "Timeout in seconds"
     }
   }
 }

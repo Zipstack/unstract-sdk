@@ -7,3 +7,5 @@ metadata = {
     "description": "Mistral LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["MistralLLM"]

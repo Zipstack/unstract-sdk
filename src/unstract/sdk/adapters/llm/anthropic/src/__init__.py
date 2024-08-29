@@ -7,3 +7,5 @@ metadata = {
     "description": "Anthropic LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["AnthropicLLM"]

@@ -1,5 +1,5 @@
 {
-  "title": "Pa LLM",
+  "title": "PaLM LLM",
   "type": "object",
   "required": [
     "adapter_name",
@@ -21,15 +21,15 @@
     "model_name": {
       "type": "string",
       "title": "Model Name",
-      "default": "",
-      "description": "The name of the model to use for this adapter instance. Refer to https://ai.google.dev/models/palm Leave it empty to use the default model."
+      "default": "models/text-bison-001",
+      "description": "The name of the model to use for this adapter instance. Refer https://ai.google.dev/models/palm. Leave it empty to use the default model."
     },
     "num_output": {
       "type": "number",
       "minimum": 0,
       "multipleOf": 1,
       "title": "Max output tokens",
-      "description": "The number of tokens to generate. The higher the number, the longer the response will be. Leave it empty to use the default value."
+      "description": "The number of tokens to generate. This is limited by the maximum supported by the model and will vary from model to model. The higher the number, the longer the response will be. Leave it empty to use the model's maximum."
     }
   }
 }

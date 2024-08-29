@@ -1,6 +1,7 @@
 import logging
+import re
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Optional
 
 from llama_index.core.llms import LLM, MockLLM
 
@@ -68,8 +69,34 @@ class LLMAdapter(Adapter, ABC):
         """
         return MockLLM()
 
-    def test_connection(self, llm_metadata: dict[str, Any]) -> bool:
-        return False
+    @staticmethod
+    def _test_llm_instance(llm: Optional[LLM]) -> bool:
+        if llm is None:
+            return False
+        response = llm.complete(
+            "The capital of Tamilnadu is ",
+            temperature=0.003,
+        )
+        response_lower_case: str = response.text.lower()
+        find_match = re.search("chennai", response_lower_case)
+        if find_match:
+            return True
+        else:
+            return False
+
+    def test_connection(self) -> bool:
+        try:
+            llm = self.get_llm_instance()
+            test_result: bool = self._test_llm_instance(llm=llm)
+        except Exception as e:
+            # Avoids circular import errors
+            from unstract.sdk.adapters.llm.exceptions import parse_llm_err
+
+            err = parse_llm_err(e)
+            msg = f"Error while testing LLM '{self.get_name()}'. {str(err)}"
+            err.message = msg
+            raise err from e
+        return test_result
 
     def get_context_window_size(self) -> int:
         """Get the context window size supported by the LLM.

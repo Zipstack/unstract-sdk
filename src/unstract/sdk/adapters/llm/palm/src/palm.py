@@ -1,12 +1,12 @@
 import os
-from typing import Any
+from typing import Any, Optional
 
+from google.api_core.exceptions import GoogleAPICallError
 from llama_index.core.llms import LLM
 from llama_index.llms.palm import PaLM
 
-from unstract.sdk.adapters.exceptions import AdapterError
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
+from unstract.sdk.exceptions import LLMError
 
 
 class Constants:
@@ -51,7 +51,7 @@ class PaLMLLM(LLMAdapter):
 
     def get_llm_instance(self) -> LLM:
         try:
-            num_output = (
+            num_output: Optional[int] = (
                 int(self.config.get(Constants.NUM_OUTPUT, Constants.DEFAULT_MAX_TOKENS))
                 if self.config.get(Constants.NUM_OUTPUT) is not None
                 else None
@@ -66,9 +66,21 @@ class PaLMLLM(LLMAdapter):
 
             return llm
         except Exception as e:
-            raise AdapterError(str(e))
+            # To avoid circular import errors
+            from unstract.sdk.adapters.llm.exceptions import parse_llm_err
 
-    def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        return test_result
+            raise parse_llm_err(e)
+
+    @staticmethod
+    def parse_llm_err(e: GoogleAPICallError) -> LLMError:
+        """Parse the error from PaLM.
+
+        Helps parse errors from PaLM and wraps with custom exception.
+
+        Args:
+            e (OpenAIAPIError): Exception from PaLM
+
+        Returns:
+            LLMError: Error to be sent to the user
+        """
+        return LLMError(f"Error from PaLM. {e.message}")

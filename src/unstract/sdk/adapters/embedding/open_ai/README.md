@@ -1,1 +1,1 @@
-# Unstract Open AI Embeddings
+# Unstract OpenAI Embeddings

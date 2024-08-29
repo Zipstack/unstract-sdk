@@ -5,7 +5,6 @@ from llama_index.core.llms import LLM
 from llama_index.llms.replicate import Replicate
 
 from unstract.sdk.adapters.exceptions import AdapterError
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
 
@@ -64,8 +63,3 @@ class ReplicateLLM(LLMAdapter):
             return llm
         except Exception as e:
             raise AdapterError(str(e))
-
-    def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        return test_result

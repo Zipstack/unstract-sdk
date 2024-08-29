@@ -7,3 +7,5 @@ metadata = {
     "description": "Bedrock LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["BedrockLLM"]
