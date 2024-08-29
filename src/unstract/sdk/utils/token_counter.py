@@ -21,6 +21,8 @@ class TokenCounter:
             self.prompt_llm_token_count + self.completion_llm_token_count
         )
 
+    # TODO: Add unit test cases for the following function
+    #  for ease of manintenance
     @staticmethod
     def get_llm_token_counts(payload: dict[str, Any]):
         prompt_tokens = Constants.DEFAULT_TOKEN_COUNT
