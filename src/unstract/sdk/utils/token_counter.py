@@ -42,7 +42,7 @@ class TokenCounter:
         if EventPayload.PROMPT in payload:
             completion_raw = payload.get(EventPayload.COMPLETION).raw
             if completion_raw:
-                # For Open AI models, token count is part of ChatCompletion
+                # For OpenAI models, token count is part of ChatCompletion
                 if isinstance(completion_raw, ChatCompletion):
                     if hasattr(completion_raw, Constants.KEY_USAGE):
                         token_counts: dict[

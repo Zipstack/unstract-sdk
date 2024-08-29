@@ -80,12 +80,12 @@ class OpenAILLM(LLMAdapter):
 
     @staticmethod
     def parse_llm_err(e: OpenAIAPIError) -> LLMError:
-        """Parse the error from Open AI.
+        """Parse the error from OpenAI.
 
-        Helps parse errors from Open AI and wraps with custom exception.
+        Helps parse errors from OpenAI and wraps with custom exception.
 
         Args:
-            e (OpenAIAPIError): Exception from Open AI
+            e (OpenAIAPIError): Exception from OpenAI
 
         Returns:
             LLMError: Error to be sent to the user

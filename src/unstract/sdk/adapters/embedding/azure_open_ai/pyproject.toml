@@ -6,7 +6,7 @@ build-backend = "pdm.backend"
 [project]
 name = "unstract-azure-open-ai-embedding"
 version = "0.0.1"
-description = "Azure Open AI Embedding"
+description = "Azure OpenAI Embedding"
 authors = [
     {name = "Zipstack Inc.", email = "devsupport@zipstack.com"},
 ]

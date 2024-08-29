@@ -1,5 +1,5 @@
 {
-  "title": "Azure Open AI Embedding",
+  "title": "Azure OpenAI Embedding",
   "type": "object",
   "required": [
     "adapter_name",
