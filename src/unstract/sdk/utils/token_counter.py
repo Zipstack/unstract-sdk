@@ -1,24 +1,10 @@
-from typing import Any
+from typing import Any, Union
 
 from llama_index.core.callbacks.schema import EventPayload
-from llama_index.core.utilities.token_counting import TokenCounter
-from openai.types import CompletionUsage
-from openai.types.chat import ChatCompletion
+from llama_index.core.llms import ChatResponse, CompletionResponse
 
 
 class Constants:
-    KEY_USAGE = "usage"
-    KEY_USAGE_METADATA = "usage_metadata"
-    KEY_EVAL_COUNT = "eval_count"
-    KEY_PROMPT_EVAL_COUNT = "prompt_eval_count"
-    KEY_RAW_RESPONSE = "_raw_response"
-    KEY_TEXT_TOKEN_COUNT = "inputTextTokenCount"
-    KEY_TOKEN_COUNT = "tokenCount"
-    KEY_RESULTS = "results"
-    INPUT_TOKENS = "input_tokens"
-    OUTPUT_TOKENS = "output_tokens"
-    PROMPT_TOKENS = "prompt_tokens"
-    COMPLETION_TOKENS = "completion_tokens"
     DEFAULT_TOKEN_COUNT = 0
 
 
@@ -35,69 +21,25 @@ class TokenCounter:
             self.prompt_llm_token_count + self.completion_llm_token_count
         )
 
+    # TODO: Add unit test cases for the following function
+    #  for ease of manintenance
     @staticmethod
-    def get_llm_token_counts(payload: dict[str, Any]) -> TokenCounter:
+    def get_llm_token_counts(payload: dict[str, Any]):
         prompt_tokens = Constants.DEFAULT_TOKEN_COUNT
         completion_tokens = Constants.DEFAULT_TOKEN_COUNT
         if EventPayload.PROMPT in payload:
-            completion_raw = payload.get(EventPayload.COMPLETION).raw
-            if completion_raw:
-                # For OpenAI models, token count is part of ChatCompletion
-                if isinstance(completion_raw, ChatCompletion):
-                    if hasattr(completion_raw, Constants.KEY_USAGE):
-                        token_counts: dict[
-                            str, int
-                        ] = TokenCounter._get_prompt_completion_tokens(completion_raw)
-                        prompt_tokens = token_counts[Constants.PROMPT_TOKENS]
-                        completion_tokens = token_counts[Constants.COMPLETION_TOKENS]
-                # For other models
-                elif isinstance(completion_raw, dict):
-                    # For Gemini models
-                    if completion_raw.get(Constants.KEY_RAW_RESPONSE):
-                        if hasattr(
-                            completion_raw.get(Constants.KEY_RAW_RESPONSE),
-                            Constants.KEY_USAGE_METADATA,
-                        ):
-                            usage = completion_raw.get(
-                                Constants.KEY_RAW_RESPONSE
-                            ).usage_metadata
-                            prompt_tokens = usage.prompt_token_count
-                            completion_tokens = usage.candidates_token_count
-                    elif completion_raw.get(Constants.KEY_USAGE):
-                        token_counts: dict[
-                            str, int
-                        ] = TokenCounter._get_prompt_completion_tokens(completion_raw)
-                        prompt_tokens = token_counts[Constants.PROMPT_TOKENS]
-                        completion_tokens = token_counts[Constants.COMPLETION_TOKENS]
-                    # For Bedrock models
-                    elif Constants.KEY_TEXT_TOKEN_COUNT in completion_raw:
-                        prompt_tokens = completion_raw[Constants.KEY_TEXT_TOKEN_COUNT]
-                        if Constants.KEY_RESULTS in completion_raw:
-                            result_list: list = completion_raw[Constants.KEY_RESULTS]
-                            if len(result_list) > 0:
-                                result: dict = result_list[0]
-                                if Constants.KEY_TOKEN_COUNT in result:
-                                    completion_tokens = result.get(
-                                        Constants.KEY_TOKEN_COUNT
-                                    )
-                    else:
-                        if completion_raw.get(Constants.KEY_PROMPT_EVAL_COUNT):
-                            prompt_tokens = completion_raw.get(
-                                Constants.KEY_PROMPT_EVAL_COUNT
-                            )
-                        if completion_raw.get(Constants.KEY_EVAL_COUNT):
-                            completion_tokens = completion_raw.get(
-                                Constants.KEY_EVAL_COUNT
-                            )
-        # For Anthropic models
+            response = payload.get(EventPayload.COMPLETION)
+            (
+                prompt_tokens,
+                completion_tokens,
+            ) = TokenCounter._get_tokens_from_response(response)
         elif EventPayload.MESSAGES in payload:
-            response_raw = payload.get(EventPayload.RESPONSE).raw
-            if response_raw:
-                token_counts: dict[
-                    str, int
-                ] = TokenCounter._get_prompt_completion_tokens(response_raw)
-                prompt_tokens = token_counts[Constants.PROMPT_TOKENS]
-                completion_tokens = token_counts[Constants.COMPLETION_TOKENS]
+            response = payload.get(EventPayload.RESPONSE)
+            if response:
+                (
+                    prompt_tokens,
+                    completion_tokens,
+                ) = TokenCounter._get_tokens_from_response(response)
 
         token_counter = TokenCounter(
             input_tokens=prompt_tokens,
@@ -106,33 +48,72 @@ class TokenCounter:
         return token_counter
 
     @staticmethod
-    def _get_prompt_completion_tokens(response) -> dict[str, int]:
-        usage = None
-        prompt_tokens = Constants.DEFAULT_TOKEN_COUNT
-        completion_tokens = Constants.DEFAULT_TOKEN_COUNT
-        # For OpenAI models,response is an obj of CompletionUsage
-        if (
-            isinstance(response, ChatCompletion)
-            and hasattr(response, Constants.KEY_USAGE)
-            and isinstance(response.usage, CompletionUsage)
+    def _get_tokens_from_response(
+        response: Union[CompletionResponse, ChatResponse, dict]
+    ) -> tuple[int, int]:
+        """Get the token counts from a raw response."""
+        prompt_tokens, completion_tokens = 0, 0
+        if isinstance(response, CompletionResponse) or isinstance(
+            response, ChatResponse
         ):
-            usage = response.usage
-        # For LLM models other than OpenAI, response is a dict
-        elif isinstance(response, dict) and Constants.KEY_USAGE in response:
-            usage = response.get(Constants.KEY_USAGE)
+            raw_response = response.raw
+            if not isinstance(raw_response, dict):
+                raw_response = dict(raw_response)
 
-        if usage:
-            if hasattr(usage, Constants.INPUT_TOKENS):
-                prompt_tokens = usage.input_tokens
-            elif hasattr(usage, Constants.PROMPT_TOKENS):
-                prompt_tokens = usage.prompt_tokens
+            usage = raw_response.get("usage", None)
+        if usage is None:
+            if (
+                hasattr(response, "additional_kwargs")
+                and "prompt_tokens" in response.additional_kwargs
+            ):
+                usage = response.additional_kwargs
+            elif hasattr(response, "raw"):
+                completion_raw = response.raw
+                if ("_raw_response" in completion_raw) and hasattr(
+                    completion_raw["_raw_response"], "usage_metadata"
+                ):
+                    usage = completion_raw["_raw_response"].usage_metadata
+                    prompt_tokens = usage.prompt_token_count
+                    completion_tokens = usage.candidates_token_count
+                    return prompt_tokens, completion_tokens
+                elif "inputTextTokenCount" in completion_raw:
+                    prompt_tokens = completion_raw["inputTextTokenCount"]
+                    if "results" in completion_raw:
+                        result_list: list = completion_raw["results"]
+                        if len(result_list) > 0:
+                            result: dict = result_list[0]
+                            if "tokenCount" in result:
+                                completion_tokens = result.get("tokenCount", 0)
+                    return prompt_tokens, completion_tokens
+                else:
+                    usage = response.raw
+            else:
+                usage = response
 
-            if hasattr(usage, Constants.OUTPUT_TOKENS):
-                completion_tokens = usage.output_tokens
-            elif hasattr(usage, Constants.COMPLETION_TOKENS):
-                completion_tokens = usage.completion_tokens
+        if not isinstance(usage, dict):
+            usage = usage.model_dump()
 
-        token_counts: dict[str, int] = dict()
-        token_counts[Constants.PROMPT_TOKENS] = prompt_tokens
-        token_counts[Constants.COMPLETION_TOKENS] = completion_tokens
-        return token_counts
+        possible_input_keys = (
+            "prompt_tokens",
+            "input_tokens",
+            "prompt_eval_count",
+        )
+        possible_output_keys = (
+            "completion_tokens",
+            "output_tokens",
+            "eval_count",
+        )
+
+        prompt_tokens = 0
+        for input_key in possible_input_keys:
+            if input_key in usage:
+                prompt_tokens = int(usage[input_key])
+                break
+
+        completion_tokens = 0
+        for output_key in possible_output_keys:
+            if output_key in usage:
+                completion_tokens = int(usage[output_key])
+                break
+
+        return prompt_tokens, completion_tokens
