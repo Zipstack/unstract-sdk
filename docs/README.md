@@ -11,7 +11,7 @@ Execute the below command from [sdks](/sdks/) in order to generate the markdown 
 ```
 lazydocs src/unstract/sdk \
 --output-path ./docs/site/docs/API\ Reference/ \
---src-base-url https://github.com/Zipstack/Pandora/tree/development
+--src-base-url https://github.com/Zipstack/unstract/tree/development
 ```
 
 **NOTE:** There exists issues with lazydocs' generation and all image tags in the generated markdown need to be removed for
