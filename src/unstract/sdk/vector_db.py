@@ -146,7 +146,7 @@ class VectorDB:
             **index_kwargs,
         )
 
-    @deprecated(version="0.46.0", reason="Use index_document() instead")
+    @deprecated(version="0.47.0", reason="Use index_document() instead")
     def get_vector_store_index_from_storage_context(
         self,
         documents: Sequence[Document],
