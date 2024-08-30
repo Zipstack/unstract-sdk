@@ -28,11 +28,11 @@ To create a new tool, run the following command:
 ```bash
 unstract-tool-gen --command NEW \
 --tool-name indexer \
---location ~/Devel/Github/pandora/tools/ \
+--location ~/Devel/Github/unstract/tools/ \
 --overwrite false
 ```
 
-This will create a new tool in the `~/Devel/Github/pandora/tools/` directory. Replace the directory with yours. The tool will be named `indexer`. 
+This will create a new tool in the `~/Devel/Github/unstract/tools/` directory. Replace the directory with yours. The tool will be named `indexer`. 
 
 The tool will be created with the following structure:
 
