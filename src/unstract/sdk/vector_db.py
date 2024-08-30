@@ -5,6 +5,7 @@ from typing import Any, Optional, Union
 from deprecated import deprecated
 from llama_index.core import StorageContext, VectorStoreIndex
 from llama_index.core.indices.base import IndexType
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import BaseNode, Document
 from llama_index.core.vector_stores.types import (
     BasePydanticVectorStore,
@@ -119,6 +120,33 @@ class VectorDB:
             )
             raise VectorDBError(f"Error getting vectorDB instance: {e}") from e
 
+    def index_document(
+        self,
+        documents: Sequence[Document],
+        chunk_size: int = 1024,
+        chunk_overlap: int = 128,
+        show_progress: bool = False,
+        **index_kwargs,
+    ) -> IndexType:
+        if not self._embedding_instance:
+            raise VectorDBError(self.EMBEDDING_INSTANCE_ERROR)
+        storage_context = self.get_storage_context()
+        parser = SentenceSplitter.from_defaults(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            callback_manager=self._embedding_instance.callback_manager,
+        )
+        return VectorStoreIndex.from_documents(
+            documents,
+            storage_context=storage_context,
+            show_progress=show_progress,
+            embed_model=self._embedding_instance,
+            transformations=[parser],
+            callback_manager=self._embedding_instance.callback_manager,
+            **index_kwargs,
+        )
+
+    @deprecated(version="0.46.0", reason="Use index_document() instead")
     def get_vector_store_index_from_storage_context(
         self,
         documents: Sequence[Document],
