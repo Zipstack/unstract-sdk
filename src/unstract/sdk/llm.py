@@ -69,7 +69,7 @@ class LLM:
     def complete(
         self,
         prompt: str,
-        extract_json: bool = False,
+        extract_json: bool = True,
         process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
@@ -79,7 +79,7 @@ class LLM:
             prompt (str): The input text prompt for generating the completion.
             extract_json (bool, optional): If set to True, the response text is
                 processed using a regex to extract JSON content from it. If no JSON is
-                found, the text is returned as it is. Defaults to False.
+                found, the text is returned as it is. Defaults to True.
             process_text (Optional[Callable[[str], str]], optional): A callable that
                 processes the generated text and extracts specific information.
                 Defaults to None.
@@ -194,7 +194,7 @@ class LLM:
         return self._llm_instance.class_name()
 
     def get_model_name(self) -> str:
-        """Gets the name of the LLM model
+        """Gets the name of the LLM model.
 
         Args:
             NA
