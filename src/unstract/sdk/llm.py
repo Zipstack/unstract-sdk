@@ -193,6 +193,17 @@ class LLM:
         """
         return self._llm_instance.class_name()
 
+    def get_model_name(self) -> str:
+        """Gets the name of the LLM model
+
+        Args:
+            NA
+
+        Returns:
+            LLM model name
+        """
+        return self._llm_instance.model
+
     @deprecated("Use LLM instead of ToolLLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
         if not self._llm_instance:

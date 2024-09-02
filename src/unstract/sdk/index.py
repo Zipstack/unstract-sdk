@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional
 
 from deprecated import deprecated
 from llama_index.core import Document
-from llama_index.core.node_parser import SimpleNodeParser
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.vector_stores import (
     FilterOperator,
     MetadataFilter,
@@ -199,7 +199,8 @@ class Index:
                     self.tool.stream_log(f"No nodes found for {doc_id}")
             except Exception as e:
                 self.tool.stream_log(
-                    f"Error querying {vector_db_instance_id}: {e}", level=LogLevel.ERROR
+                    f"Error querying {vector_db_instance_id}: {e}, proceeding to index",
+                    level=LogLevel.ERROR,
                 )
 
             if doc_id_found and reindex:
@@ -288,7 +289,7 @@ class Index:
 
             try:
                 if chunk_size == 0:
-                    parser = SimpleNodeParser.from_defaults(
+                    parser = SentenceSplitter.from_defaults(
                         chunk_size=len(documents[0].text) + 10,
                         chunk_overlap=0,
                         callback_manager=embedding.get_callback_manager(),
@@ -301,12 +302,6 @@ class Index:
                     vector_db.add(doc_id, nodes=[node])
                     self.tool.stream_log("Added node to vector db")
                 else:
-                    storage_context = vector_db.get_storage_context()
-                    parser = SimpleNodeParser.from_defaults(
-                        chunk_size=chunk_size,
-                        chunk_overlap=chunk_overlap,
-                        callback_manager=embedding.get_callback_manager(),
-                    )
                     self.tool.stream_log("Adding nodes to vector db...")
                     # TODO: Phase 2:
                     # Post insertion to VDB, use query using doc_id and
@@ -318,13 +313,11 @@ class Index:
                     # Once this is in place, the overridden implementation
                     # of prefixing ids with doc_id before adding to VDB
                     # can be removed
-                    vector_db.get_vector_store_index_from_storage_context(
+                    vector_db.index_document(
                         documents,
-                        storage_context=storage_context,
+                        chunk_size=chunk_size,
+                        chunk_overlap=chunk_overlap,
                         show_progress=True,
-                        embed_model=embedding,
-                        node_parser=parser,
-                        callback_manager=embedding.get_callback_manager(),
                     )
             except Exception as e:
                 self.tool.stream_log(
