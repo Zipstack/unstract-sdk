@@ -357,7 +357,7 @@ To use the local development version of the _unstract sdk_ install it from the l
 the path to your local repository:
 
 ```commandline
-pip install ~/Devel/Github/pandora/sdks/.
+pip install ~/Devel/Github/unstract/sdks/.
 ```
 
 Load the environment variables:
@@ -439,7 +439,7 @@ To test the tool from its docker image, run the following command:
 
 ```commandline
 docker run \
-    -v /Users/arun/Devel/pandora_storage:/mnt/unstract/fs_input \
+    -v /Users/arun/Devel/unstract_storage:/mnt/unstract/fs_input \
     unstract-tool-fileops:0.1 \
     python main.py \
     --command RUN \
@@ -462,7 +462,7 @@ docker run \
 
 Notes for Docker:
 
-* The `-v` option mounts the `/Users/arun/Devel/pandora_storage` folder on the host machine to
+* The `-v` option mounts the `/Users/arun/Devel/unstract_storage` folder on the host machine to
   the `/mnt/unstract/fs_input`. Replace the path with the path to your documents folder.
 * When this command is called by the workflow execution subsystem, the path to the input files configured by the user in
   the UI is automatically mounted and loaded as a volumne in the `/mnt/unstract/fs_input` folder in the container.

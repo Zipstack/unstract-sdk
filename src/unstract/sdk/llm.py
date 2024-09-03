@@ -69,24 +69,28 @@ class LLM:
     def complete(
         self,
         prompt: str,
+        extract_json: bool = True,
         process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any]:
         """Generates a completion response for the given prompt.
 
         Args:
             prompt (str): The input text prompt for generating the completion.
+            extract_json (bool, optional): If set to True, the response text is
+                processed using a regex to extract JSON content from it. If no JSON is
+                found, the text is returned as it is. Defaults to True.
             process_text (Optional[Callable[[str], str]], optional): A callable that
                 processes the generated text and extracts specific information.
                 Defaults to None.
             **kwargs (Any): Additional arguments passed to the completion function.
 
         Returns:
-            Optional[dict[str, Any]]: A dictionary containing the result of the
-                completion and processed output or None if the completion fails.
+            dict[str, Any]: A dictionary containing the result of the completion
+                and any processed output.
 
         Raises:
-            Any: If an error occurs during the completion process, it will be
+            LLMError: If an error occurs during the completion process, it will be
                 raised after being processed by `parse_llm_err`.
         """
         try:
@@ -100,9 +104,10 @@ class LLM:
                 except Exception as e:
                     logger.error(f"Error occured inside function 'process_text': {e}")
                     process_text_output = {}
-            match = LLM.json_regex.search(response.text)
-            if match:
-                response.text = match.group(0)
+            if extract_json:
+                match = LLM.json_regex.search(response.text)
+                if match:
+                    response.text = match.group(0)
             return {LLM.RESPONSE: response, **process_text_output}
         except Exception as e:
             raise parse_llm_err(e) from e
@@ -189,7 +194,7 @@ class LLM:
         return self._llm_instance.class_name()
 
     def get_model_name(self) -> str:
-        """Gets the name of the LLM model
+        """Gets the name of the LLM model.
 
         Args:
             NA
