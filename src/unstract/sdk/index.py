@@ -433,6 +433,8 @@ class Index:
             file_hash,
         )
 
+    # TODO: Deprecate index_file function and
+    # refactor everywhere to use index()
     def index_file(
         self,
         tool_id: str,
