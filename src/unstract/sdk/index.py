@@ -203,20 +203,7 @@ class Index:
                     level=LogLevel.ERROR,
                 )
 
-            if doc_id_found and reindex:
-                # Delete the nodes for the doc_id
-                try:
-                    vector_db.delete(ref_doc_id=doc_id)
-                    self.tool.stream_log(f"Deleted nodes for {doc_id}")
-                except Exception as e:
-                    self.tool.stream_log(
-                        f"Error deleting nodes for {doc_id}: {e}",
-                        level=LogLevel.ERROR,
-                    )
-                    raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
-                doc_id_found = False
-
-            if doc_id_found:
+            if doc_id_found and not reindex:
                 self.tool.stream_log(f"File was indexed already under {doc_id}")
                 return doc_id
 
@@ -286,6 +273,18 @@ class Index:
                 document.id_ = doc_id
                 documents.append(document)
             self.tool.stream_log(f"Number of documents: {len(documents)}")
+
+            if doc_id_found:
+                # Delete the nodes for the doc_id
+                try:
+                    vector_db.delete(ref_doc_id=doc_id)
+                    self.tool.stream_log(f"Deleted nodes for {doc_id}")
+                except Exception as e:
+                    self.tool.stream_log(
+                        f"Error deleting nodes for {doc_id}: {e}",
+                        level=LogLevel.ERROR,
+                    )
+                    raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
 
             try:
                 if chunk_size == 0:
