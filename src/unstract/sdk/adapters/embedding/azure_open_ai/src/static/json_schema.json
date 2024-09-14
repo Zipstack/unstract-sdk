@@ -59,7 +59,7 @@
       "minimum": 0,
       "multipleOf": 1,
       "title": "Timeout",
-      "default": 60,
+      "default": 240,
       "description": "Timeout for each request in seconds"
     }
   }

@@ -16,7 +16,7 @@ class Constants:
     ADAPTER_NAME = "adapter_name"
     API_TYPE = "openai"
     TIMEOUT = "timeout"
-    DEFAULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 240
 
 
 class OpenAI(EmbeddingAdapter):
