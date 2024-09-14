@@ -1,6 +1,7 @@
 import os
 from typing import Any
 
+import httpx
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.azure_openai import AzureOpenAIEmbedding
 
@@ -18,7 +19,7 @@ class Constants:
     DEPLOYMENT_NAME = "deployment_name"
     API_TYPE = "azure"
     TIMEOUT = "timeout"
-    DEFAULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 240
 
 
 class AzureOpenAI(EmbeddingAdapter):
@@ -59,6 +60,8 @@ class AzureOpenAI(EmbeddingAdapter):
                 config=self.config
             )
             timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
+            httpx_timeout = httpx.Timeout(timeout, connect=60.0)
+            httpx_client = httpx.Client(timeout=httpx_timeout)
             embedding: BaseEmbedding = AzureOpenAIEmbedding(
                 model=str(self.config.get(Constants.MODEL)),
                 deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
@@ -68,6 +71,7 @@ class AzureOpenAI(EmbeddingAdapter):
                 embed_batch_size=embedding_batch_size,
                 api_type=Constants.API_TYPE,
                 timeout=timeout,
+                http_client=httpx_client,
             )
             return embedding
         except Exception as e:
