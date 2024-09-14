@@ -12,6 +12,7 @@ from unstract.sdk.adapters.exceptions import AdapterError
 
 class Constants:
     API_KEY = "api_key"
+    MODEL = "model"
     API_BASE_VALUE = "https://api.openai.com/v1/"
     API_BASE_KEY = "api_base"
     ADAPTER_NAME = "adapter_name"
@@ -62,6 +63,7 @@ class OpenAI(EmbeddingAdapter):
                 api_base=str(
                     self.config.get(Constants.API_BASE_KEY, Constants.API_BASE_VALUE)
                 ),
+                model=str(self.config.get(Constants.MODEL)),
                 api_type=Constants.API_TYPE,
                 timeout=timeout,
                 http_client=httpx_client,
