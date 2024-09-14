@@ -60,7 +60,7 @@ class AzureOpenAI(EmbeddingAdapter):
                 config=self.config
             )
             timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
-            httpx_timeout = httpx.Timeout(10.0, connect=60.0)
+            httpx_timeout = httpx.Timeout(timeout, connect=60.0)
             httpx_client = httpx.Client(timeout=httpx_timeout)
             embedding: BaseEmbedding = AzureOpenAIEmbedding(
                 model=str(self.config.get(Constants.MODEL)),
