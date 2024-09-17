@@ -50,8 +50,9 @@ class ToolExecutor:
         settings: dict[str, Any] = loads(args.settings)
 
         tool_name = self.tool.properties["displayName"]
+        tool_version = self.tool.properties["toolVersion"]
         self.tool.stream_log(
-            f"Running tool '{tool_name}' with "
+            f"Running tool '{tool_name}:{tool_version}' with "
             f"Workflow ID: {self.tool.workflow_id}, "
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}"
