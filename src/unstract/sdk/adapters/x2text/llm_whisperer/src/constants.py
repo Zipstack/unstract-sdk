@@ -7,6 +7,13 @@ class ProcessingModes(Enum):
     TEXT = "text"
 
 
+class Modes(Enum):
+    NATIVE_TEXT = "native_text"
+    LOW_COST = "low_cost"
+    HIGH_QUALITY = "high_quality"
+    FORM = "form"
+
+
 class OutputModes(Enum):
     LINE_PRINTER = "line-printer"
     DUMP_TEXT = "dump-text"
@@ -52,6 +59,7 @@ class WhispererConfig:
 
     URL = "url"
     PROCESSING_MODE = "processing_mode"
+    MODE = "mode"
     OUTPUT_MODE = "output_mode"
     UNSTRACT_KEY = "unstract_key"
     MEDIAN_FILTER_SIZE = "median_filter_size"
