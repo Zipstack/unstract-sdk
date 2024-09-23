@@ -146,6 +146,8 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.PROCESSING_MODE, ProcessingModes.TEXT.value
             ),
             # Not providing default value to maintain legacy compatablity
+            # Providing default value will overide the params
+            # processing_mode, force_text_processing
             WhispererConfig.MODE: self.config.get(WhispererConfig.MODE),
             WhispererConfig.OUTPUT_MODE: self.config.get(
                 WhispererConfig.OUTPUT_MODE, OutputModes.LINE_PRINTER.value
