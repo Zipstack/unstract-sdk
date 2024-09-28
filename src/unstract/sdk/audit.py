@@ -102,7 +102,9 @@ class Audit(StreamMixin):
                     level=LogLevel.ERROR,
                 )
             else:
-                self.stream_log("Successfully pushed usage details")
+                self.stream_log(
+                    "Successfully pushed usage details", level=LogLevel.DEBUG
+                )
 
         except requests.RequestException as e:
             self.stream_log(
@@ -152,7 +154,9 @@ class Audit(StreamMixin):
                     level=LogLevel.ERROR,
                 )
             else:
-                self.stream_log("Successfully pushed page usage details")
+                self.stream_log(
+                    "Successfully pushed page usage details", level=LogLevel.DEBUG
+                )
 
         except requests.RequestException as e:
             self.stream_log(

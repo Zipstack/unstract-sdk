@@ -5,7 +5,7 @@ import requests
 from requests.exceptions import ConnectionError, HTTPError
 
 from unstract.sdk.adapters.utils import AdapterUtils
-from unstract.sdk.constants import AdapterKeys, ToolEnv
+from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
@@ -65,7 +65,8 @@ class ToolAdapter(PlatformBase):
             # TODO: Print config after redacting sensitive information
             self.tool.stream_log(
                 "Successfully retrieved config "
-                f"for adapter instance {adapter_instance_id}"
+                f"for adapter instance {adapter_instance_id}",
+                level=LogLevel.DEBUG,
             )
         except ConnectionError:
             raise SdkError(
@@ -110,7 +111,8 @@ class ToolAdapter(PlatformBase):
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
 
         tool.stream_log(
-            f"Connecting to DB and getting table metadata for {adapter_instance_id}"
+            f"Connecting to DB and getting table metadata for {adapter_instance_id}",
+            level=LogLevel.DEBUG,
         )
         tool_adapter = ToolAdapter(
             tool=tool,
