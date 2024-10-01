@@ -5,7 +5,7 @@ import requests
 from requests.exceptions import ConnectionError, HTTPError
 
 from unstract.sdk.adapters.utils import AdapterUtils
-from unstract.sdk.constants import AdapterKeys, ToolEnv
+from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
@@ -62,10 +62,15 @@ class ToolAdapter(PlatformBase):
             response.raise_for_status()
             adapter_data: dict[str, Any] = response.json()
 
-            # TODO: Print config after redacting sensitive information
+            # Removing name and type to avoid migration for already indexed records
+            adapter_name = adapter_data.pop("adapter_name", "")
+            adapter_type = adapter_data.pop("adapter_type", "")
+            provider = adapter_data.get("adapter_id", "").split("|")[0]
+            # TODO: Print metadata after redacting sensitive information
             self.tool.stream_log(
-                "Successfully retrieved config "
-                f"for adapter instance {adapter_instance_id}"
+                f"Retrieved config for '{adapter_instance_id}', type: "
+                f"'{adapter_type}', provider: '{provider}', name: '{adapter_name}'",
+                level=LogLevel.DEBUG,
             )
         except ConnectionError:
             raise SdkError(
@@ -110,7 +115,8 @@ class ToolAdapter(PlatformBase):
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
 
         tool.stream_log(
-            f"Connecting to DB and getting table metadata for {adapter_instance_id}"
+            f"Retrieving config from DB for '{adapter_instance_id}'",
+            level=LogLevel.DEBUG,
         )
         tool_adapter = ToolAdapter(
             tool=tool,
