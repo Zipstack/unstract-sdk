@@ -387,7 +387,7 @@ class Index:
             raise IndexingError(str(e)) from e
 
         self.tool.stream_log("File has been indexed successfully")
-        return doc_id
+        return
 
     def generate_index_key(
         self,
