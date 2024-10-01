@@ -178,7 +178,7 @@ class Index:
                 logger.error(f"Error occured inside function 'process_text': {e}")
         return extracted_text
 
-    @log_elapsed(operation="INDEXING(might include EXTRACTION)")
+    @log_elapsed(operation="CHECK_AND_INDEX(overall)")
     def index(
         self,
         tool_id: str,
@@ -293,82 +293,101 @@ class Index:
             if not extracted_text:
                 raise IndexingError("No text available to index")
 
-            full_text = [
-                {
-                    "section": "full",
-                    "text_contents": extracted_text,
-                }
-            ]
-
-            # Check if chunking is required
-            documents = []
-            for item in full_text:
-                text = item["text_contents"]
-                self.tool.stream_log("Indexing file...")
-                document = Document(
-                    text=text,
-                    doc_id=doc_id,
-                    metadata={"section": item["section"]},
-                )
-                document.id_ = doc_id
-                documents.append(document)
-            self.tool.stream_log(f"Number of documents: {len(documents)}")
-
-            if doc_id_found:
-                # Delete the nodes for the doc_id
-                try:
-                    vector_db.delete(ref_doc_id=doc_id)
-                    self.tool.stream_log(f"Deleted nodes for {doc_id}")
-                except Exception as e:
-                    self.tool.stream_log(
-                        f"Error deleting nodes for {doc_id}: {e}",
-                        level=LogLevel.ERROR,
-                    )
-                    raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
-
-            try:
-                if chunk_size == 0:
-                    parser = SentenceSplitter.from_defaults(
-                        chunk_size=len(documents[0].text) + 10,
-                        chunk_overlap=0,
-                        callback_manager=embedding.get_callback_manager(),
-                    )
-                    nodes = parser.get_nodes_from_documents(
-                        documents, show_progress=True
-                    )
-                    node = nodes[0]
-                    node.embedding = embedding.get_query_embedding(" ")
-                    vector_db.add(doc_id, nodes=[node])
-                    self.tool.stream_log("Added node to vector db")
-                else:
-                    self.tool.stream_log("Adding nodes to vector db...")
-                    # TODO: Phase 2:
-                    # Post insertion to VDB, use query using doc_id and
-                    # store all the VDB ids to a table against the doc_id
-                    # During deletion for cases where metadata filtering
-                    # does not work, these ids can be used for direct deletion
-                    # This new table will also act like an audit trail for
-                    # all nodes that were added to the VDB by Unstract
-                    # Once this is in place, the overridden implementation
-                    # of prefixing ids with doc_id before adding to VDB
-                    # can be removed
-                    vector_db.index_document(
-                        documents,
-                        chunk_size=chunk_size,
-                        chunk_overlap=chunk_overlap,
-                        show_progress=True,
-                    )
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error adding nodes to vector db: {e}",
-                    level=LogLevel.ERROR,
-                )
-                raise IndexingError(str(e)) from e
-
-            self.tool.stream_log("File has been indexed successfully")
+            self.index_to_vector_db(
+                vector_db=vector_db,
+                embedding=embedding,
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                doc_id=doc_id,
+                text_to_idx=extracted_text,
+                doc_id_found=doc_id_found,
+            )
             return doc_id
         finally:
             vector_db.close()
+
+    @log_elapsed(operation="INDEXING")
+    def index_to_vector_db(
+        self,
+        vector_db: VectorDB,
+        embedding: Embedding,
+        chunk_size: int,
+        chunk_overlap: int,
+        text_to_idx: str,
+        doc_id: str,
+        doc_id_found: bool,
+    ):
+        self.tool.stream_log("Indexing file...")
+        full_text = [
+            {
+                "section": "full",
+                "text_contents": text_to_idx,
+            }
+        ]
+        # Check if chunking is required
+        documents = []
+        for item in full_text:
+            text = item["text_contents"]
+            document = Document(
+                text=text,
+                doc_id=doc_id,
+                metadata={"section": item["section"]},
+            )
+            document.id_ = doc_id
+            documents.append(document)
+        self.tool.stream_log(f"Number of documents: {len(documents)}")
+
+        if doc_id_found:
+            # Delete the nodes for the doc_id
+            try:
+                vector_db.delete(ref_doc_id=doc_id)
+                self.tool.stream_log(f"Deleted nodes for {doc_id}")
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error deleting nodes for {doc_id}: {e}",
+                    level=LogLevel.ERROR,
+                )
+                raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
+
+        try:
+            if chunk_size == 0:
+                parser = SentenceSplitter.from_defaults(
+                    chunk_size=len(documents[0].text) + 10,
+                    chunk_overlap=0,
+                    callback_manager=embedding.get_callback_manager(),
+                )
+                nodes = parser.get_nodes_from_documents(documents, show_progress=True)
+                node = nodes[0]
+                node.embedding = embedding.get_query_embedding(" ")
+                vector_db.add(doc_id, nodes=[node])
+                self.tool.stream_log("Added node to vector db")
+            else:
+                self.tool.stream_log("Adding nodes to vector db...")
+                # TODO: Phase 2:
+                # Post insertion to VDB, use query using doc_id and
+                # store all the VDB ids to a table against the doc_id
+                # During deletion for cases where metadata filtering
+                # does not work, these ids can be used for direct deletion
+                # This new table will also act like an audit trail for
+                # all nodes that were added to the VDB by Unstract
+                # Once this is in place, the overridden implementation
+                # of prefixing ids with doc_id before adding to VDB
+                # can be removed
+                vector_db.index_document(
+                    documents,
+                    chunk_size=chunk_size,
+                    chunk_overlap=chunk_overlap,
+                    show_progress=True,
+                )
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error adding nodes to vector db: {e}",
+                level=LogLevel.ERROR,
+            )
+            raise IndexingError(str(e)) from e
+
+        self.tool.stream_log("File has been indexed successfully")
+        return doc_id
 
     def generate_index_key(
         self,
