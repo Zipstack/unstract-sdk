@@ -135,9 +135,8 @@ class Index:
                 to post-process the text. Defaults to None.
 
         Raises:
-            IndexingError: _description_
+            IndexingError: Errors during text extraction
         """
-        # Extract text and index
         self.tool.stream_log("Extracting text from input file")
         extracted_text = ""
         try:
