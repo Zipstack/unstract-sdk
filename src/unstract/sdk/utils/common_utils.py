@@ -40,7 +40,7 @@ def log_elapsed(operation):
             finally:
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                logger.debug(f"Time taken for '{operation}': {elapsed_time:.3f}s")
+                logger.info(f"Time taken for '{operation}': {elapsed_time:.3f}s")
             return result
 
         return wrapper
