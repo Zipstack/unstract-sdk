@@ -119,13 +119,13 @@
         "type": "boolean",
         "title": "Mark Vertical Lines",
         "default": false,
-        "description": "Mark vertical lines during OCR processing. Useful to improve text alignment in tables or forms."
+        "description": "Detect vertical lines in the document and replicate the same using text (using \"|\" symbol). Use this for displaying tables with borders."
       },
       "mark_horizontal_lines": {
         "type": "boolean",
         "title": "Mark Horizontal Lines",
         "default": false,
-        "description": "Mark horizontal lines during OCR processing."
+        "description": "Detect horizontal lines in the document and replicate the same using text (using \"-\" symbol). Use this for displaying tables with borders and other horizontal serperators found in the document."
       }
     },
     "required": [
