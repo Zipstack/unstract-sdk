@@ -1,5 +1,5 @@
 {
-  "title": "Azure Open AI LLM",
+  "title": "Azure OpenAI LLM",
   "type": "object",
   "required": [
     "adapter_name",
@@ -26,14 +26,6 @@
       "default": "",
       "description": "Provide the name of the deployment you defined in Azure console"
     },
-    "max_retries": {
-      "type": "number",
-      "minimum": 0,
-      "multipleOf": 1,
-      "title": "Max Retries",
-      "default": 5,
-      "description": "Maximum number of retries to attempt when a request fails."
-    },
     "api_key": {
       "type": "string",
       "title": "API Key",
@@ -52,6 +44,21 @@
       "default": "",
       "format": "uri",
       "description": "Provide the Azure endpoint. Example: https://<your-deployment>.openai.azure.com/"
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Maximum Output Tokens",
+      "description": "Maximum number of output tokens to limit LLM replies, leave it empty to use the maximum possible for the selected model."
+    },
+    "max_retries": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Max Retries",
+      "default": 5,
+      "description": "Maximum number of retries to attempt when a request fails."
     },
     "timeout": {
       "type": "number",

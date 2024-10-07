@@ -1,5 +1,5 @@
 {
-  "title": "Open AI Embedding",
+  "title": "OpenAI Embedding",
   "type": "object",
   "required": [
     "adapter_name",
@@ -12,11 +12,23 @@
       "default": "",
       "description": "Provide a unique name for this adapter instance. Example: openai-emb-1"
     },
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "default": "text-embedding-ada-002",
+      "description": "Provide the name of the model."
+    },
     "api_key": {
       "type": "string",
       "title": "API Key",
       "default": "",
       "format": "password"
+    },
+    "api_base": {
+      "type": "string",
+      "title": "API Base",
+      "format": "uri",
+      "default": "https://api.openai.com/v1/"
     },
     "embed_batch_size": {
       "type": "number",
@@ -25,11 +37,13 @@
       "title": "Embed Batch Size",
       "default": 10
     },
-    "api_base": {
-      "type": "string",
-      "title": "API Base",
-      "format": "uri",
-      "default": "https://api.openai.com/v1/"
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 240,
+      "description": "Timeout in seconds"
     }
   }
 }

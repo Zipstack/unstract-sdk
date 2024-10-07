@@ -15,7 +15,6 @@ from vertexai.generative_models._generative_models import (
 
 from unstract.sdk.adapters.exceptions import LLMError
 from unstract.sdk.adapters.llm.constants import LLMKeys
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
 logger = logging.getLogger(__name__)
@@ -184,14 +183,6 @@ class VertexAILLM(LLMAdapter):
             )
         ]
         return vertex_safety_settings
-
-    def test_connection(self) -> bool:
-        try:
-            llm = self.get_llm_instance()
-            test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        except Exception as e:
-            raise LLMError(f"Error while testing connection for VertexAI: {str(e)}")
-        return test_result
 
     @staticmethod
     def parse_llm_err(e: ResponseValidationError) -> LLMError:

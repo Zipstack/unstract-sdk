@@ -21,13 +21,6 @@
       "default": "amazon.titan-text-express-v1",
       "description": "Model name. Refer to Bedrock's documentation for the list of available models."
     },
-    "context_size": {
-      "type": "number",
-      "minimum": 0,
-      "multipleOf": 1,
-      "title": "Context Size",
-      "description": "The maximum number of context tokens for the model. For setting default in supportied models, leave this empty."
-    },
     "aws_access_key_id": {
       "type": "string",
       "title": "AWS Access Key ID",
@@ -45,13 +38,20 @@
       "title": "AWS Region name",
       "description": "Provide the AWS Region name where the service is running. Eg. us-east-1"
     },
-    "timeout": {
+    "context_size": {
       "type": "number",
       "minimum": 0,
       "multipleOf": 1,
-      "title": "Timeout",
-      "default": 900,
-      "description": "Timeout in seconds"
+      "title": "Context Size",
+      "description": "The maximum number of context (input) tokens for the model. For setting default in supported models, leave this empty."
+    },
+    "max_tokens": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "default": 512,
+      "title": "Maximum Output Tokens",
+      "description": "Maximum number of output tokens to limit LLM replies, the maximum possible differs from model to model."
     },
     "max_retries": {
       "type": "number",
@@ -60,6 +60,14 @@
       "title": "Max Retries",
       "default": 5,
       "description": "Maximum number of retries to attempt when a request fails."
+    },
+    "timeout": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 1,
+      "title": "Timeout",
+      "default": 900,
+      "description": "Timeout in seconds"
     }
   }
 }

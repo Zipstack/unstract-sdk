@@ -1,8 +1,10 @@
 import json
-from typing import Any, Optional
+import logging
+from typing import Any, Callable, Optional
 
+from deprecated import deprecated
 from llama_index.core import Document
-from llama_index.core.node_parser import SimpleNodeParser
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.vector_stores import (
     FilterOperator,
     MetadataFilter,
@@ -10,7 +12,6 @@ from llama_index.core.vector_stores import (
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
-from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
@@ -22,8 +23,11 @@ from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
+from unstract.sdk.utils.common_utils import log_elapsed
 from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
+
+logger = logging.getLogger(__name__)
 
 
 class Constants:
@@ -101,27 +105,80 @@ class Index:
         finally:
             vector_db.close()
 
-    def _cleanup_text(self, full_text):
-        # Remove text which is not required
-        full_text_lines = full_text.split("\n")
-        new_context_lines = []
-        empty_line_count = 0
-        for line in full_text_lines:
-            if line.strip() == "":
-                empty_line_count += 1
-            else:
-                if empty_line_count >= 3:
-                    empty_line_count = 3
-                for i in range(empty_line_count):
-                    new_context_lines.append("")
-                empty_line_count = 0
-                new_context_lines.append(line.rstrip())
-        self.tool.stream_log(
-            f"Old context length: {len(full_text_lines)}, "
-            f"New context length: {len(new_context_lines)}"
-        )
-        return "\n".join(new_context_lines)
+    @log_elapsed(operation="EXTRACTION")
+    def extract_text(
+        self,
+        x2text_instance_id: str,
+        file_path: str,
+        output_file_path: Optional[str] = None,
+        enable_highlight: bool = False,
+        usage_kwargs: dict[Any, Any] = {},
+        process_text: Optional[Callable[[str], str]] = None,
+    ) -> str:
+        """Extracts text from a document.
 
+        Uses the configured service to perform the extraction
+        - LLM Whisperer
+        - Unstructured IO Community / Enterprise
+        - Llama Parse
+
+        Args:
+            x2text_instance_id (str): UUID of the text extractor
+            file_path (str): Path to the file
+            output_file_path (Optional[str], optional): File path to write
+                the extracted contents into. Defaults to None.
+            enable_highlight (bool, optional): Flag to provide highlighting metadata.
+                Defaults to False.
+            usage_kwargs (dict[Any, Any], optional): Dict to capture usage.
+                Defaults to {}.
+            process_text (Optional[Callable[[str], str]], optional): Optional function
+                to post-process the text. Defaults to None.
+
+        Raises:
+            IndexingError: Errors during text extraction
+        """
+        self.tool.stream_log("Extracting text from input file")
+        extracted_text = ""
+        try:
+            x2text = X2Text(
+                tool=self.tool,
+                adapter_instance_id=x2text_instance_id,
+                usage_kwargs=usage_kwargs,
+            )
+            if enable_highlight and isinstance(x2text._x2text_instance, LLMWhisperer):
+                process_response: TextExtractionResult = x2text.process(
+                    input_file_path=file_path,
+                    output_file_path=output_file_path,
+                    enable_highlight=enable_highlight,
+                )
+                whisper_hash_value = process_response.extraction_metadata.whisper_hash
+
+                metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
+
+                self.tool.update_exec_metadata(metadata)
+
+            else:
+                process_response: TextExtractionResult = x2text.process(
+                    input_file_path=file_path,
+                    output_file_path=output_file_path,
+                )
+
+            extracted_text = process_response.extracted_text
+        except AdapterError as e:
+            # Wrapping AdapterErrors with SdkError
+            raise IndexingError(str(e)) from e
+        if process_text:
+            try:
+                result = process_text(extracted_text)
+                if isinstance(result, str):
+                    extracted_text = result
+                else:
+                    logger.warning("'process_text' is expected to return an 'str'")
+            except Exception as e:
+                logger.error(f"Error occured inside function 'process_text': {e}")
+        return extracted_text
+
+    @log_elapsed(operation="CHECK_AND_INDEX(overall)")
     def index(
         self,
         tool_id: str,
@@ -136,6 +193,7 @@ class Index:
         output_file_path: Optional[str] = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
+        process_text: Optional[Callable[[str], str]] = None,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -159,8 +217,7 @@ class Index:
         Returns:
             str: A unique ID for the file and indexing arguments combination
         """
-        doc_id = self.generate_file_id(
-            tool_id=tool_id,
+        doc_id = self.generate_index_key(
             vector_db=vector_db_instance_id,
             embedding=embedding_instance_id,
             x2text=x2text_instance_id,
@@ -217,140 +274,123 @@ class Index:
                     self.tool.stream_log(f"No nodes found for {doc_id}")
             except Exception as e:
                 self.tool.stream_log(
-                    f"Error querying {vector_db_instance_id}: {e}", level=LogLevel.ERROR
+                    f"Error querying {vector_db_instance_id}: {e}, proceeding to index",
+                    level=LogLevel.ERROR,
                 )
 
-            if doc_id_found and reindex:
-                # Delete the nodes for the doc_id
-                try:
-                    vector_db.delete(ref_doc_id=doc_id)
-                    self.tool.stream_log(f"Deleted nodes for {doc_id}")
-                except Exception as e:
-                    self.tool.stream_log(
-                        f"Error deleting nodes for {doc_id}: {e}",
-                        level=LogLevel.ERROR,
-                    )
-                    raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
-                doc_id_found = False
-
-            if doc_id_found:
+            if doc_id_found and not reindex:
                 self.tool.stream_log(f"File was indexed already under {doc_id}")
                 return doc_id
 
-            # Extract text and index
-            self.tool.stream_log("Extracting text from input file")
-            full_text = []
-            extracted_text = ""
-            try:
-                mime_type = ToolUtils.get_file_mime_type(file_path)
-                if mime_type == "text/plain":
-                    with open(file_path, encoding="utf-8") as file:
-                        extracted_text = file.read()
-                else:
-                    x2text = X2Text(
-                        tool=self.tool, adapter_instance_id=x2text_instance_id
-                    )
-                    if enable_highlight and isinstance(
-                        x2text._x2text_instance, LLMWhisperer
-                    ):
-                        process_response: TextExtractionResult = x2text.process(
-                            input_file_path=file_path,
-                            output_file_path=output_file_path,
-                            enable_highlight=enable_highlight,
-                        )
-                        whisper_hash_value = (
-                            process_response.extraction_metadata.whisper_hash
-                        )
-
-                        metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
-
-                        self.tool.update_exec_metadata(metadata)
-
-                    else:
-                        process_response: TextExtractionResult = x2text.process(
-                            input_file_path=file_path,
-                            output_file_path=output_file_path,
-                        )
-
-                    extracted_text = process_response.extracted_text
-            except AdapterError as e:
-                # Wrapping AdapterErrors with SdkError
-                raise IndexingError(str(e)) from e
-            full_text.append(
-                {
-                    "section": "full",
-                    "text_contents": self._cleanup_text(extracted_text),
-                }
+            extracted_text = self.extract_text(
+                x2text_instance_id=x2text_instance_id,
+                file_path=file_path,
+                output_file_path=output_file_path,
+                enable_highlight=enable_highlight,
+                usage_kwargs=usage_kwargs,
+                process_text=process_text,
             )
-
             if not extracted_text:
                 raise IndexingError("No text available to index")
 
-            # Check if chunking is required
-            documents = []
-            for item in full_text:
-                text = item["text_contents"]
-                self.tool.stream_log("Indexing file...")
-                document = Document(
-                    text=text,
-                    doc_id=doc_id,
-                    metadata={"section": item["section"]},
-                )
-                document.id_ = doc_id
-                documents.append(document)
-            self.tool.stream_log(f"Number of documents: {len(documents)}")
-
-            try:
-                if chunk_size == 0:
-                    parser = SimpleNodeParser.from_defaults(
-                        chunk_size=len(documents[0].text) + 10, chunk_overlap=0
-                    )
-                    nodes = parser.get_nodes_from_documents(
-                        documents, show_progress=True
-                    )
-                    node = nodes[0]
-                    node.embedding = embedding.get_query_embedding(" ")
-                    vector_db.add(doc_id, nodes=[node])
-                    self.tool.stream_log("Added node to vector db")
-                else:
-                    storage_context = vector_db.get_storage_context()
-                    parser = SimpleNodeParser.from_defaults(
-                        chunk_size=chunk_size, chunk_overlap=chunk_overlap
-                    )
-                    self.tool.stream_log("Adding nodes to vector db...")
-                    # TODO: Phase 2:
-                    # Post insertion to VDB, use query using doc_id and
-                    # store all the VDB ids to a table against the doc_id
-                    # During deletion for cases where metadata filtering
-                    # does not work, these ids can be used for direct deletion
-                    # This new table will also act like an audit trail for
-                    # all nodes that were added to the VDB by Unstract
-                    # Once this is in place, the overridden implementation
-                    # of prefixing ids with doc_id before adding to VDB
-                    # can be removed
-                    vector_db.get_vector_store_index_from_storage_context(
-                        documents,
-                        storage_context=storage_context,
-                        show_progress=True,
-                        embed_model=embedding,
-                        node_parser=parser,
-                    )
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error adding nodes to vector db: {e}",
-                    level=LogLevel.ERROR,
-                )
-                raise IndexingError(str(e)) from e
-            self.tool.stream_log("Added nodes to vector db")
-
-            self.tool.stream_log("File has been indexed successfully")
+            self.index_to_vector_db(
+                vector_db=vector_db,
+                embedding=embedding,
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                doc_id=doc_id,
+                text_to_idx=extracted_text,
+                doc_id_found=doc_id_found,
+            )
             return doc_id
         finally:
             vector_db.close()
 
-    def generate_file_id(
+    @log_elapsed(operation="INDEXING")
+    def index_to_vector_db(
         self,
-        tool_id: str,
+        vector_db: VectorDB,
+        embedding: Embedding,
+        chunk_size: int,
+        chunk_overlap: int,
+        text_to_idx: str,
+        doc_id: str,
+        doc_id_found: bool,
+    ):
+        self.tool.stream_log("Indexing file...")
+        full_text = [
+            {
+                "section": "full",
+                "text_contents": text_to_idx,
+            }
+        ]
+        # Check if chunking is required
+        documents = []
+        for item in full_text:
+            text = item["text_contents"]
+            document = Document(
+                text=text,
+                doc_id=doc_id,
+                metadata={"section": item["section"]},
+            )
+            document.id_ = doc_id
+            documents.append(document)
+        self.tool.stream_log(f"Number of documents: {len(documents)}")
+
+        if doc_id_found:
+            # Delete the nodes for the doc_id
+            try:
+                vector_db.delete(ref_doc_id=doc_id)
+                self.tool.stream_log(f"Deleted nodes for {doc_id}")
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error deleting nodes for {doc_id}: {e}",
+                    level=LogLevel.ERROR,
+                )
+                raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
+
+        try:
+            if chunk_size == 0:
+                parser = SentenceSplitter.from_defaults(
+                    chunk_size=len(documents[0].text) + 10,
+                    chunk_overlap=0,
+                    callback_manager=embedding.get_callback_manager(),
+                )
+                nodes = parser.get_nodes_from_documents(documents, show_progress=True)
+                node = nodes[0]
+                node.embedding = embedding.get_query_embedding(" ")
+                vector_db.add(doc_id, nodes=[node])
+                self.tool.stream_log("Added node to vector db")
+            else:
+                self.tool.stream_log("Adding nodes to vector db...")
+                # TODO: Phase 2:
+                # Post insertion to VDB, use query using doc_id and
+                # store all the VDB ids to a table against the doc_id
+                # During deletion for cases where metadata filtering
+                # does not work, these ids can be used for direct deletion
+                # This new table will also act like an audit trail for
+                # all nodes that were added to the VDB by Unstract
+                # Once this is in place, the overridden implementation
+                # of prefixing ids with doc_id before adding to VDB
+                # can be removed
+                vector_db.index_document(
+                    documents,
+                    chunk_size=chunk_size,
+                    chunk_overlap=chunk_overlap,
+                    show_progress=True,
+                )
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error adding nodes to vector db: {e}",
+                level=LogLevel.ERROR,
+            )
+            raise IndexingError(str(e)) from e
+
+        self.tool.stream_log("File has been indexed successfully")
+        return
+
+    def generate_index_key(
+        self,
         vector_db: str,
         embedding: str,
         x2text: str,
@@ -362,7 +402,6 @@ class Index:
         """Generates a unique ID useful for identifying files during indexing.
 
         Args:
-            tool_id (str): Unique ID of the tool or workflow
             vector_db (str): UUID of the vector DB adapter
             embedding (str): UUID of the embedding adapter
             x2text (str): UUID of the X2Text adapter
@@ -386,7 +425,6 @@ class Index:
         # which might not be relevant to indexing. This is easier for now than
         # marking certain keys of the adapter config as necessary.
         index_key = {
-            "tool_id": tool_id,
             "file_hash": file_hash,
             "vector_db_config": ToolAdapter.get_adapter_config(self.tool, vector_db),
             "embedding_config": ToolAdapter.get_adapter_config(self.tool, embedding),
@@ -401,7 +439,28 @@ class Index:
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
 
-    @deprecated("Instantiate Index and call index() instead")
+    @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
+    def generate_file_id(
+        self,
+        tool_id: str,
+        vector_db: str,
+        embedding: str,
+        x2text: str,
+        chunk_size: str,
+        chunk_overlap: str,
+        file_path: Optional[str] = None,
+        file_hash: Optional[str] = None,
+    ) -> str:
+        return self.generate_index_key(
+            vector_db,
+            embedding,
+            x2text,
+            chunk_size,
+            chunk_overlap,
+            file_path,
+            file_hash,
+        )
+
     def index_file(
         self,
         tool_id: str,

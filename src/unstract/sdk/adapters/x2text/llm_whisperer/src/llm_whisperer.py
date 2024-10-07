@@ -1,6 +1,8 @@
+import json
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Any, Optional
 
 import requests
@@ -143,6 +145,10 @@ class LLMWhisperer(X2TextAdapter):
             WhispererConfig.PROCESSING_MODE: self.config.get(
                 WhispererConfig.PROCESSING_MODE, ProcessingModes.TEXT.value
             ),
+            # Not providing default value to maintain legacy compatablity
+            # Providing default value will overide the params
+            # processing_mode, force_text_processing
+            WhispererConfig.MODE: self.config.get(WhispererConfig.MODE),
             WhispererConfig.OUTPUT_MODE: self.config.get(
                 WhispererConfig.OUTPUT_MODE, OutputModes.LINE_PRINTER.value
             ),
@@ -162,6 +168,8 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.PAGES_TO_EXTRACT,
                 WhispererDefaults.PAGES_TO_EXTRACT,
             ),
+            WhispererConfig.ADD_LINE_NOS: WhispererDefaults.ADD_LINE_NOS,
+            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
             WhispererConfig.PAGE_SEPARATOR: self.config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
@@ -264,7 +272,10 @@ class LLMWhisperer(X2TextAdapter):
         logger.info(f"Extracting async for whisper hash: {whisper_hash}")
 
         headers: dict[str, Any] = self._get_request_headers()
-        params = {WhisperStatus.WHISPER_HASH: whisper_hash}
+        params = {
+            WhisperStatus.WHISPER_HASH: whisper_hash,
+            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
+        }
 
         # Polls in fixed intervals and checks status
         self._check_status_until_ready(
@@ -278,7 +289,7 @@ class LLMWhisperer(X2TextAdapter):
             params=params,
         )
         if retrieve_response.status_code == 200:
-            return retrieve_response.content.decode("utf-8")
+            return retrieve_response.json()
         else:
             raise ExtractorError(
                 "Error retrieving from LLMWhisperer: "
@@ -310,25 +321,61 @@ class LLMWhisperer(X2TextAdapter):
     def _extract_text_from_response(
         self, output_file_path: Optional[str], response: requests.Response
     ) -> str:
-
-        output = ""
+        output_json = {}
         if response.status_code == 200:
-            output = response.content.decode("utf-8")
+            output_json = response.json()
         elif response.status_code == 202:
             whisper_hash = response.json().get(WhisperStatus.WHISPER_HASH)
-            output = self._extract_async(whisper_hash=whisper_hash)
+            output_json = self._extract_async(whisper_hash=whisper_hash)
         else:
             raise ExtractorError("Couldn't extract text from file")
+        if output_file_path:
+            self._write_output_to_file(
+                output_json=output_json,
+                output_file_path=Path(output_file_path),
+            )
+        return output_json.get("text", "")
 
+    def _write_output_to_file(self, output_json: dict, output_file_path: Path) -> None:
+        """Writes the extracted text and metadata to the specified output file
+        and metadata file.
+
+        Args:
+            output_json (dict): The dictionary containing the extracted data,
+                with "text" as the key for the main content.
+            output_file_path (Path): The file path where the extracted text
+                should be written.
+
+        Raises:
+            ExtractorError: If there is an error while writing the output file.
+        """
         try:
-            # Write output to a file
-            if output_file_path:
-                with open(output_file_path, "w", encoding="utf-8") as f:
-                    f.write(output)
-        except OSError as e:
-            logger.error(f"OS error while writing {output_file_path}: {e} ")
+            text_output = output_json.get("text", "")
+            logger.info(f"Writing output to {output_file_path}")
+            output_file_path.write_text(text_output, encoding="utf-8")
+            try:
+                # Define the directory of the output file and metadata paths
+                output_dir = output_file_path.parent
+                metadata_dir = output_dir / "metadata"
+                metadata_file_name = output_file_path.with_suffix(".json").name
+                metadata_file_path = metadata_dir / metadata_file_name
+                # Ensure the metadata directory exists
+                metadata_dir.mkdir(parents=True, exist_ok=True)
+                # Remove the "text" key from the metadata
+                metadata = {
+                    key: value for key, value in output_json.items() if key != "text"
+                }
+                metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
+                logger.info(f"Writing metadata to {metadata_file_path}")
+                metadata_file_path.write_text(metadata_json, encoding="utf-8")
+            except Exception as e:
+                logger.error(
+                    f"Error while writing metadata to {metadata_file_path}: {e}"
+                )
+
+        except Exception as e:
+            logger.error(f"Error while writing {output_file_path}: {e}")
             raise ExtractorError(str(e))
-        return output
 
     def process(
         self,

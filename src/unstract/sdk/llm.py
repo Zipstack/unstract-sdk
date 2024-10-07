@@ -1,12 +1,13 @@
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
+from deprecated import deprecated
+from llama_index.core.base.llms.types import CompletionResponseGen
 from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
-from typing_extensions import deprecated
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
@@ -68,15 +69,59 @@ class LLM:
     def complete(
         self,
         prompt: str,
-        retries: int = 3,
+        extract_json: bool = True,
+        process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any]:
+        """Generates a completion response for the given prompt.
+
+        Args:
+            prompt (str): The input text prompt for generating the completion.
+            extract_json (bool, optional): If set to True, the response text is
+                processed using a regex to extract JSON content from it. If no JSON is
+                found, the text is returned as it is. Defaults to True.
+            process_text (Optional[Callable[[str], str]], optional): A callable that
+                processes the generated text and extracts specific information.
+                Defaults to None.
+            **kwargs (Any): Additional arguments passed to the completion function.
+
+        Returns:
+            dict[str, Any]: A dictionary containing the result of the completion
+                and any processed output.
+
+        Raises:
+            LLMError: If an error occurs during the completion process, it will be
+                raised after being processed by `parse_llm_err`.
+        """
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
-            match = LLM.json_regex.search(response.text)
-            if match:
-                response.text = match.group(0)
-            return {LLM.RESPONSE: response}
+            process_text_output = {}
+            if process_text:
+                try:
+                    process_text_output = process_text(response, LLM.json_regex)
+                    if not isinstance(process_text_output, dict):
+                        process_text_output = {}
+                except Exception as e:
+                    logger.error(f"Error occured inside function 'process_text': {e}")
+                    process_text_output = {}
+            if extract_json:
+                match = LLM.json_regex.search(response.text)
+                if match:
+                    response.text = match.group(0)
+            return {LLM.RESPONSE: response, **process_text_output}
+        except Exception as e:
+            raise parse_llm_err(e) from e
+
+    def stream_complete(
+        self,
+        prompt: str,
+        **kwargs: Any,
+    ) -> CompletionResponseGen:
+        try:
+            response: CompletionResponseGen = self._llm_instance.stream_complete(
+                prompt, **kwargs
+            )
+            return response
         except Exception as e:
             raise parse_llm_err(e) from e
 
@@ -147,6 +192,17 @@ class LLM:
                 Class name
         """
         return self._llm_instance.class_name()
+
+    def get_model_name(self) -> str:
+        """Gets the name of the LLM model.
+
+        Args:
+            NA
+
+        Returns:
+            LLM model name
+        """
+        return self._llm_instance.model
 
     @deprecated("Use LLM instead of ToolLLM")
     def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:

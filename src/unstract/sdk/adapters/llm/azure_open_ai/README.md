@@ -1,1 +1,1 @@
-# Unstract Azure Open AI LLM Adapter
+# Unstract Azure OpenAI LLM Adapter

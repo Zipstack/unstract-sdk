@@ -7,3 +7,5 @@ metadata = {
     "description": "Replicate LLM adapter",
     "is_active": True,
 }
+
+__all__ = ["ReplicateLLM"]

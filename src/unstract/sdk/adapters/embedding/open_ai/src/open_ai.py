@@ -1,6 +1,7 @@
 import os
 from typing import Any
 
+import httpx
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.openai import OpenAIEmbedding
 
@@ -11,10 +12,13 @@ from unstract.sdk.adapters.exceptions import AdapterError
 
 class Constants:
     API_KEY = "api_key"
+    MODEL = "model"
     API_BASE_VALUE = "https://api.openai.com/v1/"
     API_BASE_KEY = "api_base"
     ADAPTER_NAME = "adapter_name"
     API_TYPE = "openai"
+    TIMEOUT = "timeout"
+    DEFAULT_TIMEOUT = 240
 
 
 class OpenAI(EmbeddingAdapter):
@@ -51,12 +55,18 @@ class OpenAI(EmbeddingAdapter):
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
+            timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
+            httpx_timeout = httpx.Timeout(10.0, connect=60.0)
+            httpx_client = httpx.Client(timeout=httpx_timeout)
             embedding: BaseEmbedding = OpenAIEmbedding(
                 api_key=str(self.config.get(Constants.API_KEY)),
                 api_base=str(
                     self.config.get(Constants.API_BASE_KEY, Constants.API_BASE_VALUE)
                 ),
+                model=str(self.config.get(Constants.MODEL)),
                 api_type=Constants.API_TYPE,
+                timeout=timeout,
+                http_client=httpx_client,
             )
             return embedding
         except Exception as e:

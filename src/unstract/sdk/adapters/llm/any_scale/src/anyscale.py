@@ -1,12 +1,12 @@
 import os
 from typing import Any
 
+from llama_index.core.constants import DEFAULT_NUM_OUTPUTS
 from llama_index.core.llms import LLM
 from llama_index.llms.anyscale import Anyscale
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
 
@@ -14,8 +14,9 @@ class Constants:
     MODEL = "model"
     API_KEY = "api_key"
     API_BASE = "api_base"
-    MAX_RETIRES = "max_retries"
+    MAX_RETRIES = "max_retries"
     ADDITIONAL_KWARGS = "additional_kwargs"
+    MAX_TOKENS = "max_tokens"
 
 
 class AnyScaleLLM(LLMAdapter):
@@ -52,21 +53,18 @@ class AnyScaleLLM(LLMAdapter):
 
     def get_llm_instance(self) -> LLM:
         try:
+            max_tokens = int(self.config.get(Constants.MAX_TOKENS, DEFAULT_NUM_OUTPUTS))
             llm: LLM = Anyscale(
                 model=str(self.config.get(Constants.MODEL)),
                 api_key=str(self.config.get(Constants.API_KEY)),
                 api_base=str(self.config.get(Constants.API_BASE)),
                 additional_kwargs=self.config.get(Constants.ADDITIONAL_KWARGS),
                 max_retries=int(
-                    self.config.get(Constants.MAX_RETIRES, LLMKeys.DEFAULT_MAX_RETRIES)
+                    self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 temperature=0,
+                max_tokens=max_tokens,
             )
             return llm
         except Exception as e:
             raise AdapterError(str(e))
-
-    def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        return test_result

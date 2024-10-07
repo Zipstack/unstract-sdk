@@ -6,7 +6,6 @@ from llama_index.llms.azure_openai import AzureOpenAI
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
-from unstract.sdk.adapters.llm.helper import LLMHelper
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
 
@@ -16,6 +15,7 @@ class Constants:
     API_KEY = "api_key"
     API_VERSION = "api_version"
     MAX_RETRIES = "max_retries"
+    MAX_TOKENS = "max_tokens"
     AZURE_ENDPONT = "azure_endpoint"
     API_TYPE = "azure"
     TIMEOUT = "timeout"
@@ -58,6 +58,8 @@ class AzureOpenAILLM(LLMAdapter):
         max_retries = int(
             self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
         )
+        max_tokens = self.config.get(Constants.MAX_TOKENS)
+        max_tokens = int(max_tokens) if max_tokens else None
         try:
             llm: LLM = AzureOpenAI(
                 model=self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
@@ -71,12 +73,8 @@ class AzureOpenAILLM(LLMAdapter):
                     self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
                 ),
                 max_retries=max_retries,
+                max_tokens=max_tokens,
             )
             return llm
         except Exception as e:
             raise AdapterError(str(e))
-
-    def test_connection(self) -> bool:
-        llm = self.get_llm_instance()
-        test_result: bool = LLMHelper.test_llm_instance(llm=llm)
-        return test_result

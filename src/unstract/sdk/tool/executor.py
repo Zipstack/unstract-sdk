@@ -49,8 +49,10 @@ class ToolExecutor:
             self.tool.stream_error_and_exit("--settings are required for RUN command")
         settings: dict[str, Any] = loads(args.settings)
 
+        tool_name = self.tool.properties["displayName"]
+        tool_version = self.tool.properties["toolVersion"]
         self.tool.stream_log(
-            f"Running tool with "
+            f"Running tool '{tool_name}:{tool_version}' with "
             f"Workflow ID: {self.tool.workflow_id}, "
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}"
@@ -72,7 +74,8 @@ class ToolExecutor:
                 output_dir=self.tool.get_output_dir(),
             )
         except Exception as e:
-            logger.error(f"Error while tool run: {e}", stack_info=True, exc_info=True)
-            self.tool.stream_error_and_exit(f"Error while running tool: {str(e)}")
+            msg = f"Error while running tool '{tool_name}': {str(e)}"
+            logger.error(msg, stack_info=True, exc_info=True)
+            self.tool.stream_error_and_exit(msg)
 
         # TODO: Call tool method to validate if output was written

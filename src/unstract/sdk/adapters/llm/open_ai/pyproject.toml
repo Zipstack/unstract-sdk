@@ -6,7 +6,7 @@ build-backend = "pdm.backend"
 [project]
 name = "unstract-open-ai-llm"
 version = "0.0.1"
-description = "Open AI LLM"
+description = "OpenAI LLM"
 authors = [
     {name = "Zipstack Inc.", email = "devsupport@zipstack.com"},
 ]

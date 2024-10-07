@@ -7,6 +7,13 @@ class ProcessingModes(Enum):
     TEXT = "text"
 
 
+class Modes(Enum):
+    NATIVE_TEXT = "native_text"
+    LOW_COST = "low_cost"
+    HIGH_QUALITY = "high_quality"
+    FORM = "form"
+
+
 class OutputModes(Enum):
     LINE_PRINTER = "line-printer"
     DUMP_TEXT = "dump-text"
@@ -52,6 +59,7 @@ class WhispererConfig:
 
     URL = "url"
     PROCESSING_MODE = "processing_mode"
+    MODE = "mode"
     OUTPUT_MODE = "output_mode"
     UNSTRACT_KEY = "unstract_key"
     MEDIAN_FILTER_SIZE = "median_filter_size"
@@ -61,6 +69,8 @@ class WhispererConfig:
     HORIZONTAL_STRETCH_FACTOR = "horizontal_stretch_factor"
     PAGES_TO_EXTRACT = "pages_to_extract"
     STORE_METADATA_FOR_HIGHLIGHTING = "store_metadata_for_highlighting"
+    ADD_LINE_NOS = "add_line_nos"
+    OUTPUT_JSON = "output_json"
     PAGE_SEPARATOR = "page_seperator"
 
 
@@ -87,4 +97,6 @@ class WhispererDefaults:
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
     PAGES_TO_EXTRACT = ""
+    ADD_LINE_NOS = True
+    OUTPUT_JSON = True
     PAGE_SEPARATOR = "<<< >>>"
