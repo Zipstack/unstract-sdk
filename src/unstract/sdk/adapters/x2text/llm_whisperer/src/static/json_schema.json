@@ -114,6 +114,18 @@
         "title": "Gaussian Blur Radius",
         "default": 0.0,
         "description": "The radius of the gaussian blur to use for pre-processing the image during OCR based extraction. Useful to eliminate noise from the image. Default is 0.0 if the value is not explicitly set. Available only in the Enterprise version."
+      },
+      "mark_vertical_lines": {
+        "type": "boolean",
+        "title": "Mark Vertical Lines",
+        "default": false,
+        "description": "Mark vertical lines during OCR processing. Useful to improve text alignment in tables or forms."
+      },
+      "mark_horizontal_lines": {
+        "type": "boolean",
+        "title": "Mark Horizontal Lines",
+        "default": false,
+        "description": "Mark horizontal lines during OCR processing."
       }
     },
     "required": [
