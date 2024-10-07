@@ -174,6 +174,14 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
+            WhispererConfig.MARK_VERTICAL_LINES: self.config.get(
+                        WhispererConfig.MARK_VERTICAL_LINES,
+                        WhispererDefaults.MARK_VERTICAL_LINES,
+                    ),
+            WhispererConfig.MARK_HORIZONTAL_LINES: self.config.get(
+                        WhispererConfig.MARK_HORIZONTAL_LINES,
+                        WhispererDefaults.MARK_HORIZONTAL_LINES,
+                    ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(
