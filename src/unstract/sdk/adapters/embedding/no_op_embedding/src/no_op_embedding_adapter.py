@@ -49,5 +49,4 @@ class NoOpEmbeddingAdapter(EmbeddingAdapter):
         return embedding
 
     def test_connection(self) -> bool:
-        time.sleep(self.config.get("wait_time"))
         return True

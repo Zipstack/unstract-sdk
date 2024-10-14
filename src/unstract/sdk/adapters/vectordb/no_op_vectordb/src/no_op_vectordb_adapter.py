@@ -67,7 +67,6 @@ class NoOpVectorDBAdapter(VectorDBAdapter):
             raise AdapterError(str(e))
 
     def test_connection(self) -> bool:
-        time.sleep(self._config.get("wait_time"))
         return True
 
     def close(self, **kwargs: Any) -> None:
