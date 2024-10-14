@@ -252,7 +252,7 @@ class LLM:
                 raise RateLimitError(msg)
             raise LLMError(msg) from e
 
-    def is_noOp(self, llm: LlamaIndexLLM) -> bool:
+    def is_no_op(self, llm: LlamaIndexLLM) -> bool:
         if isinstance(llm, NoOpLLM):
             return True
         return False
