@@ -54,4 +54,9 @@ class NoOpLLM(CustomLLM):
 
     @property
     def metadata(self) -> LLMMetadata:
+        """Method to fetch LLM metadata. Overriden to extent Base class.
+
+        Returns:
+            LLMMetadata
+        """
         return LLMMetadata(num_output=-1)

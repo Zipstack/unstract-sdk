@@ -60,8 +60,7 @@ class NoOpVectorDBAdapter(VectorDBAdapter):
             vector_db: VectorStore = NoOpVectorDB(
                 dim=dimension, wait_time=self._config.get(VectorDbConstants.WAIT_TIME)
             )
-            if vector_db is not None:
-                self._client = vector_db.client
+            self._client = vector_db.client
             return vector_db
         except Exception as e:
             raise AdapterError(str(e))
@@ -73,7 +72,7 @@ class NoOpVectorDBAdapter(VectorDBAdapter):
         pass
 
     def delete(self, ref_doc_id: str, **delete_kwargs: Any) -> None:
-        time.sleep(self._config.get("wait_time"))
+        pass
 
     def add(self, ref_doc_id: str, nodes: list[BaseNode]) -> list[str]:
         mock_result: list[str] = []

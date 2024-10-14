@@ -14,9 +14,9 @@
     },
     "wait_time": {
       "type": "number",
-      "title": "Wait time",
+      "title": "Wait time (in seconds)",
       "default": "0",
-      "description": "Provide the wait time."
+      "description": "Provide the time to wait (in seconds) before returning the response. This will be used for any query or addition of nodes to vectordb"
     }
   }
 }
