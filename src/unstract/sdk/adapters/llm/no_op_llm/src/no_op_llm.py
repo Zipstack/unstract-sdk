@@ -10,11 +10,11 @@ from llama_index.core.llms.custom import CustomLLM
 
 
 class NoOpLLM(CustomLLM):
-    wait_time: int
+    wait_time: float
 
     def __init__(
         self,
-        wait_time: int,
+        wait_time: float,
     ) -> None:
         wait_time = wait_time
         super().__init__(wait_time=wait_time)

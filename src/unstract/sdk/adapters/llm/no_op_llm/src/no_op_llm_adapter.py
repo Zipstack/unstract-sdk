@@ -50,12 +50,8 @@ class NoOpLLMAdapter(LLMAdapter):
         llm = self.get_llm_instance()
         if not llm:
             return False
-        response = llm.complete(
+        llm.complete(
             "The capital of Tamilnadu is ",
             temperature=0.003,
         )
-        response_lower_case: str = response.text.lower()
-        if response_lower_case:
-            return True
-        else:
-            return False
+        return True

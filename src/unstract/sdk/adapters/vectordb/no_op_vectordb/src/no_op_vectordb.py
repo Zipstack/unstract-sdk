@@ -8,11 +8,11 @@ class NoOpVectorDB(VectorStore):
     stores_text: bool = True
     stores_node: bool = True
     is_embedding_query: bool = True
-    wait_time: int = 0
+    wait_time: float = 0
 
     def __init__(
         self,
-        wait_time: int,
+        wait_time: float,
         dim: int,
     ) -> None:
         """Initialize params."""
