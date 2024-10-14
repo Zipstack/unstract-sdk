@@ -4,7 +4,7 @@ metadata = {
     "name": NoOpLLMAdapter.__name__,
     "version": "1.0.0",
     "adapter": NoOpLLMAdapter,
-    "description": "Ollama LLM adapter",
+    "description": "NoOp LLM adapter",
     "is_active": True,
 }
 
