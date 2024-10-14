@@ -48,6 +48,9 @@ class NoOpX2TextAdapter(X2TextAdapter):
             " This is a sample response and intended for testing \f"
         )
         time.sleep(self.config.get("wait_time"))
+        if output_file_path:
+            with open(output_file_path, "w", encoding="utf-8") as f:
+                f.write(extracted_text)
         return TextExtractionResult(extracted_text=extracted_text)
 
     def test_connection(self) -> bool:
