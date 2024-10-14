@@ -253,10 +253,7 @@ class LLM:
             raise LLMError(msg) from e
 
     def is_no_op(self, llm: LlamaIndexLLM) -> bool:
-        if isinstance(llm, NoOpLLM):
-            return True
-        return False
-
+        return isinstance(llm, NoOpLLM)
 
 # Legacy
 ToolLLM = LLM
