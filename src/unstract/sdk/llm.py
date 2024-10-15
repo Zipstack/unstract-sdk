@@ -14,7 +14,6 @@ from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.llm import adapters
 from unstract.sdk.adapters.llm.exceptions import parse_llm_err
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
-from unstract.sdk.adapters.llm.no_op_llm.src.no_op_llm import NoOpLLM
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.helper import SdkHelper
@@ -252,8 +251,6 @@ class LLM:
                 raise RateLimitError(msg)
             raise LLMError(msg) from e
 
-    def is_no_op(self, llm: LlamaIndexLLM) -> bool:
-        return isinstance(llm, NoOpLLM)
 
 # Legacy
 ToolLLM = LLM
