@@ -61,7 +61,6 @@ class WhispererConfig:
     LINE_SPLITTER_STRATEGY = "line_splitter_strategy"
     HORIZONTAL_STRETCH_FACTOR = "horizontal_stretch_factor"
     PAGES_TO_EXTRACT = "pages_to_extract"
-    STORE_METADATA_FOR_HIGHLIGHTING = "store_metadata_for_highlighting"
     MARK_VERTICAL_LINES = "mark_vertical_lines"
     MARK_HORIZONTAL_LINES = "mark_horizontal_lines"
     PAGE_SEPARATOR = "page_seperator"
