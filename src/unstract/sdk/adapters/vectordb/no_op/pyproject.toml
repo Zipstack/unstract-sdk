@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 
 [project]
-name = "unstract-noOp-vectordb"
+name = "unstract-no-op-vectordb"
 version = "0.0.1"
 description = "NoOp Vector Database"
 authors = [

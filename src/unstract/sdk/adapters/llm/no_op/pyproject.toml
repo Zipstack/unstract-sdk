@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 
 [project]
-name = "unstract-noOp-llm"
+name = "unstract-no-op-llm"
 version = "0.0.1"
 description = "noOp LLM"
 authors = [

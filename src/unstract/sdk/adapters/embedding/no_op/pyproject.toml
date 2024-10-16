@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 
 [project]
-name = "unstract-noOp-embedding"
+name = "unstract-no-op-embedding"
 version = "0.0.1"
 description = "NoOp Embedding"
 authors = [

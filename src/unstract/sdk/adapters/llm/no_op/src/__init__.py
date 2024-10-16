@@ -1,9 +1,9 @@
-from .no_op_llm_adapter import NoOpLLMAdapter
+from unstract.sdk.adapters.llm.no_op.src.no_op_llm import NoOpLLM
 
 metadata = {
-    "name": NoOpLLMAdapter.__name__,
+    "name": NoOpLLM.__name__,
     "version": "1.0.0",
-    "adapter": NoOpLLMAdapter,
+    "adapter": NoOpLLM,
     "description": "NoOp LLM adapter",
     "is_active": True,
 }

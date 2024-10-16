@@ -9,7 +9,7 @@ from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 logger = logging.getLogger(__name__)
 
 
-class NoOpX2TextAdapter(X2TextAdapter):
+class NoOpX2Text(X2TextAdapter):
     def __init__(self, settings: dict[str, Any]):
         super().__init__("NoOpX2Text")
         self.config = settings

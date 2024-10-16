@@ -1,9 +1,9 @@
-from .no_op_embedding_adapter import NoOpEmbeddingAdapter
+from .no_op_embedding import NoOpEmbedding
 
 metadata = {
-    "name": NoOpEmbeddingAdapter.__name__,
+    "name": NoOpEmbedding.__name__,
     "version": "1.0.0",
-    "adapter": NoOpEmbeddingAdapter,
+    "adapter": NoOpEmbedding,
     "description": "NoOp embedding adapter",
     "is_active": True,
 }

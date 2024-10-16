@@ -1,62 +1,57 @@
-import time
+import logging
+import os
 from typing import Any
 
-from llama_index.core.base.llms.types import (
-    CompletionResponse,
-    CompletionResponseGen,
-    LLMMetadata,
-)
-from llama_index.core.llms.custom import CustomLLM
+from llama_index.core.llms import LLM
+
+from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
+from unstract.sdk.adapters.llm.no_op.src.no_op_custom_llm import NoOpCustomLLM
+
+logger = logging.getLogger(__name__)
 
 
-class NoOpLLM(CustomLLM):
-    wait_time: float
+class NoOpLLM(LLMAdapter):
+    def __init__(self, settings: dict[str, Any]):
+        super().__init__("NoOpLlm")
+        self.config = settings
 
-    def __init__(
-        self,
-        wait_time: float,
-    ) -> None:
-        wait_time = wait_time
-        super().__init__(wait_time=wait_time)
+    @staticmethod
+    def get_id() -> str:
+        return "noOpLlm|f673a5a2-90f9-40f5-94c0-9fbc663b7553"
 
-    @classmethod
-    def class_name(cls) -> str:
-        return "NoOpLLM"
+    @staticmethod
+    def get_name() -> str:
+        return "No Op LLM"
 
-    def _generate_text(self) -> str:
-        # Returns a JSON here to support for all enforce types.
-        return '{ "response":"This is a sample response from a NoOp LLM Adapter."}'
+    @staticmethod
+    def get_description() -> str:
+        return "No Op LLM"
 
-    def complete(
-        self, prompt: str, formatted: bool = False, **kwargs: Any
-    ) -> CompletionResponse:
-        time.sleep(self.wait_time)
-        response_text = self._generate_text()
+    @staticmethod
+    def get_provider() -> str:
+        return "noOpLlm"
 
-        return CompletionResponse(
-            text=response_text,
+    @staticmethod
+    def get_icon() -> str:
+        return "/icons/adapter-icons/noOpLlm.png"
+
+    @staticmethod
+    def get_json_schema() -> str:
+        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
+        schema = f.read()
+        f.close()
+        return schema
+
+    def get_llm_instance(self) -> LLM:
+        llm: LLM = NoOpCustomLLM(wait_time=self.config.get("wait_time"))
+        return llm
+
+    def test_connection(self) -> bool:
+        llm = self.get_llm_instance()
+        if not llm:
+            return False
+        llm.complete(
+            "The capital of Tamilnadu is ",
+            temperature=0.003,
         )
-
-    def stream_complete(
-        self, prompt: str, formatted: bool = False, **kwargs: Any
-    ) -> CompletionResponseGen:
-
-        def gen_response() -> CompletionResponseGen:
-            response_text = self._generate_text()
-            yield CompletionResponse(
-                text=response_text,
-                delta=response_text,
-            )
-
-        time.sleep(self.wait_time)
-
-        return gen_response()
-
-    @property
-    def metadata(self) -> LLMMetadata:
-        """Method to fetch LLM metadata. Overriden to extent Base class.
-
-        Returns:
-            LLMMetadata
-        """
-        return LLMMetadata(num_output=-1)
+        return True

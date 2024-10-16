@@ -15,7 +15,9 @@ from llama_index.core.vector_stores import (
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
-from unstract.sdk.adapters.vectordb.no_op.src.no_op_vectordb import NoOpVectorDB
+from unstract.sdk.adapters.vectordb.no_op.src.no_op_custom_vectordb import (
+    NoOpCustomVectorDB,
+)
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
@@ -295,11 +297,17 @@ class Index:
             if not extracted_text:
                 raise IndexingError("No text available to index")
 
+            # For No-op adapters, addition of nodes to vectorDB should not happen
+            # and this has to be handled in the adapter level. But there are a
+            # few challenges considering callback manager and upstream Llama index
+            # method invocations. Hence, making this check here and returning
+            # the doc id to maintain the legacy flow of adapters.
+
             if isinstance(
                 vector_db.get_vector_db(
                     adapter_instance_id=vector_db_instance_id, embedding_dimension=1
                 ),
-                (NoOpVectorDB),
+                (NoOpCustomVectorDB),
             ):
                 return doc_id
 
