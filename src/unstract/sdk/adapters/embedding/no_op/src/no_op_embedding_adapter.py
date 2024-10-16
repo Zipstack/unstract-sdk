@@ -1,13 +1,10 @@
 import os
-import time
 from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
 
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
-from unstract.sdk.adapters.embedding.no_op_embedding.src.no_op_embedding import (
-    NoOpEmbedding,
-)
+from unstract.sdk.adapters.embedding.no_op.src.no_op_embedding import NoOpEmbedding
 
 
 class NoOpEmbeddingAdapter(EmbeddingAdapter):

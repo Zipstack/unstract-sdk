@@ -1,5 +1,5 @@
 {
-  "title": "NoOp LLM Adapter",
+  "title": "No-op",
   "type": "object",
   "required": [
     "adapter_name",
@@ -9,7 +9,7 @@
     "adapter_name": {
       "type": "string",
       "title": "Name",
-      "default": "",
+      "default": "no-op-embedding",
       "description": "Provide a unique name for this No Op adapter instance. Example: no-op-instance-1"
     },
     "wait_time": {

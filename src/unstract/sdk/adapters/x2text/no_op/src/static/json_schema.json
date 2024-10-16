@@ -1,5 +1,5 @@
 {
-  "title": "NoOp X2Text Convertor",
+  "title": "No-op",
   "type": "object",
   "required": [
     "adapter_name",

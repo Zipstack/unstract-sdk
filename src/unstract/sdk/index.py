@@ -15,9 +15,7 @@ from llama_index.core.vector_stores import (
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
-from unstract.sdk.adapters.vectordb.no_op_vectordb.src.no_op_vectordb import (
-    NoOpVectorDB,
-)
+from unstract.sdk.adapters.vectordb.no_op.src.no_op_vectordb import NoOpVectorDB
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer

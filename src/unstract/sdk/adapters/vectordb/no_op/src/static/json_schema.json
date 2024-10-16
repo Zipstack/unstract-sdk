@@ -1,5 +1,5 @@
 {
-  "title": "NoOp VectorDB Adapter",
+  "title": "No-op",
   "type": "object",
   "required": [
     "adapter_name",

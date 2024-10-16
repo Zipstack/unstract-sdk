@@ -8,9 +8,7 @@ from llama_index.core.vector_stores.types import VectorStore
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
-from unstract.sdk.adapters.vectordb.no_op_vectordb.src.no_op_vectordb import (
-    NoOpVectorDB,
-)
+from unstract.sdk.adapters.vectordb.no_op.src.no_op_vectordb import NoOpVectorDB
 from unstract.sdk.adapters.vectordb.vectordb_adapter import VectorDBAdapter
 
 

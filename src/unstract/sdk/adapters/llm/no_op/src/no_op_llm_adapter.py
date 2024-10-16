@@ -5,7 +5,7 @@ from typing import Any
 from llama_index.core.llms import LLM
 
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
-from unstract.sdk.adapters.llm.no_op_llm.src.no_op_llm import NoOpLLM
+from unstract.sdk.adapters.llm.no_op.src.no_op_llm import NoOpLLM
 
 logger = logging.getLogger(__name__)
 
