@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -11,55 +10,24 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
-from unstract.sdk.adapters.x2text.constants import X2TextConstants
-from unstract.sdk.adapters.x2text.dto import (
-    TextExtractionMetadata,
-    TextExtractionResult,
-)
-from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
+from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     HTTPMethod,
+    Modes,
     OutputModes,
-    ProcessingModes,
     WhispererConfig,
     WhispererDefaults,
     WhispererEndpoint,
     WhispererHeader,
     WhisperStatus,
 )
-from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 
 logger = logging.getLogger(__name__)
 
 
-class LLMWhispererV2(X2TextAdapter):
-    def __init__(self, settings: dict[str, Any]):
-        super().__init__("LLMWhispererV2")
-        self.config = settings
+class LLMWhispererHelper:
 
     @staticmethod
-    def get_id() -> str:
-        return "llmwhisperer|0a1647f0-f65f-410d-843b-3d979c78350e"
-
-    @staticmethod
-    def get_name() -> str:
-        return "LLMWhisperer"
-
-    @staticmethod
-    def get_description() -> str:
-        return "LLMWhisperer V2 X2Text"
-
-    @staticmethod
-    def get_icon() -> str:
-        return "/icons/adapter-icons/LLMWhispererV2.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
-
-    def _get_request_headers(self) -> dict[str, Any]:
+    def get_request_headers(config: dict[str, Any]) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLM Whisperer.
 
         Returns:
@@ -67,11 +35,12 @@ class LLMWhispererV2(X2TextAdapter):
         """
         return {
             "accept": "application/json",
-            WhispererHeader.UNSTRACT_KEY: self.config.get(WhispererConfig.UNSTRACT_KEY),
+            WhispererHeader.UNSTRACT_KEY: config.get(WhispererConfig.UNSTRACT_KEY),
         }
 
-    def _make_request(
-        self,
+    @staticmethod
+    def make_request(
+        config: dict[str, Any],
         request_method: HTTPMethod,
         request_endpoint: str,
         headers: Optional[dict[str, Any]] = None,
@@ -94,10 +63,10 @@ class LLMWhispererV2(X2TextAdapter):
             Response: Response from the request
         """
         llm_whisperer_svc_url = (
-            f"{self.config.get(WhispererConfig.URL)}" f"/v1/{request_endpoint}"
+            f"{config.get(WhispererConfig.URL)}" f"/api/v2/{request_endpoint}"
         )
         if not headers:
-            headers = self._get_request_headers()
+            headers = LLMWhispererHelper.get_request_headers()
 
         try:
             response: Response
@@ -133,7 +102,8 @@ class LLMWhispererV2(X2TextAdapter):
             raise ExtractorError(msg)
         return response
 
-    def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
+    @staticmethod
+    def get_whisper_params(config: dict[str, Any]) -> dict[str, Any]:
         """Gets query params meant for /whisper endpoint.
 
         The params is filled based on the configuration passed.
@@ -142,68 +112,75 @@ class LLMWhispererV2(X2TextAdapter):
             dict[str, Any]: Query params
         """
         params = {
-            WhispererConfig.PROCESSING_MODE: self.config.get(
-                WhispererConfig.PROCESSING_MODE, ProcessingModes.TEXT.value
+            WhispererConfig.PROCESSING_MODE: config.get(
+                WhispererConfig.PROCESSING_MODE, Modes.FORM.value
             ),
-            # Not providing default value to maintain legacy compatablity
-            # Providing default value will overide the params
-            # processing_mode, force_text_processing
-            WhispererConfig.MODE: self.config.get(WhispererConfig.MODE),
-            WhispererConfig.OUTPUT_MODE: self.config.get(
-                WhispererConfig.OUTPUT_MODE, OutputModes.LINE_PRINTER.value
+            WhispererConfig.OUTPUT_MODE: config.get(
+                WhispererConfig.OUTPUT_MODE, OutputModes.LAYOUT_PRESERVING.value
             ),
-            WhispererConfig.FORCE_TEXT_PROCESSING: self.config.get(
-                WhispererConfig.FORCE_TEXT_PROCESSING,
-                WhispererDefaults.FORCE_TEXT_PROCESSING,
-            ),
-            WhispererConfig.LINE_SPLITTER_TOLERANCE: self.config.get(
+            WhispererConfig.LINE_SPLITTER_TOLERANCE: config.get(
                 WhispererConfig.LINE_SPLITTER_TOLERANCE,
                 WhispererDefaults.LINE_SPLITTER_TOLERANCE,
             ),
-            WhispererConfig.HORIZONTAL_STRETCH_FACTOR: self.config.get(
+            WhispererConfig.LINE_SPLITTER_STRATEGY: config.get(
+                WhispererConfig.LINE_SPLITTER_STRATEGY,
+                WhispererDefaults.LINE_SPLITTER_STRATEGY,
+            ),
+            WhispererConfig.HORIZONTAL_STRETCH_FACTOR: config.get(
                 WhispererConfig.HORIZONTAL_STRETCH_FACTOR,
                 WhispererDefaults.HORIZONTAL_STRETCH_FACTOR,
             ),
-            WhispererConfig.PAGES_TO_EXTRACT: self.config.get(
+            WhispererConfig.PAGES_TO_EXTRACT: config.get(
                 WhispererConfig.PAGES_TO_EXTRACT,
                 WhispererDefaults.PAGES_TO_EXTRACT,
             ),
-            WhispererConfig.ADD_LINE_NOS: WhispererDefaults.ADD_LINE_NOS,
-            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
-            WhispererConfig.PAGE_SEPARATOR: self.config.get(
+            WhispererConfig.MARK_VERTICAL_LINES: config.get(
+                WhispererConfig.MARK_VERTICAL_LINES,
+                WhispererDefaults.MARK_VERTICAL_LINES,
+            ),
+            WhispererConfig.MARK_HORIZONTAL_LINES: config.get(
+                WhispererConfig.MARK_HORIZONTAL_LINES,
+                WhispererDefaults.MARK_HORIZONTAL_LINES,
+            ),
+            WhispererConfig.URL_IN_POST: WhispererDefaults.URL_IN_POST,
+            WhispererConfig.PAGE_SEPARATOR: config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
+            WhispererConfig.LANG: config.get(
+                WhispererConfig.LANG,
+                WhispererDefaults.LANG,
+            ),
+            WhispererConfig.TAG: config.get(
+                WhispererConfig.TAG,
+                WhispererDefaults.TAG,
+            ),
+            # Not providing default value to maintain legacy compatablity
+            # these are optional params and identifiers for audit
+            WhispererConfig.FILE_NAME: config.get(WhispererConfig.FILE_NAME),
+            WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK),
+            WhispererConfig.WEBHOOK_METADATA: config.get(
+                WhispererConfig.WEBHOOK_METADATA
+            ),
         }
-        if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
+        if params[WhispererConfig.PROCESSING_MODE] == Modes.LOW_COST.value:
             params.update(
                 {
-                    WhispererConfig.MEDIAN_FILTER_SIZE: self.config.get(
+                    WhispererConfig.MEDIAN_FILTER_SIZE: config.get(
                         WhispererConfig.MEDIAN_FILTER_SIZE,
                         WhispererDefaults.MEDIAN_FILTER_SIZE,
                     ),
-                    WhispererConfig.GAUSSIAN_BLUR_RADIUS: self.config.get(
+                    WhispererConfig.GAUSSIAN_BLUR_RADIUS: config.get(
                         WhispererConfig.GAUSSIAN_BLUR_RADIUS,
                         WhispererDefaults.GAUSSIAN_BLUR_RADIUS,
                     ),
                 }
             )
-
-        if enable_highlight:
-            params.update(
-                {WhispererConfig.STORE_METADATA_FOR_HIGHLIGHTING: enable_highlight}
-            )
         return params
 
-    def test_connection(self) -> bool:
-        self._make_request(
-            request_method=HTTPMethod.GET,
-            request_endpoint=WhispererEndpoint.TEST_CONNECTION,
-        )
-        return True
-
-    def _check_status_until_ready(
-        self, whisper_hash: str, headers: dict[str, Any], params: dict[str, Any]
+    @staticmethod
+    def check_status_until_ready(
+        whisper_hash: str, headers: dict[str, Any], params: dict[str, Any]
     ) -> WhisperStatus:
         """Checks the extraction status by polling.
 
@@ -231,7 +208,7 @@ class LLMWhispererV2(X2TextAdapter):
                 f"Checking status with interval: {POLL_INTERVAL}s"
                 f", request count: {request_count} [max: {MAX_POLLS}]"
             )
-            status_response = self._make_request(
+            status_response = LLMWhispererHelper.make_request(
                 request_method=HTTPMethod.GET,
                 request_endpoint=WhispererEndpoint.STATUS,
                 headers=headers,
@@ -258,7 +235,8 @@ class LLMWhispererV2(X2TextAdapter):
 
         return status
 
-    def _extract_async(self, whisper_hash: str) -> str:
+    @staticmethod
+    def extract_async(whisper_hash: str) -> dict[Any, Any]:
         """Makes an async extraction with LLMWhisperer.
 
         Polls and checks the status first before proceeding to retrieve once.
@@ -271,18 +249,18 @@ class LLMWhispererV2(X2TextAdapter):
         """
         logger.info(f"Extracting async for whisper hash: {whisper_hash}")
 
-        headers: dict[str, Any] = self._get_request_headers()
+        headers: dict[str, Any] = LLMWhispererHelper.get_request_headers()
         params = {
             WhisperStatus.WHISPER_HASH: whisper_hash,
-            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
+            WhispererConfig.TEXT_ONLY: WhispererDefaults.TEXT_ONLY,
         }
 
         # Polls in fixed intervals and checks status
-        self._check_status_until_ready(
+        LLMWhispererHelper.check_status_until_ready(
             whisper_hash=whisper_hash, headers=headers, params=params
         )
 
-        retrieve_response = self._make_request(
+        retrieve_response = LLMWhispererHelper.make_request(
             request_method=HTTPMethod.GET,
             request_endpoint=WhispererEndpoint.RETRIEVE,
             headers=headers,
@@ -296,17 +274,18 @@ class LLMWhispererV2(X2TextAdapter):
                 f"{retrieve_response.status_code} - {retrieve_response.text}"
             )
 
-    def _send_whisper_request(
-        self, input_file_path: str, enable_highlight: bool = False
+    @staticmethod
+    def send_whisper_request(
+        input_file_path: str, config: dict[str, Any]
     ) -> requests.Response:
-        headers = self._get_request_headers()
+        headers = LLMWhispererHelper.get_request_headers(config)
         headers["Content-Type"] = "application/octet-stream"
-        params = self._get_whisper_params(enable_highlight)
+        params = LLMWhispererHelper.get_whisper_params(config)
 
         response: requests.Response
         try:
             with open(input_file_path, "rb") as input_f:
-                response = self._make_request(
+                response = LLMWhispererHelper.make_request(
                     request_method=HTTPMethod.POST,
                     request_endpoint=WhispererEndpoint.WHISPER,
                     headers=headers,
@@ -318,25 +297,27 @@ class LLMWhispererV2(X2TextAdapter):
             raise ExtractorError(str(e))
         return response
 
-    def _extract_text_from_response(
-        self, output_file_path: Optional[str], response: requests.Response
+    @staticmethod
+    def extract_text_from_response(
+        output_file_path: Optional[str], response: requests.Response
     ) -> str:
         output_json = {}
         if response.status_code == 200:
             output_json = response.json()
         elif response.status_code == 202:
             whisper_hash = response.json().get(WhisperStatus.WHISPER_HASH)
-            output_json = self._extract_async(whisper_hash=whisper_hash)
+            output_json = LLMWhispererHelper.extract_async(whisper_hash=whisper_hash)
         else:
             raise ExtractorError("Couldn't extract text from file")
         if output_file_path:
-            self._write_output_to_file(
+            LLMWhispererHelper.write_output_to_file(
                 output_json=output_json,
                 output_file_path=Path(output_file_path),
             )
-        return output_json.get("text", "")
+        return output_json.get("result_text", "")
 
-    def _write_output_to_file(self, output_json: dict, output_file_path: Path) -> None:
+    @staticmethod
+    def write_output_to_file(output_json: dict, output_file_path: Path) -> None:
         """Writes the extracted text and metadata to the specified output file
         and metadata file.
 
@@ -350,7 +331,7 @@ class LLMWhispererV2(X2TextAdapter):
             ExtractorError: If there is an error while writing the output file.
         """
         try:
-            text_output = output_json.get("text", "")
+            text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             output_file_path.write_text(text_output, encoding="utf-8")
             try:
@@ -361,9 +342,11 @@ class LLMWhispererV2(X2TextAdapter):
                 metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
                 metadata_dir.mkdir(parents=True, exist_ok=True)
-                # Remove the "text" key from the metadata
+                # Remove the "result_text" key from the metadata
                 metadata = {
-                    key: value for key, value in output_json.items() if key != "text"
+                    key: value
+                    for key, value in output_json.items()
+                    if key != "result_text"
                 }
                 metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
                 logger.info(f"Writing metadata to {metadata_file_path}")
@@ -376,35 +359,3 @@ class LLMWhispererV2(X2TextAdapter):
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
             raise ExtractorError(str(e))
-
-    def process(
-        self,
-        input_file_path: str,
-        output_file_path: Optional[str] = None,
-        **kwargs: dict[Any, Any],
-    ) -> TextExtractionResult:
-        """Used to extract text from documents.
-
-        Args:
-            input_file_path (str): Path to file that needs to be extracted
-            output_file_path (Optional[str], optional): File path to write
-                extracted text into, if None doesn't write to a file.
-                Defaults to None.
-
-        Returns:
-            str: Extracted text
-        """
-
-        response: requests.Response = self._send_whisper_request(
-            input_file_path,
-            bool(kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)),
-        )
-
-        metadata = TextExtractionMetadata(
-            whisper_hash=response.headers.get(X2TextConstants.WHISPER_HASH, "")
-        )
-
-        return TextExtractionResult(
-            extracted_text=self._extract_text_from_response(output_file_path, response),
-            extraction_metadata=metadata,
-        )
