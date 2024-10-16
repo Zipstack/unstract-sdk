@@ -18,7 +18,7 @@
       "title": "URL",
       "format": "uri",
       "default": "https://llmwhisperer-api.unstract.com",
-      "description": "Provide the URL of the LLM Whisperer service."
+      "description": "Provide the URL of the LLM Whisperer service. Please note that this version of Whisperer is deprecated."
     },
     "unstract_key": {
       "type": "string",
