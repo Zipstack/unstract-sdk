@@ -66,7 +66,7 @@ class LLMWhispererHelper:
             f"{config.get(WhispererConfig.URL)}" f"/api/v2/{request_endpoint}"
         )
         if not headers:
-            headers = LLMWhispererHelper.get_request_headers()
+            headers = LLMWhispererHelper.get_request_headers(config=config)
 
         try:
             response: Response
@@ -103,7 +103,7 @@ class LLMWhispererHelper:
         return response
 
     @staticmethod
-    def get_whisper_params(config: dict[str, Any]) -> dict[str, Any]:
+    def get_whisperer_params(config: dict[str, Any]) -> dict[str, Any]:
         """Gets query params meant for /whisper endpoint.
 
         The params is filled based on the configuration passed.
@@ -112,9 +112,7 @@ class LLMWhispererHelper:
             dict[str, Any]: Query params
         """
         params = {
-            WhispererConfig.PROCESSING_MODE: config.get(
-                WhispererConfig.PROCESSING_MODE, Modes.FORM.value
-            ),
+            WhispererConfig.MODE: config.get(WhispererConfig.MODE, Modes.FORM.value),
             WhispererConfig.OUTPUT_MODE: config.get(
                 WhispererConfig.OUTPUT_MODE, OutputModes.LAYOUT_PRESERVING.value
             ),
@@ -147,23 +145,18 @@ class LLMWhispererHelper:
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
-            WhispererConfig.LANG: config.get(
-                WhispererConfig.LANG,
-                WhispererDefaults.LANG,
-            ),
             WhispererConfig.TAG: config.get(
                 WhispererConfig.TAG,
                 WhispererDefaults.TAG,
             ),
             # Not providing default value to maintain legacy compatablity
             # these are optional params and identifiers for audit
-            WhispererConfig.FILE_NAME: config.get(WhispererConfig.FILE_NAME),
             WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK),
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
             ),
         }
-        if params[WhispererConfig.PROCESSING_MODE] == Modes.LOW_COST.value:
+        if params[WhispererConfig.MODE] == Modes.LOW_COST.value:
             params.update(
                 {
                     WhispererConfig.MEDIAN_FILTER_SIZE: config.get(
@@ -180,7 +173,10 @@ class LLMWhispererHelper:
 
     @staticmethod
     def check_status_until_ready(
-        whisper_hash: str, headers: dict[str, Any], params: dict[str, Any]
+        config: dict[str, Any],
+        whisper_hash: str,
+        headers: dict[str, Any],
+        params: dict[str, Any],
     ) -> WhisperStatus:
         """Checks the extraction status by polling.
 
@@ -209,6 +205,7 @@ class LLMWhispererHelper:
                 f", request count: {request_count} [max: {MAX_POLLS}]"
             )
             status_response = LLMWhispererHelper.make_request(
+                config=config,
                 request_method=HTTPMethod.GET,
                 request_endpoint=WhispererEndpoint.STATUS,
                 headers=headers,
@@ -236,7 +233,7 @@ class LLMWhispererHelper:
         return status
 
     @staticmethod
-    def extract_async(whisper_hash: str) -> dict[Any, Any]:
+    def extract_async(config: dict[str, Any], whisper_hash: str) -> dict[Any, Any]:
         """Makes an async extraction with LLMWhisperer.
 
         Polls and checks the status first before proceeding to retrieve once.
@@ -249,7 +246,7 @@ class LLMWhispererHelper:
         """
         logger.info(f"Extracting async for whisper hash: {whisper_hash}")
 
-        headers: dict[str, Any] = LLMWhispererHelper.get_request_headers()
+        headers: dict[str, Any] = LLMWhispererHelper.get_request_headers(config)
         params = {
             WhisperStatus.WHISPER_HASH: whisper_hash,
             WhispererConfig.TEXT_ONLY: WhispererDefaults.TEXT_ONLY,
@@ -257,10 +254,11 @@ class LLMWhispererHelper:
 
         # Polls in fixed intervals and checks status
         LLMWhispererHelper.check_status_until_ready(
-            whisper_hash=whisper_hash, headers=headers, params=params
+            config=config, whisper_hash=whisper_hash, headers=headers, params=params
         )
 
         retrieve_response = LLMWhispererHelper.make_request(
+            config=config,
             request_method=HTTPMethod.GET,
             request_endpoint=WhispererEndpoint.RETRIEVE,
             headers=headers,
@@ -280,12 +278,13 @@ class LLMWhispererHelper:
     ) -> requests.Response:
         headers = LLMWhispererHelper.get_request_headers(config)
         headers["Content-Type"] = "application/octet-stream"
-        params = LLMWhispererHelper.get_whisper_params(config)
+        params = LLMWhispererHelper.get_whisperer_params(config)
 
         response: requests.Response
         try:
             with open(input_file_path, "rb") as input_f:
                 response = LLMWhispererHelper.make_request(
+                    config=config,
                     request_method=HTTPMethod.POST,
                     request_endpoint=WhispererEndpoint.WHISPER,
                     headers=headers,
@@ -299,14 +298,19 @@ class LLMWhispererHelper:
 
     @staticmethod
     def extract_text_from_response(
-        output_file_path: Optional[str], response: requests.Response
+        config: dict[str, Any],
+        output_file_path: Optional[str],
+        response_dict: dict[str, Any],
+        response: Response,
     ) -> str:
         output_json = {}
         if response.status_code == 200:
             output_json = response.json()
         elif response.status_code == 202:
-            whisper_hash = response.json().get(WhisperStatus.WHISPER_HASH)
-            output_json = LLMWhispererHelper.extract_async(whisper_hash=whisper_hash)
+            whisper_hash = response_dict.get(WhisperStatus.WHISPER_HASH)
+            output_json = LLMWhispererHelper.extract_async(
+                config=config, whisper_hash=whisper_hash
+            )
         else:
             raise ExtractorError("Couldn't extract text from file")
         if output_file_path:

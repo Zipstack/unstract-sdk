@@ -52,7 +52,7 @@ class WhispererConfig:
     """Dictionary keys used to configure LLMWhisperer service."""
 
     URL = "url"
-    PROCESSING_MODE = "mode"
+    MODE = "mode"
     OUTPUT_MODE = "output_mode"
     UNSTRACT_KEY = "unstract_key"
     MEDIAN_FILTER_SIZE = "median_filter_size"
@@ -65,9 +65,7 @@ class WhispererConfig:
     MARK_HORIZONTAL_LINES = "mark_horizontal_lines"
     PAGE_SEPARATOR = "page_seperator"
     URL_IN_POST = "url_in_post"
-    LANG = "lang"
     TAG = "tag"
-    FILE_NAME = "file_name"
     USE_WEBHOOK = "use_webhook"
     WEBHOOK_METADATA = "webhook_metadata"
     TEXT_ONLY = "text_only"
@@ -101,6 +99,5 @@ class WhispererDefaults:
     MARK_VERTICAL_LINES = False
     MARK_HORIZONTAL_LINES = False
     URL_IN_POST = False
-    LANG = "eng"
     TAG = "default"
     TEXT_ONLY = False

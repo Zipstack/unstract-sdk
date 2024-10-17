@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from typing import Any, Optional
@@ -49,6 +50,7 @@ class LLMWhispererV2(X2TextAdapter):
 
     def test_connection(self) -> bool:
         LLMWhispererHelper.make_request(
+            config=self.config,
             request_method=HTTPMethod.GET,
             request_endpoint=WhispererEndpoint.TEST_CONNECTION,
         )
@@ -75,14 +77,15 @@ class LLMWhispererV2(X2TextAdapter):
         response: requests.Response = LLMWhispererHelper.send_whisper_request(
             input_file_path, self.config
         )
-
+        response_text = response.text
+        reponse_dict = json.loads(response_text)
         metadata = TextExtractionMetadata(
-            whisper_hash=response.headers.get(X2TextConstants.WHISPER_HASH, "")
+            whisper_hash=reponse_dict.get(X2TextConstants.WHISPER_HASH_V2, "")
         )
 
         return TextExtractionResult(
             extracted_text=LLMWhispererHelper.extract_text_from_response(
-                output_file_path, response
+                self.config, output_file_path, reponse_dict, response
             ),
             extraction_metadata=metadata,
         )

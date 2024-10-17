@@ -10,7 +10,7 @@
     "adapter_name": {
       "type": "string",
       "title": "Name",
-      "default": "",
+      "default": "llm-whisperer-v2",
       "description": "Provide a unique name for this adapter instance. Example: LLM Whisperer 1"
     },
     "url": {
@@ -89,23 +89,11 @@
       "type": "boolean",
       "title": "Mark horizontal lines",
       "default": false,
-      "description": "States whether to reproduce verthorizontalical lines in the document."
-    },
-    "lang": {
-      "type": "string",
-      "title": "Language",
-      "default": "eng",
-      "description": "The language hint to OCR. Currently auto detected. Available only in the Enterprise version."
+      "description": "States whether to reproduce horizontal lines in the document."
     },
     "tag": {
       "type": "string",
       "title": "Tag",
-      "default": "default",
-      "description": "Auditing feature. Set a value which will be associated with the invocation of the adapter. This can be used for cross referencing in usage reports."
-    },
-    "file_name": {
-      "type": "string",
-      "title": "File Name",
       "default": "default",
       "description": "Auditing feature. Set a value which will be associated with the invocation of the adapter. This can be used for cross referencing in usage reports."
     },
