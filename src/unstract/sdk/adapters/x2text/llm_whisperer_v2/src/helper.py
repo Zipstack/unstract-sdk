@@ -338,28 +338,23 @@ class LLMWhispererHelper:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             output_file_path.write_text(text_output, encoding="utf-8")
-            try:
-                # Define the directory of the output file and metadata paths
-                output_dir = output_file_path.parent
-                metadata_dir = output_dir / "metadata"
-                metadata_file_name = output_file_path.with_suffix(".json").name
-                metadata_file_path = metadata_dir / metadata_file_name
-                # Ensure the metadata directory exists
-                metadata_dir.mkdir(parents=True, exist_ok=True)
-                # Remove the "result_text" key from the metadata
-                metadata = {
-                    key: value
-                    for key, value in output_json.items()
-                    if key != "result_text"
-                }
-                metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
-                logger.info(f"Writing metadata to {metadata_file_path}")
-                metadata_file_path.write_text(metadata_json, encoding="utf-8")
-            except Exception as e:
-                logger.error(
-                    f"Error while writing metadata to {metadata_file_path}: {e}"
-                )
-
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
             raise ExtractorError(str(e))
+        try:
+            # Define the directory of the output file and metadata paths
+            output_dir = output_file_path.parent
+            metadata_dir = output_dir / "metadata"
+            metadata_file_name = output_file_path.with_suffix(".json").name
+            metadata_file_path = metadata_dir / metadata_file_name
+            # Ensure the metadata directory exists
+            metadata_dir.mkdir(parents=True, exist_ok=True)
+            # Remove the "result_text" key from the metadata
+            metadata = {
+                key: value for key, value in output_json.items() if key != "result_text"
+            }
+            metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
+            logger.info(f"Writing metadata to {metadata_file_path}")
+            metadata_file_path.write_text(metadata_json, encoding="utf-8")
+        except Exception as e:
+            logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")
