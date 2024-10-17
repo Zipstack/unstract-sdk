@@ -24,7 +24,7 @@
       "type": "string",
       "title": "Unstract Key",
       "format": "password",
-      "description": "API key obtained from the Unstract developer portal (https://unstract-api-resource.developer.azure-api.net)"
+      "description": "API key obtained from the Unstract developer portal (https://us-central.unstract.com/llm-whisperer)"
     },
     "mode": {
       "type": "string",
