@@ -145,12 +145,12 @@ class LLMWhispererHelper:
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
+            # Not providing default value to maintain legacy compatablity
+            # these are optional params and identifiers for audit
             WhispererConfig.TAG: config.get(
                 WhispererConfig.TAG,
                 WhispererDefaults.TAG,
             ),
-            # Not providing default value to maintain legacy compatablity
-            # these are optional params and identifiers for audit
             WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK),
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
