@@ -1,0 +1,22 @@
+{
+  "title": "No-op",
+  "type": "object",
+  "required": [
+    "adapter_name",
+    "wait_time"
+  ],
+  "properties": {
+    "adapter_name": {
+      "type": "string",
+      "title": "Name",
+      "default": "",
+      "description": "Provide a unique name for this No Op adapter instance. Example: no-op-instance-1"
+    },
+    "wait_time": {
+      "type": "number",
+      "title": "Wait time  (in seconds)",
+      "default": "0",
+      "description": "Provide the time to wait (in seconds) before returning the response"
+    }
+  }
+}
