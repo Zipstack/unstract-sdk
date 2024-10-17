@@ -7,6 +7,7 @@ from requests import ConnectionError, RequestException, Response
 from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.common_utils import log_elapsed
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class PromptTool:
         if not is_public_call:
             self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
+    @log_elapsed(operation="ANSWER_PROMPTS")
     def answer_prompt(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
     ) -> dict[str, Any]:
@@ -97,10 +99,7 @@ class PromptTool:
         response: Response = Response()
         try:
             response = requests.post(
-                url=url,
-                json=payload,
-                params=params,
-                headers=headers
+                url=url, json=payload, params=params, headers=headers
             )
             response.raise_for_status()
             result["status"] = "OK"

@@ -145,6 +145,10 @@ class LLMWhisperer(X2TextAdapter):
             WhispererConfig.PROCESSING_MODE: self.config.get(
                 WhispererConfig.PROCESSING_MODE, ProcessingModes.TEXT.value
             ),
+            # Not providing default value to maintain legacy compatablity
+            # Providing default value will overide the params
+            # processing_mode, force_text_processing
+            WhispererConfig.MODE: self.config.get(WhispererConfig.MODE),
             WhispererConfig.OUTPUT_MODE: self.config.get(
                 WhispererConfig.OUTPUT_MODE, OutputModes.LINE_PRINTER.value
             ),
@@ -170,6 +174,14 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
+            WhispererConfig.MARK_VERTICAL_LINES: self.config.get(
+                        WhispererConfig.MARK_VERTICAL_LINES,
+                        WhispererDefaults.MARK_VERTICAL_LINES,
+                    ),
+            WhispererConfig.MARK_HORIZONTAL_LINES: self.config.get(
+                        WhispererConfig.MARK_HORIZONTAL_LINES,
+                        WhispererDefaults.MARK_HORIZONTAL_LINES,
+                    ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(

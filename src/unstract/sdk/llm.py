@@ -245,7 +245,7 @@ class LLM:
         except OpenAIAPIError as e:
             msg = "OpenAI error: "
             msg += e.message
-            if hasattr(e, "body") and "message" in e.body:
+            if hasattr(e, "body") and isinstance(e.body, dict) and "message" in e.body:
                 msg += e.body["message"]
             if isinstance(e, OpenAIRateLimitError):
                 raise RateLimitError(msg)

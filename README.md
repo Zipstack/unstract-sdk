@@ -57,6 +57,50 @@ Supported commands:
 Unstract SDK 0.3.2 uses the following version of Llama
 Index Version **0.9.28** as on January 14th, 2024
 
+### Developing with the SDK
+
+Ensure that you have all the required dependencies and pre-commit hooks installed
+```shell
+pdm install
+pre-commit install
+```
+
+Once the changes have been made, it can be tested with [Unstract](https://github.com/Zipstack/unstract) through the following means.
+
+#### With PDM
+Specify the SDK as a dependency to a project using a tool like `pdm` by adding the following to your `pyproject.toml`
+
+```toml
+[tool.pdm.dev-dependencies]
+local_copies = [
+    "-e unstract-adapters @ file:///${UNSTRACT_ADAPTERS_PATH}",
+    "-e unstract-sdk @ file:///${UNSTRACT_SDK_PATH}",
+]
+```
+Or by running the below command
+```shell
+pdm add -e /path/to/unstract-sdk --dev
+```
+
+#### With pip
+- If the project is using `pip` it might be possible to add it as a dependency in `requirements.txt`
+```
+-e /path/to/unstract-sdk
+```
+NOTE: Building locally might require the below section to be replaced in the `unstract-sdk`'s build system configuration
+```
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+```
+- Another option is to provide a git URL in `requirements.txt`, this can come in handy while building tool
+docker images. Don't forget to run `apt install git` within the `Dockerfile` for this
+```shell
+unstract-sdk @ git+https://github.com/Zipstack/unstract-sdk@feature-branch
+```
+
+- Or try installing a [local PyPI server](https://pypi.org/project/pypiserver/) and upload / download your package from this server
+
 ### Environment variables required for various LLMs (deprecated)
 
 - Azure OpenAI

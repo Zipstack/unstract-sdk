@@ -30,9 +30,7 @@ class PlatformBase:
             - PLATFORM_SERVICE_API_KEY environment variable is required.
         """
         self.tool = tool
-        self.base_url = SdkHelper.get_platform_base_url(
-            platform_host, platform_port
-        )
+        self.base_url = SdkHelper.get_platform_base_url(platform_host, platform_port)
         self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
 
@@ -78,5 +76,4 @@ class PlatformHelper(PlatformBase):
             return None
         else:
             platform_details: dict[str, Any] = response.json().get("details")
-            self.tool.stream_log("Successfully retrieved platform settings")
             return platform_details

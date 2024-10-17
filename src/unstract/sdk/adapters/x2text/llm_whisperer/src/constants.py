@@ -7,6 +7,13 @@ class ProcessingModes(Enum):
     TEXT = "text"
 
 
+class Modes(Enum):
+    NATIVE_TEXT = "native_text"
+    LOW_COST = "low_cost"
+    HIGH_QUALITY = "high_quality"
+    FORM = "form"
+
+
 class OutputModes(Enum):
     LINE_PRINTER = "line-printer"
     DUMP_TEXT = "dump-text"
@@ -52,6 +59,7 @@ class WhispererConfig:
 
     URL = "url"
     PROCESSING_MODE = "processing_mode"
+    MODE = "mode"
     OUTPUT_MODE = "output_mode"
     UNSTRACT_KEY = "unstract_key"
     MEDIAN_FILTER_SIZE = "median_filter_size"
@@ -64,6 +72,8 @@ class WhispererConfig:
     ADD_LINE_NOS = "add_line_nos"
     OUTPUT_JSON = "output_json"
     PAGE_SEPARATOR = "page_seperator"
+    MARK_VERTICAL_LINES = "mark_vertical_lines"
+    MARK_HORIZONTAL_LINES = "mark_horizontal_lines"
 
 
 class WhisperStatus:
@@ -92,3 +102,6 @@ class WhispererDefaults:
     ADD_LINE_NOS = True
     OUTPUT_JSON = True
     PAGE_SEPARATOR = "<<< >>>"
+    MARK_VERTICAL_LINES = False
+    MARK_HORIZONTAL_LINES = False
+
