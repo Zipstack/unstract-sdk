@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from typing import Any
 
 from llama_index.core.llms import LLM
@@ -54,4 +55,5 @@ class NoOpLLM(LLMAdapter):
             "The capital of Tamilnadu is ",
             temperature=0.003,
         )
+        time.sleep(self.config.get("wait_time"))
         return True

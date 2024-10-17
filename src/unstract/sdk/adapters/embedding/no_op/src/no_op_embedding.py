@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
@@ -48,4 +49,5 @@ class NoOpEmbedding(EmbeddingAdapter):
         return embedding
 
     def test_connection(self) -> bool:
+        time.sleep(self.config.get("wait_time"))
         return True

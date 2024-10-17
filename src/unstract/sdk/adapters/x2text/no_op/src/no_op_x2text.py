@@ -54,4 +54,5 @@ class NoOpX2Text(X2TextAdapter):
         return TextExtractionResult(extracted_text=extracted_text)
 
     def test_connection(self) -> bool:
+        time.sleep(self.config.get("wait_time"))
         return True
