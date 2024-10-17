@@ -1,0 +1,16 @@
+class Common:
+    FULL = -1
+    DEFAULT_ENCODING = "utf-8"
+
+
+class FileSeekPosition:
+    START = 0
+    CURRENT = 1
+    END = 2
+
+
+class GCS:
+    CREDS = "GOOGLE_APPLICATION_CREDENTIALS"
+    # CREDS_FILE_PATH = "GCS_CREDS_PATH"
+    PROJECT_ID = "PROJECT_ID"
+    REMOTE_STORAGE = "REMOTE_STORAGE"
