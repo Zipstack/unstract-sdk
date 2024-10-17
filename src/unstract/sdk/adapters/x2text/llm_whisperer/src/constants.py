@@ -72,6 +72,8 @@ class WhispererConfig:
     ADD_LINE_NOS = "add_line_nos"
     OUTPUT_JSON = "output_json"
     PAGE_SEPARATOR = "page_seperator"
+    MARK_VERTICAL_LINES = "mark_vertical_lines"
+    MARK_HORIZONTAL_LINES = "mark_horizontal_lines"
 
 
 class WhisperStatus:
@@ -100,3 +102,6 @@ class WhispererDefaults:
     ADD_LINE_NOS = True
     OUTPUT_JSON = True
     PAGE_SEPARATOR = "<<< >>>"
+    MARK_VERTICAL_LINES = False
+    MARK_HORIZONTAL_LINES = False
+
