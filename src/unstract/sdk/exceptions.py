@@ -39,3 +39,11 @@ class OCRError(SdkError):
 
 class RateLimitError(SdkError):
     DEFAULT_MESSAGE = "Running into rate limit errors, please try again later"
+
+
+class FileStorageError(SdkError):
+    pass
+
+
+class FileOperationError(SdkError):
+    pass

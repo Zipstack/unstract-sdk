@@ -82,7 +82,11 @@ scripts = { unstract-tool-gen = "unstract.sdk.scripts.tool_gen:main" }
 
 [tool.pdm.dev-dependencies]
 docs = [ "lazydocs~=0.4.8" ]
-test = [ "parameterized==0.9.0" ]
+test = [
+    "parameterized==0.9.0",
+    "pytest==8.3.3",
+    "pytest-mock",
+    "gcsfs"]
 lint = [
     "autopep8~=2.0.2",
     "black~=23.3.0",
