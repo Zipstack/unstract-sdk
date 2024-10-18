@@ -161,8 +161,6 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    # User of the API is expected to explicitly call close on
-    # open files. The library will not be closing any open file
     def close(self, file_handle: Union[AbstractFileSystem]):
         """Close the file that has been opened.
 
