@@ -16,6 +16,7 @@ class FileStorageInterface(ABC):
     ) -> Union[AbstractFileSystem]:
         pass
 
+    @abstractmethod
     def read(
         self,
         file_handle: Union[AbstractFileSystem],

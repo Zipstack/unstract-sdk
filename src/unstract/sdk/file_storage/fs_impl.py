@@ -14,9 +14,9 @@ class FileStorage(FileStorageInterface):
 
     fs: fsspec  # fsspec file system handle
 
-    def __init__(self, type, credentials: dict() = {}):
+    def __init__(self, provider, credentials: dict() = {}):
         self.fs = FileStorageHelper.file_storage_init(
-            type=type, credentials=credentials
+            provider=provider, credentials=credentials
         )
 
     def open(
