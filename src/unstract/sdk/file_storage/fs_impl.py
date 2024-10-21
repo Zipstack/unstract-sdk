@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 
 import fsspec
 from fsspec import AbstractFileSystem
@@ -14,7 +14,7 @@ class FileStorage(FileStorageInterface):
 
     fs: fsspec  # fsspec file system handle
 
-    def __init__(self, provider, credentials: dict() = {}):
+    def __init__(self, provider, credentials: dict[str, Any] = {}):
         self.fs = FileStorageHelper.file_storage_init(
             provider=provider, credentials=credentials
         )

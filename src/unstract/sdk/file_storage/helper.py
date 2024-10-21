@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import fsspec
 from google.oauth2 import service_account
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FileStorageHelper:
     @staticmethod
-    def file_storage_init(provider: FileStorageProvider, credentials: dict()):
+    def file_storage_init(provider: FileStorageProvider, credentials: dict[str, Any]):
         """Initialises file storage based on provider.
 
         Args:
