@@ -7,15 +7,6 @@ from unstract.sdk.file_storage.constants import Common, FileSeekPosition
 
 
 class FileStorageInterface(ABC):
-    # @abstractmethod
-    # def open(
-    #     self,
-    #     path: str,
-    #     mode: str,
-    #     encoding: str = Common.DEFAULT_ENCODING,
-    # ) -> Union[AbstractFileSystem]:
-    #     pass
-
     @abstractmethod
     def read_file(
         self,
@@ -62,7 +53,3 @@ class FileStorageInterface(ABC):
     @abstractmethod
     def remove(self, path: str, recursive: bool = True):
         pass
-
-    # @abstractmethod
-    # def close(self, file_handle: Union[AbstractFileSystem]):
-    #     pass
