@@ -1,8 +1,6 @@
 from typing import Any, Union
 
-from fsspec import AbstractFileSystem
-
-from unstract.sdk.exceptions import FileStorageError
+from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import Common
 from unstract.sdk.file_storage.fs_impl import FileStorage
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
@@ -33,14 +31,33 @@ class PermanentFileStorage(FileStorage):
     def copy_on_write(self, path1, path2):
         self.fs.put(path1, path2)
 
-    def open(
+    def read_file(
         self,
         path: str,
         mode: str,
         encoding: str = Common.DEFAULT_ENCODING,
-    ) -> Union[AbstractFileSystem]:
-        if not self.exists(path):
-            local_file_storage = FileStorage(provider=FileStorageProvider.Local)
-            if local_file_storage.exists(path):
-                self.copy_on_write(path, path)
-        return super().open(path, mode, encoding)
+        seek_position: int = 0,
+        length: int = Common.FULL,
+    ) -> Union[bytes, str]:
+        """Read the file pointed to by the file_handle.
+
+        Args:
+            path (str): Path to the file to be opened
+            mode (str): Mode in whicg the file is to be opened. Usual options
+                        include r, rb, w and wb
+            encoding (str): Encoding type like utf-8 or utf-16
+            seek_position (int): Position to start reading from
+            length (int): Number of bytes to be read. Default is full
+            file content.
+
+        Returns:
+            Union[bytes, str] - File contents in bytes/string based on the opened mode
+        """
+        try:
+            if not self.path_exists(path):
+                local_file_storage = FileStorage(provider=FileStorageProvider.Local)
+                if local_file_storage.path_exists(path):
+                    self.copy_on_write(path, path)
+            return super().read_file(path, mode, encoding, seek_position, length)
+        except Exception as e:
+            raise FileOperationError(str(e))

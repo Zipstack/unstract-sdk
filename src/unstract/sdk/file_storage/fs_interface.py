@@ -7,56 +7,62 @@ from unstract.sdk.file_storage.constants import Common, FileSeekPosition
 
 
 class FileStorageInterface(ABC):
+    # @abstractmethod
+    # def open(
+    #     self,
+    #     path: str,
+    #     mode: str,
+    #     encoding: str = Common.DEFAULT_ENCODING,
+    # ) -> Union[AbstractFileSystem]:
+    #     pass
+
     @abstractmethod
-    def open(
+    def read_file(
         self,
         path: str,
         mode: str,
         encoding: str = Common.DEFAULT_ENCODING,
-    ) -> Union[AbstractFileSystem]:
-        pass
-
-    @abstractmethod
-    def read(
-        self,
-        file_handle: Union[AbstractFileSystem],
+        seek_position: int = 0,
         length: int = Common.FULL,
     ) -> Union[bytes, str]:
         pass
 
     @abstractmethod
-    def write(
+    def write_file(
         self,
-        file_handle: Union[AbstractFileSystem],
-        data: Union[bytes, str],
+        path: str,
+        mode: str,
+        encoding: str = Common.DEFAULT_ENCODING,
+        seek_position: int = 0,
+        data: Union[bytes, str] = "",
     ) -> int:
         pass
 
     @abstractmethod
-    def seek(
+    def seek_file(
         self,
         file_handle: Union[AbstractFileSystem],
         location: int = 0,
         position: FileSeekPosition = FileSeekPosition.START,
-    ) -> Union[AbstractFileSystem]:
+    ) -> int:
         pass
 
     @abstractmethod
-    def mkdir(self, path: str, create_parents: bool):
+    def make_dir(self, path: str, create_parents: bool):
         pass
 
     @abstractmethod
-    def exists(self, path: str) -> bool:
+    def path_exists(self, path: str) -> bool:
         pass
 
     @abstractmethod
-    def ls(self, path: str) -> list[str]:
+    def list(self, path: str) -> list[str]:
         pass
 
     @abstractmethod
-    def rm(self, path: str, recursive: bool = True):
+    def remove(self, path: str, recursive: bool = True):
         pass
 
-    @abstractmethod
-    def close(self, file_handle: Union[AbstractFileSystem]):
-        pass
+    # @abstractmethod
+    # def close(self, file_handle: Union[AbstractFileSystem]):
+    #     pass
