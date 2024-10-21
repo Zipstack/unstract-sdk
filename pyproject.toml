@@ -86,7 +86,8 @@ test = [
     "parameterized==0.9.0",
     "pytest==8.3.3",
     "pytest-mock",
-    "gcsfs"]
+    "gcsfs"
+]
 lint = [
     "autopep8~=2.0.2",
     "black~=23.3.0",
