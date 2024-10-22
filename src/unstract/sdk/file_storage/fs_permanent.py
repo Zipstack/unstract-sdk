@@ -28,10 +28,23 @@ class PermanentFileStorage(FileStorage):
         else:
             raise NotImplementedError
 
-    def copy_on_write(self, path1, path2):
-        self.fs.put(path1, path2)
+    def _copy_on_write(self, path):
+        """Copies the file to the lazily. Checks if the file is present in the
+        Local File system. If yes, copies the file to the mentioned path using
+        the remote file system. This is a silent copy done on need basis.
 
-    def read_file(
+        Args:
+            path (str): Path to the file
+
+        Returns:
+            NA
+        """
+        if not self.exists(path):
+            local_file_storage = FileStorage(provider=FileStorageProvider.Local)
+            if local_file_storage.exists(path):
+                self.cp(path, path)
+
+    def read(
         self,
         path: str,
         mode: str,
@@ -54,10 +67,8 @@ class PermanentFileStorage(FileStorage):
             Union[bytes, str] - File contents in bytes/string based on the opened mode
         """
         try:
-            if not self.path_exists(path):
-                local_file_storage = FileStorage(provider=FileStorageProvider.Local)
-                if local_file_storage.path_exists(path):
-                    self.copy_on_write(path, path)
-            return super().read_file(path, mode, encoding, seek_position, length)
+            # Lazy copy to the destination/remote file system
+            self._copy_on_write(path)
+            return super().read(path, mode, encoding, seek_position, length)
         except Exception as e:
             raise FileOperationError(str(e))

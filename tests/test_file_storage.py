@@ -4,7 +4,7 @@ import os.path
 import pytest
 from dotenv import load_dotenv
 
-from unstract.sdk.exceptions import FileStorageError
+from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.fs_impl import FileStorage
 from unstract.sdk.file_storage.fs_permanent import PermanentFileStorage
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
@@ -15,6 +15,7 @@ load_dotenv()
 class TEST_CONSTANTS:
     READ_FOLDER_PATH = os.environ.get("READ_FOLDER_PATH")
     WRITE_FOLDER_PATH = os.environ.get("WRITE_FOLDER_PATH")
+    RECURSION_FOLDER_PATH = os.environ.get("RECURSION_FOLDER_PATH")
     READ_PDF_FILE = os.environ.get("READ_PDF_FILE")
     READ_TEXT_FILE = os.environ.get("READ_TEXT_FILE")
     WRITE_PDF_FILE = os.environ.get("WRITE_PDF_FILE")
@@ -66,7 +67,7 @@ def permanent_file_storage(provider: FileStorageProvider):
     ],
 )
 def test_file_read(file_storage, path, mode, read_length, expected_read_length):
-    file_contents = file_storage.read_file(path=path, mode=mode, length=read_length)
+    file_contents = file_storage.read(path=path, mode=mode, length=read_length)
     assert len(file_contents) == expected_read_length
 
 
@@ -166,18 +167,18 @@ def test_file_write(
     read_length,
     expected_write_length,
 ):
-    if file_storage.path_exists(path=TEST_CONSTANTS.WRITE_FOLDER_PATH):
-        file_storage.remove(path=TEST_CONSTANTS.WRITE_FOLDER_PATH, recursive=True)
-    assert file_storage.path_exists(path=TEST_CONSTANTS.WRITE_FOLDER_PATH) is False
-    file_storage.make_dir(path=TEST_CONSTANTS.WRITE_FOLDER_PATH)
+    if file_storage.exists(path=TEST_CONSTANTS.WRITE_FOLDER_PATH):
+        file_storage.rm(path=TEST_CONSTANTS.WRITE_FOLDER_PATH, recursive=True)
+    assert file_storage.exists(path=TEST_CONSTANTS.WRITE_FOLDER_PATH) is False
+    file_storage.mkdir(path=TEST_CONSTANTS.WRITE_FOLDER_PATH)
     # assert file_storage.path_exists(path=TEST_CONSTANTS.WRITE_FOLDER_PATH) == True
     if read_file_path:
-        file_contents = file_storage.read_file(
+        file_contents = file_storage.read(
             path=read_file_path, mode=read_mode, length=read_length
         )
     else:
         file_contents = file_contents
-    bytes_written = file_storage.write_file(
+    bytes_written = file_storage.write(
         path=write_file_path, mode=write_mode, data=file_contents
     )
     assert bytes_written == expected_write_length
@@ -189,7 +190,9 @@ def test_file_write(
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.TEST_FOLDER,
-            False,
+            False,  # mkdir does not work for blob storages
+            # as they only support creating buckets. For
+            # further details pls check implementation of mkdir in GCSFS
         ),
         (
             file_storage(provider=FileStorageProvider.Local),
@@ -199,10 +202,10 @@ def test_file_write(
     ],
 )
 def test_make_dir(file_storage, folder_path, expected_result):
-    if file_storage.path_exists(path=folder_path):
-        file_storage.remove(path=folder_path, recursive=True)
-    file_storage.make_dir(folder_path)
-    assert file_storage.path_exists(path=folder_path) == expected_result
+    if file_storage.exists(path=folder_path):
+        file_storage.rm(path=folder_path, recursive=True)
+    file_storage.mkdir(folder_path)
+    assert file_storage.exists(path=folder_path) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -226,7 +229,7 @@ def test_make_dir(file_storage, folder_path, expected_result):
     ],
 )
 def test_path_exists(file_storage, folder_path, expected_result):
-    assert file_storage.path_exists(path=folder_path) == expected_result
+    assert file_storage.exists(path=folder_path) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -242,12 +245,15 @@ def test_path_exists(file_storage, folder_path, expected_result):
             TEST_CONSTANTS.READ_FOLDER_PATH,
             3,
         ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            1,
+        ),
     ],
 )
-def test_list(file_storage, folder_path, expected_file_count):
-    assert (
-        len(file_storage.list(TEST_CONSTANTS.READ_FOLDER_PATH)) == expected_file_count
-    )
+def test_ls(file_storage, folder_path, expected_file_count):
+    assert len(file_storage.ls(folder_path)) == expected_file_count
 
 
 @pytest.mark.parametrize(
@@ -263,11 +269,49 @@ def test_list(file_storage, folder_path, expected_file_count):
         ),
     ],
 )
-def test_remove(file_storage, folder_path):
-    if not file_storage.path_exists(path=folder_path):
-        file_storage.make_dir(path=folder_path)
-    file_storage.remove(path=folder_path)
-    assert file_storage.path_exists(path=folder_path) == False  # noqa
+def test_rm(file_storage, folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+    file_storage.rm(path=folder_path)
+    assert file_storage.exists(path=folder_path) == False  # noqa
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, recursive, test_folder_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.RECURSION_FOLDER_PATH,
+            True,
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+    ],
+)
+def test_rm_recursive(file_storage, folder_path, recursive, test_folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+    assert file_storage.exists(path=folder_path) is True
+    file_storage.rm(path=test_folder_path, recursive=recursive)
+    assert file_storage.exists(path=test_folder_path) is False
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, recursive, test_folder_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.RECURSION_FOLDER_PATH,
+            False,
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+    ],
+)
+def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+    assert file_storage.exists(path=folder_path) is True
+    with pytest.raises(FileOperationError):
+        file_storage.rm(path=test_folder_path, recursive=recursive)
 
 
 @pytest.mark.parametrize(
@@ -308,12 +352,42 @@ def test_remove(file_storage, folder_path):
     ],
 )
 def test_seek_file(file_storage, file_path, mode, location, whence, expected_size):
-    seek_position = file_storage.seek_file(file_path, location, whence)
-    file_contents = file_storage.read_file(
+    seek_position = file_storage.seek(file_path, location, whence)
+    file_contents = file_storage.read(
         path=file_path, mode=mode, seek_position=seek_position
     )
     print(file_contents)
     assert len(file_contents) == expected_size
+
+
+@pytest.mark.parametrize("provider", [(FileStorageProvider.GCS)])
+def test_file(provider):
+    os.environ.clear()
+    with pytest.raises(FileStorageError):
+        FileStorage(provider=provider)
+    load_dotenv()
+
+
+@pytest.mark.parametrize(
+    "file_storage, lpath, rpath",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER,
+        ),
+    ],
+)
+def test_cp(file_storage, lpath, rpath):
+    file_storage.cp(lpath, rpath)
+    assert file_storage.exists(rpath) is True
+    file_storage.rm(rpath, recursive=True)
+    assert file_storage.exists(rpath) is False
 
 
 @pytest.mark.parametrize(
@@ -331,22 +405,14 @@ def test_seek_file(file_storage, file_path, mode, location, whence, expected_siz
 def test_permanent_fs_copy_on_write(
     file_storage, file_read_path, read_mode, file_write_path, write_mode
 ):
-    if file_storage.path_exists(file_read_path):
-        file_storage.remove(file_read_path)
-    file_read_contents = file_storage.read_file(file_read_path, read_mode)
+    if file_storage.exists(file_read_path):
+        file_storage.rm(file_read_path)
+    file_read_contents = file_storage.read(file_read_path, read_mode)
     print(file_read_contents)
-    file_storage.write_file(file_write_path, write_mode, data=file_read_contents)
+    file_storage.write(file_write_path, write_mode, data=file_read_contents)
 
-    file_write_contents = file_storage.read_file(file_write_path, read_mode)
+    file_write_contents = file_storage.read(file_write_path, read_mode)
     assert len(file_read_contents) == len(file_write_contents)
-
-
-@pytest.mark.parametrize("provider", [(FileStorageProvider.GCS)])
-def test_file(provider):
-    os.environ.clear()
-    with pytest.raises(FileStorageError):
-        FileStorage(provider=provider)
-    load_dotenv()
 
 
 @pytest.mark.parametrize(

@@ -18,7 +18,7 @@ class FileStorage(FileStorageInterface):
             provider=provider, credentials=credentials
         )
 
-    def read_file(
+    def read(
         self,
         path: str,
         mode: str,
@@ -48,7 +48,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def write_file(
+    def write(
         self,
         path: str,
         mode: str,
@@ -75,7 +75,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def seek_file(
+    def seek(
         self,
         path: str,
         location: int = 0,
@@ -100,7 +100,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def make_dir(self, path: str, create_parents: bool = True):
+    def mkdir(self, path: str, create_parents: bool = True):
         """Create a directory.
 
         Args:
@@ -109,11 +109,11 @@ class FileStorage(FileStorageInterface):
             if any of the nested directory does not exist
         """
         try:
-            self.fs.mkdir(path, create_parents=create_parents)
+            self.fs.mkdir(path=path, create_parents=create_parents)
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def path_exists(self, path: str) -> bool:
+    def exists(self, path: str) -> bool:
         """Checks if a file/directory path exists.
 
         Args:
@@ -127,7 +127,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def list(self, path: str) -> list[str]:
+    def ls(self, path: str) -> list[str]:
         """List the directory path.
 
         Args:
@@ -141,7 +141,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def remove(self, path: str, recursive: bool = True):
+    def rm(self, path: str, recursive: bool = True):
         """Removes a file or directory mentioned in path.
 
         Args:
@@ -152,6 +152,18 @@ class FileStorage(FileStorageInterface):
         Returns:
         """
         try:
-            return self.fs.rm(path, recursive=recursive)
+            return self.fs.rm(path=path, recursive=recursive)
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def cp(self, lpath: str, rpath: str):
+        """Copies files from source(lpath) path to the destination(rpath) path.
+
+        Args:
+            lpath (str): Path to the source
+            rpath (str): Path to the destination
+        """
+        try:
+            return self.fs.put(lpath, rpath)
         except Exception as e:
             raise FileOperationError(str(e))

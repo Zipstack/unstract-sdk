@@ -8,7 +8,7 @@ from unstract.sdk.file_storage.constants import Common, FileSeekPosition
 
 class FileStorageInterface(ABC):
     @abstractmethod
-    def read_file(
+    def read(
         self,
         path: str,
         mode: str,
@@ -19,7 +19,7 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def write_file(
+    def write(
         self,
         path: str,
         mode: str,
@@ -30,7 +30,7 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def seek_file(
+    def seek(
         self,
         file_handle: Union[AbstractFileSystem],
         location: int = 0,
@@ -39,17 +39,21 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def make_dir(self, path: str, create_parents: bool):
+    def mkdir(self, path: str, create_parents: bool):
         pass
 
     @abstractmethod
-    def path_exists(self, path: str) -> bool:
+    def exists(self, path: str) -> bool:
         pass
 
     @abstractmethod
-    def list(self, path: str) -> list[str]:
+    def ls(self, path: str) -> list[str]:
         pass
 
     @abstractmethod
-    def remove(self, path: str, recursive: bool = True):
+    def rm(self, path: str, recursive: bool = True):
+        pass
+
+    @abstractmethod
+    def cp(self, lpath: str, rpath: str):
         pass
