@@ -16,7 +16,7 @@ class PermanentFileStorage(FileStorage):
     def __init__(
         self,
         provider: FileStorageProvider,
-        credentials: dict[str, Any] = {},
+        credentials: dict[str, Any] = None,
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(
