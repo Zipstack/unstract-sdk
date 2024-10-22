@@ -57,3 +57,7 @@ class FileStorageInterface(ABC):
     @abstractmethod
     def cp(self, lpath: str, rpath: str):
         pass
+
+    @abstractmethod
+    def size(self, path: str) -> int:
+        pass

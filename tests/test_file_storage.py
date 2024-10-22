@@ -1,13 +1,14 @@
+import io
 import json
 import os.path
 
+import pdfplumber
 import pytest
 from dotenv import load_dotenv
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
-from unstract.sdk.file_storage.fs_impl import FileStorage
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.file_storage.fs_permanent import PermanentFileStorage
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 
 load_dotenv()
 
@@ -388,6 +389,47 @@ def test_cp(file_storage, lpath, rpath):
     assert file_storage.exists(rpath) is True
     file_storage.rm(rpath, recursive=True)
     assert file_storage.exists(rpath) is False
+
+
+def test_pdf_read():
+    fs = file_storage(FileStorageProvider.Local)
+    pdf_contents = io.BytesIO(fs.read(path=TEST_CONSTANTS.READ_PDF_FILE, mode="rb"))
+    page_count = 0
+    with pdfplumber.open(pdf_contents) as pdf:
+        # calculate the number of pages
+        page_count = len(pdf.pages)
+        print(f"Page count: {page_count}")
+    assert page_count == 7
+
+
+@pytest.mark.parametrize(
+    "file_storage, path, expected_size",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
+        ),
+    ],
+)
+def test_file_size(file_storage, path, expected_size):
+    file_size = file_storage.size(path=path)
+    assert file_size == expected_size
 
 
 @pytest.mark.parametrize(

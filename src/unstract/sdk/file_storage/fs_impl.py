@@ -13,7 +13,7 @@ class FileStorage(FileStorageInterface):
 
     fs: fsspec  # fsspec file system handle
 
-    def __init__(self, provider, credentials: dict[str, Any] = None):
+    def __init__(self, provider, credentials: Union[dict[str, Any], None] = None):
         self.fs = FileStorageHelper.file_storage_init(
             provider=provider, credentials=credentials
         )
@@ -150,6 +150,7 @@ class FileStorage(FileStorageInterface):
             under path are to be removed or not
 
         Returns:
+            NA
         """
         try:
             return self.fs.rm(path=path, recursive=recursive)
@@ -162,8 +163,25 @@ class FileStorage(FileStorageInterface):
         Args:
             lpath (str): Path to the source
             rpath (str): Path to the destination
+
+        Returns:
+            NA
         """
         try:
             return self.fs.put(lpath, rpath)
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def size(self, path: str) -> int:
+        """Get the size of the file specified in path.
+
+        Args:
+            path (str): Path to the file
+
+        Returns:
+            int: Size of the file in bytes
+        """
+        try:
+            return self.fs.info(path)["size"]
         except Exception as e:
             raise FileOperationError(str(e))
