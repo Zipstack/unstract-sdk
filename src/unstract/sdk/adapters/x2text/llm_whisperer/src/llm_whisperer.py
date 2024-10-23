@@ -346,8 +346,7 @@ class LLMWhisperer(X2TextAdapter):
         if output_file_path:
             self._write_output_to_file(
                 output_json=output_json,
-                output_file_path=output_file_path,
-                fs=fs,
+                output_file_path=Path(output_file_path),
             )
         return output_json.get("text", "")
 
