@@ -1,11 +1,15 @@
+import logging
 from typing import Any, Union
 
 import fsspec
+import magic
 
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import Common, FileSeekPosition
 from unstract.sdk.file_storage.fs_interface import FileStorageInterface
 from unstract.sdk.file_storage.helper import FileStorageHelper
+
+logger = logging.getLogger(__name__)
 
 
 class FileStorage(FileStorageInterface):
@@ -110,6 +114,8 @@ class FileStorage(FileStorageInterface):
         """
         try:
             self.fs.mkdir(path=path, create_parents=create_parents)
+        except FileExistsError:
+            logger.debug(f"Path {path} already exists.")
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -183,5 +189,38 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.info(path)["size"]
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def mime_type(self, path: str) -> str:
+        """Gets the file MIME type for an input file. Uses libmagic to perform
+        the same.
+
+        Args:
+            path (str): Path of the input file
+
+        Returns:
+            str: MIME type of the file
+        """
+        try:
+            sample_contents = self.read(path=path, mode="rb", length=100)
+            mime_type = magic.from_buffer(sample_contents, mime=True)
+            return mime_type
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def download(self, from_path: str, to_path: str):
+        """Gets the file MIME type for an input file. Uses libmagic to perform
+        the same.
+
+        Args:
+            from_path (str): Path of the file to be downloaded
+            to_path (str): Path where the file is to be downloaded
+
+        Returns:
+            NA
+        """
+        try:
+            self.fs.get(from_path, to_path)
         except Exception as e:
             raise FileOperationError(str(e))

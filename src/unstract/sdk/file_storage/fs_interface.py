@@ -61,3 +61,11 @@ class FileStorageInterface(ABC):
     @abstractmethod
     def size(self, path: str) -> int:
         pass
+
+    @abstractmethod
+    def mime_type(self, path: str) -> str:
+        pass
+
+    @abstractmethod
+    def download(self, from_path: str, to_path: str):
+        pass

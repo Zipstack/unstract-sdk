@@ -11,6 +11,7 @@ class PermanentFileStorage(FileStorage):
         FileStorageProvider.GCS.value,
         FileStorageProvider.S3.value,
         FileStorageProvider.Azure.value,
+        FileStorageProvider.Local.value,
     ]
 
     def __init__(
@@ -25,6 +26,8 @@ class PermanentFileStorage(FileStorage):
             )
         if provider == FileStorageProvider.GCS:
             super().__init__(provider, credentials)
+        elif provider == FileStorageProvider.Local:
+            super().__init__(provider)
         else:
             raise NotImplementedError
 
