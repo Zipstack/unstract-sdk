@@ -1,3 +1,4 @@
+import io
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -15,6 +16,7 @@ from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.audit import Audit
 from unstract.sdk.constants import LogLevel, MimeType, ToolEnv
 from unstract.sdk.exceptions import X2TextError
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
@@ -87,18 +89,18 @@ class X2Text(metaclass=ABCMeta):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-        mime_type = ToolUtils.get_file_mime_type(input_file_path)
+        mime_type = ToolUtils.get_file_mime_type(input_file_path, fs)
         text_extraction_result: TextExtractionResult = None
         if mime_type == MimeType.TEXT:
-            with open(input_file_path, encoding="utf-8") as file:
-                extracted_text = file.read()
-                text_extraction_result = TextExtractionResult(
-                    extracted_text=extracted_text, extraction_metadata=None
-                )
+            extracted_text = fs.read(path=input_file_path, mode="r", encoding="utf-8")
+            text_extraction_result = TextExtractionResult(
+                extracted_text=extracted_text, extraction_metadata=None
+            )
         text_extraction_result = self._x2text_instance.process(
-            input_file_path, output_file_path, **kwargs
+            input_file_path, output_file_path, fs, **kwargs
         )
         # The will be executed each and every time text extraction takes place
         self.push_usage_details(input_file_path, mime_type)
@@ -111,13 +113,19 @@ class X2Text(metaclass=ABCMeta):
             self._initialise()
         return self._x2text_instance
 
-    def push_usage_details(self, input_file_path: str, mime_type: str) -> None:
-        file_size = ToolUtils.get_file_size(input_file_path)
+    def push_usage_details(
+        self,
+        input_file_path: str,
+        mime_type: str,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+    ) -> None:
+        file_size = ToolUtils.get_file_size(input_file_path, fs)
 
         self._x2text_instance
 
         if mime_type == MimeType.PDF:
-            with pdfplumber.open(input_file_path) as pdf:
+            pdf_contents = io.BytesIO(fs.read(path=input_file_path, mode="rb"))
+            with pdfplumber.open(pdf_contents) as pdf:
                 # calculate the number of pages
                 page_count = len(pdf.pages)
             if isinstance(self._x2text_instance, LLMWhisperer):

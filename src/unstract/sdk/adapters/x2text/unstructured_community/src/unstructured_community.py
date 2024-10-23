@@ -5,6 +5,7 @@ from typing import Any, Optional
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.helper import UnstructuredHelper
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +42,11 @@ class UnstructuredCommunity(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         extracted_text: str = UnstructuredHelper.process_document(
-            self.config, input_file_path, output_file_path
+            self.config, input_file_path, output_file_path, fs
         )
 
         return TextExtractionResult(extracted_text=extracted_text)

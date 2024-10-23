@@ -8,6 +8,7 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ class X2TextHelper:
 
     @staticmethod
     def parse_response(
-        response: Response, out_file_path: Optional[str] = None
+        response: Response,
+        out_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
     ) -> tuple[str, bool]:
         """Parses the response from a request.
 
@@ -27,6 +30,8 @@ class X2TextHelper:
             response (Response): Response to parse
             out_file_path (Optional[str], optional): Output file path to write
                  to, skipped if None or emtpy. Defaults to None.
+            fs (FileStorage): file storage object to perfrom file operations
+
         Returns:
             tuple[str, bool]: Response's content and status of parsing
         """
@@ -35,8 +40,7 @@ class X2TextHelper:
         if isinstance(response.content, bytes):
             output = response.content.decode("utf-8")
         if out_file_path:
-            with open(out_file_path, "w", encoding="utf-8") as f:
-                f.write(output)
+            fs.write(path=out_file_path, mode="w", encoding="utf-8", data=output)
         return output, True
 
 
@@ -49,9 +53,7 @@ class UnstructuredHelper:
     PROCESS = "process"
 
     @staticmethod
-    def test_server_connection(
-        unstructured_adapter_config: dict[str, Any]
-    ) -> bool:
+    def test_server_connection(unstructured_adapter_config: dict[str, Any]) -> bool:
         UnstructuredHelper.make_request(
             unstructured_adapter_config, UnstructuredHelper.TEST_CONNECTION
         )
@@ -62,12 +64,13 @@ class UnstructuredHelper:
         unstructured_adapter_config: dict[str, Any],
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
     ) -> str:
         try:
             response: Response
-            with open(input_file_path, "rb") as input_f:
+            with fs.open(input_file_path, "rb") as input_f:
                 mime_type = AdapterUtils.get_file_mime_type(
-                    input_file=input_file_path
+                    input_file=input_file_path, fs=fs
                 )
                 files = {"file": (input_file_path, input_f, mime_type)}
                 response = UnstructuredHelper.make_request(
@@ -76,7 +79,7 @@ class UnstructuredHelper:
                     files=files,
                 )
             output, is_success = X2TextHelper.parse_response(
-                response=response, out_file_path=output_file_path
+                response=response, out_file_path=output_file_path, fs=fs
             )
             if not is_success:
                 raise AdapterError("Couldn't extract text from file")
@@ -95,9 +98,7 @@ class UnstructuredHelper:
         request_type: str,
         **kwargs: dict[Any, Any],
     ) -> Response:
-        unstructured_url = unstructured_adapter_config.get(
-            UnstructuredHelper.URL
-        )
+        unstructured_url = unstructured_adapter_config.get(UnstructuredHelper.URL)
 
         x2text_service_url = unstructured_adapter_config.get(
             X2TextConstants.X2TEXT_HOST
