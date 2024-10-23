@@ -55,9 +55,10 @@ class ToolUtils:
         h = sha256()
         b = bytearray(128 * 1024)
         mv = memoryview(b)
-        with fs.open(file_path, "rb", buffering=0) as f:
-            while n := f.readinto(mv):
-                h.update(mv[:n])
+
+        file_contents = fs.read(path=file_path, mode="rb")
+        mv = memoryview(file_contents)
+        h.update(mv[: len(file_contents)])
         return str(h.hexdigest())
 
     @staticmethod
@@ -73,8 +74,8 @@ class ToolUtils:
         Returns:
             dict[str, Any]: The JSON loaded from file
         """
-        file_contents = fs.read(path=file_to_load, mode="r", encoding="utf-8")
-        loaded_json: dict[str, Any] = json.load(file_contents)
+        file_contents: str = fs.read(path=file_to_load, mode="r", encoding="utf-8")
+        loaded_json: dict[str, Any] = json.loads(file_contents)
         return loaded_json
 
     @staticmethod

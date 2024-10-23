@@ -118,6 +118,7 @@ class Index:
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
+        fs: FileStorage = FileStorage(FileStorageProvider.Local),
     ) -> str:
         """Extracts text from a document.
 
@@ -154,6 +155,7 @@ class Index:
                     input_file_path=file_path,
                     output_file_path=output_file_path,
                     enable_highlight=enable_highlight,
+                    fs=fs,
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
 
@@ -163,8 +165,7 @@ class Index:
 
             else:
                 process_response: TextExtractionResult = x2text.process(
-                    input_file_path=file_path,
-                    output_file_path=output_file_path,
+                    input_file_path=file_path, output_file_path=output_file_path, fs=fs
                 )
 
             extracted_text = process_response.extracted_text
