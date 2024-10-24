@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 import fsspec
+from fsspec import AbstractFileSystem
 from google.oauth2 import service_account
 
 from unstract.sdk.exceptions import FileStorageError
@@ -29,7 +30,7 @@ class FileStorageHelper:
             return FileStorageHelper.local_file_system_init()
 
     @staticmethod
-    def gcs_init(credentials):
+    def gcs_init(credentials) -> AbstractFileSystem:
         """Initialises FileStorage backed up by GCS.
 
         Args:
@@ -65,7 +66,7 @@ class FileStorageHelper:
         raise NotImplementedError
 
     @staticmethod
-    def local_file_system_init():
+    def local_file_system_init() -> AbstractFileSystem:
         """Initialises FileStorage backed up by Local file system.
 
         Returns:
