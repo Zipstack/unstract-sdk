@@ -210,12 +210,14 @@ class FileStorage(FileStorageInterface):
             raise FileOperationError(str(e))
 
     def download(self, from_path: str, to_path: str):
-        """Gets the file MIME type for an input file. Uses libmagic to perform
-        the same.
+        """Downloads the file mentioned in from_path to to_path on the local
+        system. The instance calling the method needs to be the FileStorage
+        initialised with the remote file system.
 
         Args:
-            from_path (str): Path of the file to be downloaded
+            from_path (str): Path of the file to be downloaded (remote)
             to_path (str): Path where the file is to be downloaded
+            on local system
 
         Returns:
             NA
