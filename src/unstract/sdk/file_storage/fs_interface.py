@@ -69,3 +69,7 @@ class FileStorageInterface(ABC):
     @abstractmethod
     def download(self, from_path: str, to_path: str):
         pass
+
+    @abstractmethod
+    def get_hash_from_file(self, path: str) -> str:
+        pass

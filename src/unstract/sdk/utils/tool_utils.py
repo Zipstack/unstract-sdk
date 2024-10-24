@@ -1,4 +1,5 @@
 import json
+import warnings
 from hashlib import md5, sha256
 from pathlib import Path
 from typing import Any
@@ -52,14 +53,14 @@ class ToolUtils:
         Returns:
             str: SHA256 hash of the file
         """
-        h = sha256()
-        b = bytearray(128 * 1024)
-        mv = memoryview(b)
 
-        file_contents = fs.read(path=file_path, mode="rb")
-        mv = memoryview(file_contents)
-        h.update(mv[: len(file_contents)])
-        return str(h.hexdigest())
+        # Adding the following DeprecationWarning manually as the package "deprecated"
+        # does not support deprecation on static methods.
+        warnings.warn(
+            "`old_function` is deprecated. Use `new_function` instead.",
+            DeprecationWarning,
+        )
+        return fs.get_hash_from_file(path=file_path)
 
     @staticmethod
     def load_json(

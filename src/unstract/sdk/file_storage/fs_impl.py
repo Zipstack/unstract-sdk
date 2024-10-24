@@ -1,4 +1,5 @@
 import logging
+from hashlib import sha256
 from typing import Any, Union
 
 import fsspec
@@ -224,5 +225,45 @@ class FileStorage(FileStorageInterface):
         """
         try:
             self.fs.get(from_path, to_path)
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def _open_with_no_buffering(self, path, mode="rb"):
+        """Opens a file using fsspec with no buffering.
+
+        Args:
+            fs: The fsspec filesystem object.
+            path: The path to the file.
+            mode: The file mode (default: 'rb' for binary read).
+
+        Returns:
+            A file-like object with no buffering.
+        """
+        try:
+            with self.fs.open(path, mode) as f:
+                return open(f.raw.name, mode, buffering=0)
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def get_hash_from_file(self, path: str) -> str:
+        """Computes the hash for a file.
+
+        Uses sha256 to compute the file hash through a buffered read.
+
+        Args:
+            file_path (str): Path to file that needs to be hashed
+
+        Returns:
+            str: SHA256 hash of the file
+        """
+
+        try:
+            h = sha256()
+            b = bytearray(128 * 1024)
+            mv = memoryview(b)
+            with self._open_with_no_buffering(path=path) as f:
+                while n := f.readinto(mv):
+                    h.update(mv[:n])
+            return str(h.hexdigest())
         except Exception as e:
             raise FileOperationError(str(e))

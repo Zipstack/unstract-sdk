@@ -445,7 +445,7 @@ class Index:
             raise ValueError("One of `file_path` or `file_hash` need to be provided")
 
         if not file_hash:
-            file_hash = ToolUtils.get_hash_from_file(file_path=file_path, fs=fs)
+            file_hash = fs.get_hash_from_file(path=file_path)
 
         # Whole adapter config is used currently even though it contains some keys
         # which might not be relevant to indexing. This is easier for now than
