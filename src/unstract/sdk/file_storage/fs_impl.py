@@ -164,18 +164,18 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def cp(self, lpath: str, rpath: str):
+    def cp(self, src: str, dest: str, overwrite: bool = True):
         """Copies files from source(lpath) path to the destination(rpath) path.
 
         Args:
-            lpath (str): Path to the source
-            rpath (str): Path to the destination
+            src (str): Path to the source
+            dest (str): Path to the destination
 
         Returns:
             NA
         """
         try:
-            return self.fs.put(lpath, rpath)
+            return self.fs.cp(src, dest, overwrite=overwrite)
         except Exception as e:
             raise FileOperationError(str(e))
 

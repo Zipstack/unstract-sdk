@@ -378,7 +378,7 @@ def test_file(provider):
     ],
 )
 def test_cp(file_storage, lpath, rpath):
-    file_storage.cp(lpath, rpath)
+    file_storage.cp(lpath, rpath, overwrite=True)
     assert file_storage.exists(rpath) is True
     file_storage.rm(rpath, recursive=True)
     assert file_storage.exists(rpath) is False
