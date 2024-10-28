@@ -161,6 +161,9 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.rm(path=path, recursive=recursive)
+        except FileNotFoundError as e:
+            logger.debug(f"Path {path} does not exist.")
+            raise FileOperationError(str(e))
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -225,6 +228,9 @@ class FileStorage(FileStorageInterface):
         """
         try:
             self.fs.get(from_path, to_path)
+        except FileNotFoundError as e:
+            logger.error(f"Path {from_path} does not exist.")
+            raise FileOperationError(str(e))
         except Exception as e:
             raise FileOperationError(str(e))
 

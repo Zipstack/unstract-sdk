@@ -6,7 +6,7 @@ from fsspec import AbstractFileSystem
 from google.oauth2 import service_account
 
 from unstract.sdk.exceptions import FileStorageError
-from unstract.sdk.file_storage.constants import GCS
+from unstract.sdk.file_storage.constants import GCS, Minio
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
@@ -26,11 +26,13 @@ class FileStorageHelper:
         """
         if provider == FileStorageProvider.GCS:
             return FileStorageHelper.gcs_init(credentials)
+        elif provider == FileStorageProvider.Minio:
+            return FileStorageHelper.minio_init(credentials)
         elif provider == FileStorageProvider.Local:
             return FileStorageHelper.local_file_system_init()
 
     @staticmethod
-    def gcs_init(credentials) -> AbstractFileSystem:
+    def gcs_init(credentials: dict[str, Any]) -> AbstractFileSystem:
         """Initialises FileStorage backed up by GCS.
 
         Args:
@@ -79,6 +81,37 @@ class FileStorageHelper:
         except Exception as e:
             logger.error(
                 f"Error in initialising {FileStorageProvider.GCS.value}"
+                f" file system {e}",
+                stack_info=True,
+                exc_info=True,
+            )
+            raise FileStorageError(str(e))
+
+    @staticmethod
+    def minio_init(config: dict[str, Any]) -> AbstractFileSystem:
+        """Initialises FileStorage backed up by Minio.
+
+        Args:
+            credentials (dict): credentials
+
+        Returns:
+            NA
+        """
+        try:
+            endpoint = config[Minio.ENDPOINT]
+            access_key = config[Minio.ACCESS_KEY]
+            secret_key = config[Minio.SECRET_KEY]
+            fs = fsspec.filesystem(
+                "s3",
+                endpoint_url=endpoint,
+                key=secret_key,
+                secret=access_key,
+            )
+            logger.debug(f"Connected to {FileStorageProvider.Minio.value} file system")
+            return fs
+        except Exception as e:
+            logger.error(
+                f"Error in initialising {FileStorageProvider.Minio.value}"
                 f" file system {e}",
                 stack_info=True,
                 exc_info=True,
