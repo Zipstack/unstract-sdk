@@ -6,6 +6,8 @@ import pdfplumber
 import pytest
 from dotenv import load_dotenv
 
+from unstract.sdk.constants import MimeType
+from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 load_dotenv()
@@ -311,7 +313,7 @@ def test_path_exists(file_storage, folder_path, expected_result):
         (
             file_storage(provider=FileStorageProvider.Minio),
             TEST_CONSTANTS.READ_FOLDER_PATH,
-            3,
+            2,
         ),
     ],
 )
@@ -319,142 +321,165 @@ def test_ls(file_storage, folder_path, expected_file_count):
     assert len(file_storage.ls(folder_path)) == expected_file_count
 
 
-# @pytest.mark.parametrize(
-#     "file_storage, folder_path",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.WRITE_FOLDER_PATH,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.WRITE_FOLDER_PATH,
-#         ),
-#     ],
-# )
-# def test_rm(file_storage, folder_path):
-#     if not file_storage.exists(path=folder_path):
-#         file_storage.mkdir(path=folder_path)
-#     file_storage.rm(path=folder_path)
-#     assert file_storage.exists(path=folder_path) == False
-#
-#
-# @pytest.mark.parametrize(
-#     "file_storage, folder_path, recursive, test_folder_path",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.RECURSION_FOLDER_PATH,
-#             True,
-#             TEST_CONSTANTS.WRITE_FOLDER_PATH,
-#         ),
-#     ],
-# )
-# def test_rm_recursive(file_storage, folder_path, recursive, test_folder_path):
-#     if not file_storage.exists(path=folder_path):
-#         file_storage.mkdir(path=folder_path)
-#     assert file_storage.exists(path=folder_path) is True
-#     file_storage.rm(path=test_folder_path, recursive=recursive)
-#     assert file_storage.exists(path=test_folder_path) is False
-#
-#
-# @pytest.mark.parametrize(
-#     "file_storage, folder_path, recursive, test_folder_path",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.RECURSION_FOLDER_PATH,
-#             False,
-#             TEST_CONSTANTS.WRITE_FOLDER_PATH,
-#         ),
-#     ],
-# )
-# def test_rm_recursive_exception(
-#     file_storage, folder_path, recursive, test_folder_path
-# ):
-#     if not file_storage.exists(path=folder_path):
-#         file_storage.mkdir(path=folder_path)
-#     assert file_storage.exists(path=folder_path) is True
-#     with pytest.raises(FileOperationError):
-#         file_storage.rm(path=test_folder_path, recursive=recursive)
-#
-#
-# @pytest.mark.parametrize(
-#     "file_storage, file_path, mode, location, whence, expected_size",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             "rb",
-#             1,
-#             0,
-#             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_PDF_FILE,
-#             "r",
-#             0,
-#             2,
-#             0,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             "rb",
-#             1,
-#             0,
-#             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.READ_PDF_FILE,
-#             "r",
-#             0,
-#             2,
-#             0,
-#         ),
-#     ],
-# )
-# def test_seek_file(
-#     file_storage, file_path, mode, location, whence, expected_size
-# ):
-#     seek_position = file_storage.seek(file_path, location, whence)
-#     file_contents = file_storage.read(
-#         path=file_path, mode=mode, seek_position=seek_position
-#     )
-#     print(file_contents)
-#     assert len(file_contents) == expected_size
-#
-#
-# @pytest.mark.parametrize("provider", [(FileStorageProvider.GCS)])
-# def test_file(provider):
-#     os.environ.clear()
-#     with pytest.raises(FileStorageError):
-#         FileStorage(provider=provider)
-#     load_dotenv()
-#
-#
-# @pytest.mark.parametrize(
-#     "file_storage, lpath, rpath",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             TEST_CONSTANTS.TEST_FOLDER,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             TEST_CONSTANTS.TEST_FOLDER,
-#         ),
-#     ],
-# )
-# def test_cp(file_storage, lpath, rpath):
-#   file_storage.cp(lpath, rpath, overwrite=True)
-#   assert file_storage.exists(rpath) is True
-#   file_storage.rm(rpath, recursive=True)
-#   assert file_storage.exists(rpath) is False
+@pytest.mark.parametrize(
+    "file_storage, folder_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+    ],
+)
+def test_rm(file_storage, folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+        if not file_storage.exists(path=folder_path):
+            file_storage.fs.touch(path=folder_path)
+    file_storage.rm(path=folder_path)
+    assert file_storage.exists(path=folder_path) is False
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, recursive, test_folder_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.RECURSION_FOLDER_PATH,
+            True,
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+    ],
+)
+def test_rm_recursive(file_storage, folder_path, recursive, test_folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+    assert file_storage.exists(path=folder_path) is True
+    file_storage.rm(path=test_folder_path, recursive=recursive)
+    assert file_storage.exists(path=test_folder_path) is False
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, recursive, test_folder_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.RECURSION_FOLDER_PATH,
+            False,
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+    ],
+)
+def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folder_path):
+    if not file_storage.exists(path=folder_path):
+        file_storage.mkdir(path=folder_path)
+    assert file_storage.exists(path=folder_path) is True
+    with pytest.raises(FileOperationError):
+        file_storage.rm(path=test_folder_path, recursive=recursive)
+
+
+@pytest.mark.parametrize(
+    "file_storage, file_path, mode, location, whence, expected_size",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            1,
+            0,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            "r",
+            0,
+            2,
+            0,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            1,
+            0,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            "r",
+            0,
+            2,
+            0,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            1,
+            0,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            "r",
+            0,
+            2,
+            0,
+        ),
+    ],
+)
+def test_seek_file(file_storage, file_path, mode, location, whence, expected_size):
+    seek_position = file_storage.seek(file_path, location, whence)
+    file_contents = file_storage.read(
+        path=file_path, mode=mode, seek_position=seek_position
+    )
+    print(file_contents)
+    assert len(file_contents) == expected_size
+
+
+@pytest.mark.parametrize("provider", [(FileStorageProvider.GCS)])
+def test_file(provider):
+    os.environ.clear()
+    with pytest.raises(FileStorageError):
+        FileStorage(provider=provider)
+    load_dotenv()
+
+
+@pytest.mark.parametrize(
+    "file_storage, lpath, rpath",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER,
+        ),
+    ],
+)
+def test_cp(file_storage, lpath, rpath):
+    file_storage.cp(lpath, rpath, overwrite=True)
+    assert file_storage.exists(rpath) is True
+    file_storage.rm(rpath, recursive=True)
+    assert file_storage.exists(rpath) is False
 
 
 def test_pdf_read():
@@ -508,33 +533,47 @@ def test_file_size(file_storage, path, expected_size):
     assert file_size == expected_size
 
 
-#
-# @pytest.mark.parametrize(
-#     "file_storage, path, expected_mime_type",
-#     [
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_PDF_FILE,
-#             MimeType.PDF,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             MimeType.TEXT,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.GCS),
-#             TEST_CONSTANTS.READ_PDF_FILE,
-#             MimeType.PDF,
-#         ),
-#         (
-#             file_storage(provider=FileStorageProvider.Local),
-#             TEST_CONSTANTS.READ_TEXT_FILE,
-#             MimeType.TEXT,
-#         ),
-#     ],
-# )
-# def test_file_mime_type(file_storage, path, expected_mime_type):
-#     mime_type = file_storage.mime_type(path=path)
-#     file_storage.mkdir(path=TEST_CONSTANTS.READ_FOLDER_PATH)
-#     assert mime_type == expected_mime_type
+@pytest.mark.parametrize(
+    "file_storage, path, expected_mime_type",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            MimeType.PDF,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            MimeType.TEXT,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            MimeType.PDF,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            MimeType.TEXT,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            MimeType.PDF,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            MimeType.TEXT,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            MimeType.PDF,
+        ),
+    ],
+)
+def test_file_mime_type(file_storage, path, expected_mime_type):
+    mime_type = file_storage.mime_type(path=path)
+    file_storage.mkdir(path=TEST_CONSTANTS.READ_FOLDER_PATH)
+    assert mime_type == expected_mime_type
