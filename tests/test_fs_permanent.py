@@ -26,7 +26,11 @@ class TEST_CONSTANTS:
 
 def permanent_file_storage(provider: FileStorageProvider):
     credentials = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_ENV))
-    file_storage = PermanentFileStorage(provider=provider, credentials=credentials)
+    file_storage = PermanentFileStorage(
+        provider=provider,
+        credentials=credentials,
+        legacy_storage_path="./prompt_studio_data",
+    )
     assert file_storage is not None
     return file_storage
 

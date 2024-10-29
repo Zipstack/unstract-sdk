@@ -8,7 +8,11 @@ from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.file_storage import (
+    FileStorage,
+    FileStorageHelper,
+    FileStorageProvider,
+)
 
 load_dotenv()
 
@@ -577,3 +581,61 @@ def test_file_mime_type(file_storage, path, expected_mime_type):
     mime_type = file_storage.mime_type(path=path)
     file_storage.mkdir(path=TEST_CONSTANTS.READ_FOLDER_PATH)
     assert mime_type == expected_mime_type
+
+
+@pytest.mark.parametrize(
+    "file_storage, from_path, to_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/1.txt",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/2.txt",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
+        ),
+    ],
+)
+def test_download(file_storage, from_path, to_path):
+    local_file_storage = FileStorageHelper.local_file_system_init()
+    if local_file_storage.exists(to_path):
+        local_file_storage.rm(to_path, recursive=True)
+    assert local_file_storage.exists(to_path) is False
+    file_storage.download(from_path, to_path)
+    assert local_file_storage.exists(to_path) is True
+
+
+@pytest.mark.parametrize(
+    "file_storage, from_path, to_path",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/1.txt",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Local),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/2.txt",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.Minio),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
+        ),
+    ],
+)
+def test_upload(file_storage, from_path, to_path):
+    local_file_storage = FileStorageHelper.local_file_system_init()
+    assert local_file_storage.exists(from_path) is True
+    if file_storage.exists(to_path):
+        file_storage.rm(to_path, recursive=True)
+    file_storage.upload(from_path, to_path)
+    assert file_storage.exists(to_path) is True
