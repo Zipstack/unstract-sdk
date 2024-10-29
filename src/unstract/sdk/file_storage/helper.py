@@ -75,7 +75,9 @@ class FileStorageHelper:
             NA
         """
         try:
-            fs = fsspec.filesystem(protocol=FileStorageProvider.Local.value)
+            fs = fsspec.filesystem(
+                protocol=FileStorageProvider.Local.value, auto_mkdir=True
+            )
             logger.debug(f"Connected to {FileStorageProvider.Local.value} file system")
             return fs
         except Exception as e:

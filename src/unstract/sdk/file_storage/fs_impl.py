@@ -227,8 +227,33 @@ class FileStorage(FileStorageInterface):
             NA
         """
         try:
-            self.fs.get(from_path, to_path)
+            self.fs.get(rpath=from_path, lpath=to_path)
         except FileNotFoundError as e:
+            logger.error(f"Path {from_path} does not exist.")
+            raise FileOperationError(str(e))
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def upload(self, from_path: str, to_path: str):
+        """Uploads the file mentioned in from_path (local system) to to_path
+        (remote system). The instance calling the method needs to be the
+        FileStorage initialised with the remote file system where the file
+        needs to be uploaded.
+
+        Args:
+            from_path (str): Path of the file to be uploaded (local)
+            to_path (str): Path where the file is on the local system
+
+        Returns:
+            NA
+        """
+        try:
+            self.fs.put(from_path, to_path)
+        except FileNotFoundError as e:
+            # if to_path in str(e):
+            #     self.fs.touch(to_path)
+            #     logger.info(f"Creating file structure {to_path}")
+            # else:
             logger.error(f"Path {from_path} does not exist.")
             raise FileOperationError(str(e))
         except Exception as e:
