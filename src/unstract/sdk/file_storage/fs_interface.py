@@ -63,6 +63,10 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
+    def modification_time(self, path: str) -> str:
+        pass
+
+    @abstractmethod
     def mime_type(self, path: str) -> str:
         pass
 
@@ -72,4 +76,8 @@ class FileStorageInterface(ABC):
 
     @abstractmethod
     def get_hash_from_file(self, path: str) -> str:
+        pass
+
+    @abstractmethod
+    def json_dump(self, path, mode, encoding, data, **kwargs):
         pass

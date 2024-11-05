@@ -1,3 +1,4 @@
+import json
 import logging
 from hashlib import sha256
 from typing import Any, Union
@@ -192,7 +193,23 @@ class FileStorage(FileStorageInterface):
             int: Size of the file in bytes
         """
         try:
-            return self.fs.info(path)["size"]
+            file_info = self.fs.info(path)
+            return file_info["size"]
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def modification_time(self, path: str) -> str:
+        """Get the last modification time of the file specified in path.
+
+        Args:
+            path (str): Path to the file
+
+        Returns:
+            str: Last modified time
+        """
+        try:
+            file_info = self.fs.info(path)
+            return file_info["mtime"]
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -296,5 +313,21 @@ class FileStorage(FileStorageInterface):
                 while n := f.readinto(mv):
                     h.update(mv[:n])
             return str(h.hexdigest())
+        except Exception as e:
+            raise FileOperationError(str(e))
+
+    def json_dump(self, path, mode, encoding, data, **kwargs):
+        """Dumps data into the given file specified by path.
+
+        Args:
+            path (str): Path to file where JSON is to be dumped
+            mode (str): write modes
+            encoding (str): Encoding to be used while writing the file
+            data (bytes|str): data to be written to the file
+            **kwargs (dict): Any other additional arguments
+        """
+        try:
+            with self.fs.open(path, mode, encoding) as f:
+                json.dump(data, f, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e))
