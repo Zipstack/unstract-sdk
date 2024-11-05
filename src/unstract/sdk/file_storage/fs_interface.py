@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Union
 
 from fsspec import AbstractFileSystem
@@ -63,7 +64,7 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def modification_time(self, path: str) -> str:
+    def modification_time(self, path: str) -> datetime:
         pass
 
     @abstractmethod

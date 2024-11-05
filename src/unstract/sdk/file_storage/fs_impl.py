@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 from hashlib import sha256
 from typing import Any, Union
 
@@ -198,18 +199,21 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e))
 
-    def modification_time(self, path: str) -> str:
+    def modification_time(self, path: str) -> datetime:
         """Get the last modification time of the file specified in path.
 
         Args:
             path (str): Path to the file
 
         Returns:
-            str: Last modified time
+            datetime: Last modified time in datetime
         """
         try:
             file_info = self.fs.info(path)
-            return file_info["mtime"]
+            file_mtime = file_info["mtime"]
+            if not isinstance(file_mtime, datetime):
+                file_mtime = datetime.fromtimestamp(file_mtime)
+            return file_mtime
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -327,7 +331,7 @@ class FileStorage(FileStorageInterface):
             **kwargs (dict): Any other additional arguments
         """
         try:
-            with self.fs.open(path, mode, encoding) as f:
+            with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
                 json.dump(data, f, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e))
