@@ -1,13 +1,14 @@
 import io
 import json
 import os.path
+from json import JSONDecodeError
 
 import pdfplumber
 import pytest
 from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
-from unstract.sdk.exceptions import FileOperationError, FileStorageError
+from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage import (
     FileStorage,
     FileStorageHelper,
@@ -28,12 +29,22 @@ class TEST_CONSTANTS:
     TEST_FOLDER = os.environ.get("TEST_FOLDER")
     GCS_BUCKET = os.environ.get("GCS_BUCKET")
     TEXT_CONTENT = os.environ.get("TEXT_CONTENT")
-    FILE_STORAGE_ENV = "FILE_STORAGE"
+    FILE_STORAGE_GCS = "FILE_STORAGE_GCS"
+    FILE_STORAGE_MINIO = "FILE_STORAGE_MINIO"
+    FILE_STORAGE_LOCAL = "FILE_STORAGE_LOCAL"
 
 
 def file_storage(provider: FileStorageProvider):
-    credentials = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_ENV))
-    file_storage = FileStorage(provider=provider, credentials=credentials)
+    try:
+        if provider == FileStorageProvider.GCS:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS, {}))
+        elif provider == FileStorageProvider.Minio:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_MINIO, {}))
+        elif provider == FileStorageProvider.Local:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, {}))
+    except JSONDecodeError:
+        creds = {}
+    file_storage = FileStorage(provider, **creds)
     assert file_storage is not None
     return file_storage
 
@@ -454,8 +465,10 @@ def test_seek_file(file_storage, file_path, mode, location, whence, expected_siz
 @pytest.mark.parametrize("provider", [(FileStorageProvider.GCS)])
 def test_file(provider):
     os.environ.clear()
-    with pytest.raises(FileStorageError):
-        FileStorage(provider=provider)
+    file_storage = FileStorage(provider=provider)
+    assert file_storage is not None
+    with pytest.raises(FileOperationError):
+        file_storage.exists(TEST_CONSTANTS.READ_PDF_FILE)
     load_dotenv()
 
 

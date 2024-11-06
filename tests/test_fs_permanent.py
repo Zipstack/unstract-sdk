@@ -1,5 +1,6 @@
 import json
 import os.path
+from json import JSONDecodeError
 
 import pytest
 from dotenv import load_dotenv
@@ -21,15 +22,20 @@ class TEST_CONSTANTS:
     TEST_FOLDER = os.environ.get("TEST_FOLDER")
     GCS_BUCKET = os.environ.get("GCS_BUCKET")
     TEXT_CONTENT = os.environ.get("TEXT_CONTENT")
-    FILE_STORAGE_ENV = "FILE_STORAGE"
+    FILE_STORAGE_GCS = "FILE_STORAGE_GCS"
+    FILE_STORAGE_LOCAL = "FILE_STORAGE_LOCAL"
 
 
 def permanent_file_storage(provider: FileStorageProvider):
-    credentials = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_ENV))
+    try:
+        if provider == FileStorageProvider.GCS:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS))
+        elif provider == FileStorageProvider.Local:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL))
+    except JSONDecodeError:
+        creds = {}
     file_storage = PermanentFileStorage(
-        provider=provider,
-        credentials=credentials,
-        legacy_storage_path="./prompt_studio_data",
+        provider=provider, legacy_storage_path="./prompt_studio_data", **creds
     )
     assert file_storage is not None
     return file_storage
@@ -103,7 +109,8 @@ def test_permanent_fs_download(file_storage, from_path, read_mode, to_path, writ
     file_read_contents = file_storage.read(from_path, read_mode)
     print(file_read_contents)
     file_storage.download(from_path, to_path)
-    file_write_contents = file_storage.read(to_path, read_mode)
+    local_file_storage = permanent_file_storage(provider=FileStorageProvider.Local)
+    file_write_contents = local_file_storage.read(to_path, read_mode)
     assert len(file_read_contents) == len(file_write_contents)
 
 

@@ -1,5 +1,3 @@
-from typing import Any, Union
-
 from unstract.sdk.exceptions import FileStorageError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
@@ -13,7 +11,7 @@ class SharedTemporaryFileStorage(FileStorage):
     def __init__(
         self,
         provider: FileStorageProvider,
-        credentials: Union[dict[str, Any], None] = None,
+        storage_config,
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(
@@ -21,7 +19,7 @@ class SharedTemporaryFileStorage(FileStorage):
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
         if provider == FileStorageProvider.Minio:
-            super().__init__(provider, credentials)
+            super().__init__(provider, storage_config)
         elif provider == FileStorageProvider.Redis:
             super().__init__(provider)
         else:

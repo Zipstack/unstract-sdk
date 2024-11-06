@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 from hashlib import sha256
-from typing import Any, Union
+from typing import Union
 
 import fsspec
 import magic
@@ -20,10 +20,8 @@ class FileStorage(FileStorageInterface):
 
     fs: fsspec  # fsspec file system handle
 
-    def __init__(self, provider, credentials: Union[dict[str, Any], None] = None):
-        self.fs = FileStorageHelper.file_storage_init(
-            provider=provider, credentials=credentials
-        )
+    def __init__(self, provider, **storage_config):
+        self.fs = FileStorageHelper.file_storage_init(provider, **storage_config)
 
     def read(
         self,
@@ -165,7 +163,7 @@ class FileStorage(FileStorageInterface):
             return self.fs.rm(path=path, recursive=recursive)
         except FileNotFoundError as e:
             logger.debug(f"Path {path} does not exist.")
-            raise FileOperationError(str(e))
+            raise e
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -251,7 +249,7 @@ class FileStorage(FileStorageInterface):
             self.fs.get(rpath=from_path, lpath=to_path)
         except FileNotFoundError as e:
             logger.error(f"Path {from_path} does not exist.")
-            raise FileOperationError(str(e))
+            raise e
         except Exception as e:
             raise FileOperationError(str(e))
 
@@ -276,7 +274,7 @@ class FileStorage(FileStorageInterface):
             #     logger.info(f"Creating file structure {to_path}")
             # else:
             logger.error(f"Path {from_path} does not exist.")
-            raise FileOperationError(str(e))
+            raise e
         except Exception as e:
             raise FileOperationError(str(e))
 
