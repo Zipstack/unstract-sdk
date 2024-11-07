@@ -19,6 +19,7 @@ class Constants:
     API_TYPE = "openai"
     TIMEOUT = "timeout"
     DEFAULT_TIMEOUT = 240
+    DEFAULT_MODEL = "text-embedding-ada-002"
 
 
 class OpenAI(EmbeddingAdapter):
@@ -63,7 +64,7 @@ class OpenAI(EmbeddingAdapter):
                 api_base=str(
                     self.config.get(Constants.API_BASE_KEY, Constants.API_BASE_VALUE)
                 ),
-                model=str(self.config.get(Constants.MODEL)),
+                model=str(self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL)),
                 api_type=Constants.API_TYPE,
                 timeout=timeout,
                 http_client=httpx_client,
