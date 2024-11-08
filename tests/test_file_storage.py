@@ -9,11 +9,7 @@ from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
 from unstract.sdk.exceptions import FileOperationError
-from unstract.sdk.file_storage import (
-    FileStorage,
-    FileStorageHelper,
-    FileStorageProvider,
-)
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 load_dotenv()
 
@@ -617,7 +613,7 @@ def test_file_mime_type(file_storage, path, expected_mime_type):
     ],
 )
 def test_download(file_storage, from_path, to_path):
-    local_file_storage = FileStorageHelper.local_file_system_init()
+    local_file_storage = FileStorage(FileStorageProvider.Local)
     if local_file_storage.exists(to_path):
         local_file_storage.rm(to_path, recursive=True)
     assert local_file_storage.exists(to_path) is False
@@ -646,7 +642,7 @@ def test_download(file_storage, from_path, to_path):
     ],
 )
 def test_upload(file_storage, from_path, to_path):
-    local_file_storage = FileStorageHelper.local_file_system_init()
+    local_file_storage = FileStorage(FileStorageProvider.Local)
     assert local_file_storage.exists(from_path) is True
     if file_storage.exists(to_path):
         file_storage.rm(to_path, recursive=True)

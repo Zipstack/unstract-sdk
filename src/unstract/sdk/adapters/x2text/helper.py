@@ -8,11 +8,7 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
-from unstract.sdk.file_storage import (
-    FileStorage,
-    FileStorageHelper,
-    FileStorageProvider,
-)
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +68,7 @@ class UnstructuredHelper:
     ) -> str:
         try:
             response: Response
-            local_storage = FileStorageHelper.local_file_system_init()
+            local_storage = FileStorage(FileStorageProvider.Local)
             if not local_storage.exists(input_file_path):
                 fs.download(from_path=input_file_path, to_path=input_file_path)
             with open(input_file_path, "rb") as input_f:
