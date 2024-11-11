@@ -29,9 +29,9 @@ class TEST_CONSTANTS:
 def permanent_file_storage(provider: FileStorageProvider):
     try:
         if provider == FileStorageProvider.GCS:
-            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS))
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS, "{}"))
         elif provider == FileStorageProvider.Local:
-            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL))
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
     except JSONDecodeError:
         creds = {}
     file_storage = PermanentFileStorage(

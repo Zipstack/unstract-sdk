@@ -35,6 +35,8 @@ class AdapterUtils:
                 return err_response.text  # type: ignore
         return default_err
 
+    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
+    # FileStorage has mime_type() which could be used instead.
     @staticmethod
     def get_file_mime_type(
         input_file: Path,

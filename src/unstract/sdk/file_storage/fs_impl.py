@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 from hashlib import sha256
-from typing import Union
+from typing import Any, Union
 
 import fsspec
 import magic
@@ -10,6 +10,7 @@ import magic
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import Common, FileSeekPosition
 from unstract.sdk.file_storage.fs_interface import FileStorageInterface
+from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 from unstract.sdk.file_storage.helper import FileStorageHelper
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ class FileStorage(FileStorageInterface):
 
     fs: fsspec  # fsspec file system handle
 
-    def __init__(self, provider, **storage_config):
+    def __init__(self, provider: FileStorageProvider, **storage_config: dict[str, Any]):
         self.fs = FileStorageHelper.file_storage_init(provider, **storage_config)
 
     def read(
@@ -269,10 +270,6 @@ class FileStorage(FileStorageInterface):
         try:
             self.fs.put(from_path, to_path)
         except FileNotFoundError as e:
-            # if to_path in str(e):
-            #     self.fs.touch(to_path)
-            #     logger.info(f"Creating file structure {to_path}")
-            # else:
             logger.error(f"Path {from_path} does not exist.")
             raise e
         except Exception as e:

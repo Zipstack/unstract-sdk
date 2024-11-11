@@ -57,7 +57,8 @@ class ToolUtils:
         # Adding the following DeprecationWarning manually as the package "deprecated"
         # does not support deprecation on static methods.
         warnings.warn(
-            "`old_function` is deprecated. Use `new_function` instead.",
+            "`get_hash_from_file` is deprecated. "
+            "Use `FileStorage get_hash_from_file()` instead.",
             DeprecationWarning,
         )
         return fs.get_hash_from_file(path=file_path)
@@ -93,6 +94,8 @@ class ToolUtils:
         compact_json = json.dumps(json_to_dump, separators=(",", ":"))
         return compact_json
 
+    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
+    # FileStorage has mime_type() which could be used instead.
     @staticmethod
     def get_file_mime_type(
         input_file: Path,

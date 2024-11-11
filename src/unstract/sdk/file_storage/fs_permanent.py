@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import Common
@@ -18,7 +18,7 @@ class PermanentFileStorage(FileStorage):
         self,
         provider: FileStorageProvider,
         legacy_storage_path: Optional[str] = None,
-        **storage_config,
+        **storage_config: dict[str, Any],
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(

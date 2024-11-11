@@ -1,3 +1,5 @@
+from typing import Any
+
 from unstract.sdk.exceptions import FileStorageError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
@@ -11,7 +13,7 @@ class SharedTemporaryFileStorage(FileStorage):
     def __init__(
         self,
         provider: FileStorageProvider,
-        storage_config,
+        **storage_config: dict[str, Any],
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(

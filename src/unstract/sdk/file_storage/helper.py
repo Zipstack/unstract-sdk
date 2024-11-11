@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import fsspec
 from fsspec import AbstractFileSystem
@@ -11,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 class FileStorageHelper:
     @staticmethod
-    def file_storage_init(provider: FileStorageProvider, **storage_config):
+    def file_storage_init(
+        provider: FileStorageProvider, **storage_config: dict[str, Any]
+    ):
         """Initialises file storage based on provider.
 
         Args:
@@ -39,17 +42,11 @@ class FileStorageHelper:
         except KeyError as e:
             logger.error(
                 f"Error in initialising {provider.value} "
-                f"file system because of missing config {e}",
-                stack_info=True,
-                exc_info=True,
+                f"file system because of missing config {e}"
             )
             raise FileStorageError(str(e))
         except Exception as e:
-            logger.error(
-                f"Error in initialising {provider.value} " f"file system {e}",
-                stack_info=True,
-                exc_info=True,
-            )
+            logger.error(f"Error in initialising {provider.value} " f"file system {e}")
             raise FileStorageError(str(e))
         return fs
 
@@ -67,8 +64,6 @@ class FileStorageHelper:
         except Exception as e:
             logger.error(
                 f"Error in initialising {FileStorageProvider.GCS.value}"
-                f" file system {e}",
-                stack_info=True,
-                exc_info=True,
+                f" file system {e}"
             )
             raise FileStorageError(str(e))
