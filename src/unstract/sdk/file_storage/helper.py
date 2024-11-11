@@ -44,10 +44,10 @@ class FileStorageHelper:
                 f"Error in initialising {provider.value} "
                 f"file system because of missing config {e}"
             )
-            raise FileStorageError(str(e))
+            raise FileStorageError(str(e)) from e
         except Exception as e:
             logger.error(f"Error in initialising {provider.value} " f"file system {e}")
-            raise FileStorageError(str(e))
+            raise FileStorageError(str(e)) from e
         return fs
 
     @staticmethod
@@ -66,4 +66,4 @@ class FileStorageHelper:
                 f"Error in initialising {FileStorageProvider.GCS.value}"
                 f" file system {e}"
             )
-            raise FileStorageError(str(e))
+            raise FileStorageError(str(e)) from e

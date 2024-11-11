@@ -1,5 +1,5 @@
-class Common:
-    FULL = -1
+class FileOperationParams:
+    READ_ENTIRE_LENGTH = -1
     DEFAULT_ENCODING = "utf-8"
 
 

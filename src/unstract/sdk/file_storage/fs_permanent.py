@@ -1,7 +1,7 @@
 from typing import Any, Optional, Union
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
-from unstract.sdk.file_storage.constants import Common
+from unstract.sdk.file_storage.constants import FileOperationParams
 from unstract.sdk.file_storage.fs_impl import FileStorage
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 
@@ -22,7 +22,8 @@ class PermanentFileStorage(FileStorage):
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(
-                f"File storage provider `{provider.value}` is not supported in Permanent mode. "
+                f"File storage provider `{provider.value}` is not "
+                f"supported in Permanent mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
         if provider == FileStorageProvider.GCS:
@@ -54,9 +55,9 @@ class PermanentFileStorage(FileStorage):
         self,
         path: str,
         mode: str,
-        encoding: str = Common.DEFAULT_ENCODING,
+        encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
-        length: int = Common.FULL,
+        length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> Union[bytes, str]:
         """Read the file pointed to by the file_handle.
 

@@ -377,7 +377,6 @@ class LLMWhisperer(X2TextAdapter):
                 encoding="utf-8",
                 data=text_output,
             )
-            # output_file_path.write_text(text_output, encoding="utf-8")
             try:
                 # Define the directory of the output file and metadata paths
                 output_dir = output_file_path.parent
@@ -386,14 +385,12 @@ class LLMWhisperer(X2TextAdapter):
                 metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
                 fs.mkdir(metadata_dir, create_parents=True)
-                # metadata_dir.mkdir(parents=True, exist_ok=True)
                 # Remove the "text" key from the metadata
                 metadata = {
                     key: value for key, value in output_json.items() if key != "text"
                 }
                 metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
                 logger.info(f"Writing metadata to {metadata_file_path}")
-                # metadata_file_path.write_text(metadata_json, encoding="utf-8")
 
                 fs.write(
                     path=metadata_file_path.name,

@@ -42,8 +42,15 @@ class RateLimitError(SdkError):
 
 
 class FileStorageError(SdkError):
-    pass
+    DEFAULT_MESSAGE = (
+        "Error while connecting with the storage. "
+        "Please check the configuration credentials"
+    )
 
 
 class FileOperationError(SdkError):
-    pass
+    DEFAULT_MESSAGE = (
+        "Error while performing operation on the file. "
+        "Please check specific storage error for "
+        "further information"
+    )

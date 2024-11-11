@@ -8,7 +8,7 @@ import fsspec
 import magic
 
 from unstract.sdk.exceptions import FileOperationError
-from unstract.sdk.file_storage.constants import Common, FileSeekPosition
+from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 from unstract.sdk.file_storage.fs_interface import FileStorageInterface
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 from unstract.sdk.file_storage.helper import FileStorageHelper
@@ -28,9 +28,9 @@ class FileStorage(FileStorageInterface):
         self,
         path: str,
         mode: str,
-        encoding: str = Common.DEFAULT_ENCODING,
+        encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
-        length: int = Common.FULL,
+        length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> Union[bytes, str]:
         """Read the file pointed to by the file_handle.
 
@@ -52,13 +52,13 @@ class FileStorage(FileStorageInterface):
                     file_handle.seek(seek_position)
                 return file_handle.read(length)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def write(
         self,
         path: str,
         mode: str,
-        encoding: str = Common.DEFAULT_ENCODING,
+        encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         data: Union[bytes, str] = "",
     ) -> int:
@@ -79,7 +79,7 @@ class FileStorage(FileStorageInterface):
             with self.fs.open(path=path, mode=mode, encoding=encoding) as file_handle:
                 return file_handle.write(data)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def seek(
         self,
@@ -104,7 +104,7 @@ class FileStorage(FileStorageInterface):
             with self.fs.open(path=path, mode="rb") as file_handle:
                 return file_handle.seek(location, position)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def mkdir(self, path: str, create_parents: bool = True):
         """Create a directory.
@@ -119,7 +119,7 @@ class FileStorage(FileStorageInterface):
         except FileExistsError:
             logger.debug(f"Path {path} already exists.")
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def exists(self, path: str) -> bool:
         """Checks if a file/directory path exists.
@@ -133,7 +133,7 @@ class FileStorage(FileStorageInterface):
         try:
             return self.fs.exists(path)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def ls(self, path: str) -> list[str]:
         """List the directory path.
@@ -147,7 +147,7 @@ class FileStorage(FileStorageInterface):
         try:
             return self.fs.ls(path)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def rm(self, path: str, recursive: bool = True):
         """Removes a file or directory mentioned in path.
@@ -166,7 +166,7 @@ class FileStorage(FileStorageInterface):
             logger.debug(f"Path {path} does not exist.")
             raise e
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def cp(self, src: str, dest: str, overwrite: bool = True):
         """Copies files from source(lpath) path to the destination(rpath) path.
@@ -181,7 +181,7 @@ class FileStorage(FileStorageInterface):
         try:
             return self.fs.cp(src, dest, overwrite=overwrite)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def size(self, path: str) -> int:
         """Get the size of the file specified in path.
@@ -196,7 +196,7 @@ class FileStorage(FileStorageInterface):
             file_info = self.fs.info(path)
             return file_info["size"]
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def modification_time(self, path: str) -> datetime:
         """Get the last modification time of the file specified in path.
@@ -214,7 +214,7 @@ class FileStorage(FileStorageInterface):
                 file_mtime = datetime.fromtimestamp(file_mtime)
             return file_mtime
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def mime_type(self, path: str) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
@@ -231,7 +231,7 @@ class FileStorage(FileStorageInterface):
             mime_type = magic.from_buffer(sample_contents, mime=True)
             return mime_type
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def download(self, from_path: str, to_path: str):
         """Downloads the file mentioned in from_path to to_path on the local
@@ -252,7 +252,7 @@ class FileStorage(FileStorageInterface):
             logger.error(f"Path {from_path} does not exist.")
             raise e
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def upload(self, from_path: str, to_path: str):
         """Uploads the file mentioned in from_path (local system) to to_path
@@ -273,7 +273,7 @@ class FileStorage(FileStorageInterface):
             logger.error(f"Path {from_path} does not exist.")
             raise e
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def _open_with_no_buffering(self, path, mode="rb"):
         """Opens a file using fsspec with no buffering.
@@ -290,7 +290,7 @@ class FileStorage(FileStorageInterface):
             with self.fs.open(path, mode) as f:
                 return open(f.raw.name, mode, buffering=0)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def get_hash_from_file(self, path: str) -> str:
         """Computes the hash for a file.
@@ -313,7 +313,7 @@ class FileStorage(FileStorageInterface):
                     h.update(mv[:n])
             return str(h.hexdigest())
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e
 
     def json_dump(self, path, mode, encoding, data, **kwargs):
         """Dumps data into the given file specified by path.
@@ -329,4 +329,4 @@ class FileStorage(FileStorageInterface):
             with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
                 json.dump(data, f, **kwargs)
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e

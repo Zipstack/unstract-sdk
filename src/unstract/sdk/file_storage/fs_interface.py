@@ -4,7 +4,7 @@ from typing import Union
 
 from fsspec import AbstractFileSystem
 
-from unstract.sdk.file_storage.constants import Common, FileSeekPosition
+from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 
 
 class FileStorageInterface(ABC):
@@ -13,9 +13,9 @@ class FileStorageInterface(ABC):
         self,
         path: str,
         mode: str,
-        encoding: str = Common.DEFAULT_ENCODING,
+        encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
-        length: int = Common.FULL,
+        length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> Union[bytes, str]:
         pass
 
@@ -24,7 +24,7 @@ class FileStorageInterface(ABC):
         self,
         path: str,
         mode: str,
-        encoding: str = Common.DEFAULT_ENCODING,
+        encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         data: Union[bytes, str] = "",
     ) -> int:
