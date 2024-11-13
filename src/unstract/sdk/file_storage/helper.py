@@ -14,7 +14,7 @@ class FileStorageHelper:
     @staticmethod
     def file_storage_init(
         provider: FileStorageProvider, **storage_config: dict[str, Any]
-    ):
+    ) -> AbstractFileSystem:
         """Initialises file storage based on provider.
 
         Args:
