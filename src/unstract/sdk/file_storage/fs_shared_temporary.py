@@ -21,7 +21,7 @@ class SharedTemporaryFileStorage(FileStorage):
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
         if provider == FileStorageProvider.Minio:
-            super().__init__(provider, storage_config)
+            super().__init__(provider, **storage_config)
         elif provider == FileStorageProvider.Redis:
             super().__init__(provider)
         else:
