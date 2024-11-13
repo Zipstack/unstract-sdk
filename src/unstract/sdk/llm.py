@@ -98,7 +98,7 @@ class LLM:
             process_text_output = {}
             if process_text:
                 try:
-                    process_text_output = process_text(response, LLM.json_regex)
+                    process_text_output = process_text(response)
                     if not isinstance(process_text_output, dict):
                         process_text_output = {}
                 except Exception as e:
