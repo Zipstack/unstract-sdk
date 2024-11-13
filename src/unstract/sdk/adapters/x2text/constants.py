@@ -5,3 +5,4 @@ class X2TextConstants:
     ENABLE_HIGHLIGHT = "enable_highlight"
     EXTRACTED_TEXT = "extracted_text"
     WHISPER_HASH = "whisper-hash"
+    WHISPER_HASH_V2 = "whisper_hash"

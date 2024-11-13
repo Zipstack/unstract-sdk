@@ -39,3 +39,18 @@ class OCRError(SdkError):
 
 class RateLimitError(SdkError):
     DEFAULT_MESSAGE = "Running into rate limit errors, please try again later"
+
+
+class FileStorageError(SdkError):
+    DEFAULT_MESSAGE = (
+        "Error while connecting with the storage. "
+        "Please check the configuration credentials"
+    )
+
+
+class FileOperationError(SdkError):
+    DEFAULT_MESSAGE = (
+        "Error while performing operation on the file. "
+        "Please check specific storage error for "
+        "further information"
+    )

@@ -91,7 +91,7 @@ class OpenAILLM(LLMAdapter):
             LLMError: Error to be sent to the user
         """
         msg = "Error from OpenAI. "
-        if hasattr(e, "body") and "message" in e.body:
+        if hasattr(e, "body") and isinstance(e.body, dict) and "message" in e.body:
             msg += e.body["message"]
         else:
             msg += e.message
