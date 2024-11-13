@@ -146,29 +146,19 @@ class PromptTool:
         """
         platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
         platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
-
-        tool.stream_log("Connecting to DB and getting exported tool metadata")
         base_url = SdkHelper.get_platform_base_url(platform_host, platform_port)
         bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-
         url = f"{base_url}/custom_tool_instance"
         query_params = {PromptStudioKeys.PROMPT_REGISTRY_ID: prompt_registry_id}
         headers = {"Authorization": f"Bearer {bearer_token}"}
         response = requests.get(url, headers=headers, params=query_params)
         if response.status_code == 200:
-            adapter_data: dict[str, Any] = response.json()
-            tool.stream_log(
-                "Successfully retrieved metadata for the exported "
-                f"tool: {prompt_registry_id}"
-            )
-            return adapter_data
-
+            return response.json()
         elif response.status_code == 404:
             tool.stream_error_and_exit(
-                f"Exported tool {prompt_registry_id} is not found"
+                f"Exported tool '{prompt_registry_id}' is not found"
             )
             return None
-
         else:
             tool.stream_error_and_exit(
                 f"Error while retrieving tool metadata "
