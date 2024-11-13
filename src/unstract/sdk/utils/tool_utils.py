@@ -41,7 +41,7 @@ class ToolUtils:
     @staticmethod
     def get_hash_from_file(
         file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Computes the hash for a file.
 
@@ -66,7 +66,7 @@ class ToolUtils:
     @staticmethod
     def load_json(
         file_to_load: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> dict[str, Any]:
         """Loads and returns a JSON from a file.
 
@@ -99,7 +99,7 @@ class ToolUtils:
     @staticmethod
     def get_file_mime_type(
         input_file: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -118,7 +118,7 @@ class ToolUtils:
     @staticmethod
     def get_file_size(
         input_file: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> int:
         """Gets the file size in bytes for an input file.
         Args:

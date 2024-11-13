@@ -10,8 +10,8 @@ class PermanentFileStorage(FileStorage):
     SUPPORTED_FILE_STORAGE_TYPES = [
         FileStorageProvider.GCS.value,
         FileStorageProvider.S3.value,
-        FileStorageProvider.Azure.value,
-        FileStorageProvider.Local.value,
+        FileStorageProvider.AZURE.value,
+        FileStorageProvider.LOCAL.value,
     ]
 
     def __init__(
@@ -28,7 +28,7 @@ class PermanentFileStorage(FileStorage):
             )
         if provider == FileStorageProvider.GCS:
             super().__init__(provider, **storage_config)
-        elif provider == FileStorageProvider.Local:
+        elif provider == FileStorageProvider.LOCAL:
             super().__init__(provider)
         else:
             raise NotImplementedError
@@ -46,7 +46,7 @@ class PermanentFileStorage(FileStorage):
             NA
         """
         if not self.exists(path):
-            local_file_storage = FileStorage(provider=FileStorageProvider.Local)
+            local_file_storage = FileStorage(provider=FileStorageProvider.LOCAL)
             local_file_path = self.legacy_storage_path + "/" + path
             if local_file_storage.exists(local_file_path):
                 self.upload(local_file_path, path)

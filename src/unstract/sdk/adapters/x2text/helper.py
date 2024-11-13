@@ -20,7 +20,7 @@ class X2TextHelper:
     def parse_response(
         response: Response,
         out_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> tuple[str, bool]:
         """Parses the response from a request.
 
@@ -64,11 +64,11 @@ class UnstructuredHelper:
         unstructured_adapter_config: dict[str, Any],
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         try:
             response: Response
-            local_storage = FileStorage(FileStorageProvider.Local)
+            local_storage = FileStorage(FileStorageProvider.LOCAL)
             if not local_storage.exists(input_file_path):
                 fs.download(from_path=input_file_path, to_path=input_file_path)
             with open(input_file_path, "rb") as input_f:

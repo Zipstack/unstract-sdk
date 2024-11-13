@@ -6,8 +6,8 @@ from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 class SharedTemporaryFileStorage(FileStorage):
     SUPPORTED_FILE_STORAGE_TYPES = [
-        FileStorageProvider.Minio.value,
-        FileStorageProvider.Redis.value,
+        FileStorageProvider.MINIO.value,
+        FileStorageProvider.REDIS.value,
     ]
 
     def __init__(
@@ -20,9 +20,9 @@ class SharedTemporaryFileStorage(FileStorage):
                 f"File storage provider is not supported in Permanent mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
-        if provider == FileStorageProvider.Minio:
+        if provider == FileStorageProvider.MINIO:
             super().__init__(provider, storage_config)
-        elif provider == FileStorageProvider.Redis:
+        elif provider == FileStorageProvider.REDIS:
             super().__init__(provider)
         else:
             raise NotImplementedError

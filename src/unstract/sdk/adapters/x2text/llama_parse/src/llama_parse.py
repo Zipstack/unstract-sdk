@@ -47,7 +47,7 @@ class LlamaParseAdapter(X2TextAdapter):
     def _call_parser(
         self,
         input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         parser = LlamaParse(
             api_key=self.config.get(LlamaParseConfig.API_KEY),
@@ -95,7 +95,7 @@ class LlamaParseAdapter(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         response_text = self._call_parser(input_file_path=input_file_path, fs=fs)

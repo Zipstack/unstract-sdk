@@ -34,9 +34,9 @@ def file_storage(provider: FileStorageProvider):
     try:
         if provider == FileStorageProvider.GCS:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS, "{}"))
-        elif provider == FileStorageProvider.Minio:
+        elif provider == FileStorageProvider.MINIO:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_MINIO, "{}"))
-        elif provider == FileStorageProvider.Local:
+        elif provider == FileStorageProvider.LOCAL:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
     except JSONDecodeError:
         creds = {}
@@ -56,28 +56,28 @@ def file_storage(provider: FileStorageProvider):
             os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             0,
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "r",
             -1,
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             0,
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "r",
             -1,
@@ -125,7 +125,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_PDF_FILE,
             "rb",
             None,
@@ -135,7 +135,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             None,
@@ -145,7 +145,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             None,
@@ -165,7 +165,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             len(TEST_CONSTANTS.TEXT_CONTENT),
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             None,
             "rb",
             TEST_CONSTANTS.TEXT_CONTENT.encode(),
@@ -175,7 +175,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             len(TEST_CONSTANTS.TEXT_CONTENT.encode()),
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
             "rb",
             None,
@@ -185,7 +185,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             None,
@@ -195,7 +195,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             None,
@@ -205,7 +205,7 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             None,
             "rb",
             TEST_CONSTANTS.TEXT_CONTENT,
@@ -254,12 +254,12 @@ def test_file_write(
             # further details pls check implementation of mkdir in GCSFS
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.TEST_FOLDER,
             True,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.TEST_FOLDER,
             False,  # mkdir does not work for blob storages
             # as they only support creating buckets. For
@@ -283,17 +283,17 @@ def test_make_dir(file_storage, folder_path, expected_result):
             True,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.TEST_FOLDER,
             True,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             "dummy",
             False,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.GCS_BUCKET,
             True,
         ),
@@ -312,17 +312,17 @@ def test_path_exists(file_storage, folder_path, expected_result):
             3,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_FOLDER_PATH,
             3,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             1,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_FOLDER_PATH,
             2,
         ),
@@ -340,11 +340,11 @@ def test_ls(file_storage, folder_path, expected_file_count):
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
         ),
     ],
@@ -362,7 +362,7 @@ def test_rm(file_storage, folder_path):
     "file_storage, folder_path, recursive, test_folder_path",
     [
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.RECURSION_FOLDER_PATH,
             True,
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
@@ -381,7 +381,7 @@ def test_rm_recursive(file_storage, folder_path, recursive, test_folder_path):
     "file_storage, folder_path, recursive, test_folder_path",
     [
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.RECURSION_FOLDER_PATH,
             False,
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
@@ -416,7 +416,7 @@ def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folde
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             1,
@@ -424,7 +424,7 @@ def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folde
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_PDF_FILE,
             "r",
             0,
@@ -432,7 +432,7 @@ def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folde
             0,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             "rb",
             1,
@@ -440,7 +440,7 @@ def test_rm_recursive_exception(file_storage, folder_path, recursive, test_folde
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE) - 1,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
             "r",
             0,
@@ -477,12 +477,12 @@ def test_file(provider):
             TEST_CONSTANTS.TEST_FOLDER,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
         ),
@@ -496,7 +496,7 @@ def test_cp(file_storage, lpath, rpath):
 
 
 def test_pdf_read():
-    fs = file_storage(FileStorageProvider.Local)
+    fs = file_storage(FileStorageProvider.LOCAL)
     pdf_contents = io.BytesIO(fs.read(path=TEST_CONSTANTS.READ_PDF_FILE, mode="rb"))
     page_count = 0
     with pdfplumber.open(pdf_contents) as pdf:
@@ -525,17 +525,17 @@ def test_pdf_read():
             os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
             os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
         ),
@@ -565,22 +565,22 @@ def test_file_size(file_storage, path, expected_size):
             MimeType.PDF,
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             MimeType.TEXT,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
             MimeType.PDF,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             MimeType.TEXT,
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
             MimeType.PDF,
         ),
@@ -601,19 +601,19 @@ def test_file_mime_type(file_storage, path, expected_mime_type):
             TEST_CONSTANTS.TEST_FOLDER + "/1.txt",
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/2.txt",
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
         ),
     ],
 )
 def test_download(file_storage, from_path, to_path):
-    local_file_storage = FileStorage(FileStorageProvider.Local)
+    local_file_storage = FileStorage(FileStorageProvider.LOCAL)
     if local_file_storage.exists(to_path):
         local_file_storage.rm(to_path, recursive=True)
     assert local_file_storage.exists(to_path) is False
@@ -630,19 +630,19 @@ def test_download(file_storage, from_path, to_path):
             TEST_CONSTANTS.TEST_FOLDER + "/1.txt",
         ),
         (
-            file_storage(provider=FileStorageProvider.Local),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/2.txt",
         ),
         (
-            file_storage(provider=FileStorageProvider.Minio),
+            file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
         ),
     ],
 )
 def test_upload(file_storage, from_path, to_path):
-    local_file_storage = FileStorage(FileStorageProvider.Local)
+    local_file_storage = FileStorage(FileStorageProvider.LOCAL)
     assert local_file_storage.exists(from_path) is True
     if file_storage.exists(to_path):
         file_storage.rm(to_path, recursive=True)

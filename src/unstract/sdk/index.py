@@ -118,7 +118,7 @@ class Index:
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
-        fs: FileStorage = FileStorage(FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
     ) -> str:
         """Extracts text from a document.
 
@@ -199,7 +199,7 @@ class Index:
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -422,7 +422,7 @@ class Index:
         chunk_overlap: str,
         file_path: Optional[str] = None,
         file_hash: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
 
@@ -485,7 +485,7 @@ class Index:
             chunk_overlap,
             file_path,
             file_hash,
-            fs=FileStorage(provider=FileStorageProvider.Local),
+            fs=FileStorage(provider=FileStorageProvider.LOCAL),
         )
 
     @deprecated(version="0.50.0", reason="Use index() instead")

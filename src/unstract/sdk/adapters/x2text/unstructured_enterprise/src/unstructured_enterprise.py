@@ -42,7 +42,7 @@ class UnstructuredEnterprise(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[str, Any],
     ) -> TextExtractionResult:
         extracted_text: str = UnstructuredHelper.process_document(

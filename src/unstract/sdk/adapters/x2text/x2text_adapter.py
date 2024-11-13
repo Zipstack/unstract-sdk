@@ -43,7 +43,7 @@ class X2TextAdapter(Adapter, ABC):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         return TextExtractionResult(

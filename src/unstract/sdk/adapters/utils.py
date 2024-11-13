@@ -40,7 +40,7 @@ class AdapterUtils:
     @staticmethod
     def get_file_mime_type(
         input_file: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -58,7 +58,7 @@ class AdapterUtils:
     @staticmethod
     def guess_extention(
         input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Returns the extention of the file passed.
 

@@ -89,7 +89,7 @@ class X2Text(metaclass=ABCMeta):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         mime_type = ToolUtils.get_file_mime_type(input_file_path, fs)
@@ -117,7 +117,7 @@ class X2Text(metaclass=ABCMeta):
         self,
         input_file_path: str,
         mime_type: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> None:
         file_size = ToolUtils.get_file_size(input_file_path, fs)
 

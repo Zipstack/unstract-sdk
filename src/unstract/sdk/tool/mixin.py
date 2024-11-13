@@ -13,7 +13,7 @@ class ToolConfigHelper:
     @staticmethod
     def spec(
         spec_file: str = "config/spec.json",
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> dict[str, Any]:
         """Returns the JSON schema for the tool settings.
 
@@ -28,7 +28,7 @@ class ToolConfigHelper:
     @staticmethod
     def properties(
         properties_file: str = "config/properties.json",
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> dict[str, Any]:
         """Returns the properties of the tool.
 
@@ -43,7 +43,7 @@ class ToolConfigHelper:
     @staticmethod
     def variables(
         variables_file: str = "config/runtime_variables.json",
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> dict[str, Any]:
         """Returns the JSON schema of the runtime variables.
 
@@ -64,7 +64,7 @@ class ToolConfigHelper:
     @staticmethod
     def icon(
         icon_file: str = "config/icon.svg",
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Returns the icon of the tool.
 

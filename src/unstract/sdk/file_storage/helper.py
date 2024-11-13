@@ -28,9 +28,9 @@ class FileStorageHelper:
 
         try:
             protocol = provider.value
-            if provider == FileStorageProvider.Local:
+            if provider == FileStorageProvider.LOCAL:
                 storage_config.update({"auto_mkdir": True})
-            elif provider in [FileStorageProvider.Minio]:
+            elif provider in [FileStorageProvider.MINIO]:
                 # Initialise using s3 for Minio
                 protocol = FileStorageProvider.S3.value
 
@@ -58,8 +58,8 @@ class FileStorageHelper:
             NA
         """
         try:
-            fs = fsspec.filesystem(protocol=FileStorageProvider.Local.value)
-            logger.debug(f"Connected to {FileStorageProvider.Local.value} file system")
+            fs = fsspec.filesystem(protocol=FileStorageProvider.LOCAL.value)
+            logger.debug(f"Connected to {FileStorageProvider.LOCAL.value} file system")
             return fs
         except Exception as e:
             logger.error(

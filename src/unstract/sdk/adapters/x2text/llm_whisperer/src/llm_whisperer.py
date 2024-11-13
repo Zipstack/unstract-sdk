@@ -308,7 +308,7 @@ class LLMWhisperer(X2TextAdapter):
     def _send_whisper_request(
         self,
         input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         enable_highlight: bool = False,
     ) -> requests.Response:
         headers = self._get_request_headers()
@@ -333,7 +333,7 @@ class LLMWhisperer(X2TextAdapter):
         self,
         output_file_path: Optional[str],
         response: requests.Response,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         output_json = {}
         if response.status_code == 200:
@@ -354,7 +354,7 @@ class LLMWhisperer(X2TextAdapter):
         self,
         output_json: dict,
         output_file_path: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> None:
         """Writes the extracted text and metadata to the specified output file
         and metadata file.
@@ -411,7 +411,7 @@ class LLMWhisperer(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         """Used to extract text from documents.

@@ -99,7 +99,7 @@ class GoogleDocumentAI(OCRAdapter):
     def _get_input_file_type_mime(
         self,
         input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         sample_contents = fs.read(path=input_file_path, mode="rb", length=100)
         file_type = filetype.guess(sample_contents)
@@ -117,7 +117,7 @@ class GoogleDocumentAI(OCRAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.Local),
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         try:
             file_type_mime = self._get_input_file_type_mime(input_file_path)

@@ -30,7 +30,7 @@ def permanent_file_storage(provider: FileStorageProvider):
     try:
         if provider == FileStorageProvider.GCS:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS, "{}"))
-        elif provider == FileStorageProvider.Local:
+        elif provider == FileStorageProvider.LOCAL:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
     except JSONDecodeError:
         creds = {}
@@ -72,7 +72,7 @@ def test_permanent_fs_copy_on_write(
     "file_storage, file_read_path, read_mode, file_write_path, write_mode",
     [
         (
-            permanent_file_storage(provider=FileStorageProvider.Local),
+            permanent_file_storage(provider=FileStorageProvider.LOCAL),
             "fsspec-test/input/3.txt",
             "r",
             "fsspec-test/output/copy_on_write.txt",
@@ -109,14 +109,14 @@ def test_permanent_fs_download(file_storage, from_path, read_mode, to_path, writ
     file_read_contents = file_storage.read(from_path, read_mode)
     print(file_read_contents)
     file_storage.download(from_path, to_path)
-    local_file_storage = permanent_file_storage(provider=FileStorageProvider.Local)
+    local_file_storage = permanent_file_storage(provider=FileStorageProvider.LOCAL)
     file_write_contents = local_file_storage.read(to_path, read_mode)
     assert len(file_read_contents) == len(file_write_contents)
 
 
 @pytest.mark.parametrize(
     "provider",
-    [(FileStorageProvider.GCS), (FileStorageProvider.Local)],
+    [(FileStorageProvider.GCS), (FileStorageProvider.LOCAL)],
 )
 def test_permanent_supported_file_storage_mode(provider):
     file_storage = permanent_file_storage(provider=provider)
