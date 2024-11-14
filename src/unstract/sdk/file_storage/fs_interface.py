@@ -76,6 +76,10 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
+    def glob(self, path: str) -> list[str]:
+        pass
+
+    @abstractmethod
     def get_hash_from_file(self, path: str) -> str:
         pass
 
