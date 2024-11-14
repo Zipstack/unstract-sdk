@@ -48,6 +48,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode=mode, encoding=encoding) as file_handle:
+                self.fs.glob()
                 if seek_position > 0:
                     file_handle.seek(seek_position)
                 return file_handle.read(length)
@@ -272,6 +273,23 @@ class FileStorage(FileStorageInterface):
         except FileNotFoundError as e:
             logger.error(f"Path {from_path} does not exist.")
             raise e
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def glob(self, path: str) -> list[str]:
+        """Lists files under path matching the pattern sepcified as part of
+        path in the argument.
+
+        Args:
+            path (str): path to the directory where files matching the
+            specified pattern is to be found
+            Eg. a/b/c/*.txt will list all txt files under a/b/c/
+
+        Returns:
+            list[str]: List of file names matching any pattern specified
+        """
+        try:
+            return self.fs.glob(path)
         except Exception as e:
             raise FileOperationError(str(e)) from e
 

@@ -648,3 +648,29 @@ def test_upload(file_storage, from_path, to_path):
         file_storage.rm(to_path, recursive=True)
     file_storage.upload(from_path, to_path)
     assert file_storage.exists(to_path) is True
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, expected_result",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
+            1,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.txt",
+            2,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
+            1,
+        ),
+    ],
+)
+def test_glob(file_storage, folder_path, expected_result):
+    file_list = file_storage.glob(path=folder_path)
+    print(f"Files: {file_list}")
+    assert len(file_list) == expected_result
