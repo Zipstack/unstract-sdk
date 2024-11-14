@@ -47,6 +47,10 @@ class StreamMixin:
 
     def _configure_logger(self) -> None:
         """Helps configure the logger for the tool run."""
+        rootlogger = logging.getLogger("")
+        # Avoids adding multiple handlers
+        if rootlogger.hasHandlers():
+            return
         handler = logging.StreamHandler()
         handler.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
         handler.setFormatter(
@@ -54,7 +58,6 @@ class StreamMixin:
                 "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
             )
         )
-        rootlogger = logging.getLogger("")
         rootlogger.addHandler(handler)
         rootlogger.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
 
