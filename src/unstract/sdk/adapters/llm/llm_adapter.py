@@ -92,10 +92,7 @@ class LLMAdapter(Adapter, ABC):
             # Avoids circular import errors
             from unstract.sdk.adapters.llm.exceptions import parse_llm_err
 
-            err = parse_llm_err(e)
-            msg = f"Error while testing LLM '{self.get_name()}'. {str(err)}"
-            err.message = msg
-            raise err from e
+            raise parse_llm_err(e, llm_adapter=self) from e
         return test_result
 
     def get_context_window_size(self) -> int:

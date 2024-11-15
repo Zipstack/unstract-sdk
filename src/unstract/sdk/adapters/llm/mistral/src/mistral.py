@@ -87,5 +87,9 @@ class MistralLLM(LLMAdapter):
             LLMError: Error to be sent to the user
         """
         if e.message and e.message.find('"message":"Unauthorized"'):
-            return LLMError("Incorrect API key, please check the API key provided.")
-        return LLMError(f"Error from MistralAI. {e}")
+            return LLMError(
+                "Incorrect API key, please check the API key provided.",
+                actual_err=e,
+                status_code=401,
+            )
+        return LLMError(str(e), actual_err=e)

@@ -242,4 +242,4 @@ class VertexAILLM(LLMAdapter):
                 err_msg = reason_messages.get(reason, str(candidate))
             err_list.append(err_msg)
         msg = "\n\nAnother error: \n".join(err_list)
-        return LLMError(msg)
+        return LLMError(msg, actual_err=e)

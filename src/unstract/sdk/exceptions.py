@@ -1,20 +1,34 @@
+from typing import Optional
+
+
 class SdkError(Exception):
     DEFAULT_MESSAGE = "Something went wrong"
+    actual_err: Optional[Exception] = None
+    status_code: Optional[int] = None
 
-    def __init__(self, message: str = DEFAULT_MESSAGE):
+    def __init__(
+        self,
+        message: str = DEFAULT_MESSAGE,
+        actual_err: Optional[Exception] = None,
+        status_code: Optional[int] = None,
+    ):
         super().__init__(message)
         # Make it user friendly wherever possible
         self.message = message
+        if actual_err:
+            self.actual_err = actual_err
+        if status_code:
+            self.status_code = status_code
 
     def __str__(self) -> str:
         return self.message
 
 
 class IndexingError(SdkError):
-    def __init__(self, message: str = ""):
+    def __init__(self, message: str = "", **kwargs):
         if "404" in message:
             message = "Index not found. Please check vector DB settings."
-        super().__init__(message)
+        super().__init__(message, **kwargs)
 
 
 class LLMError(SdkError):

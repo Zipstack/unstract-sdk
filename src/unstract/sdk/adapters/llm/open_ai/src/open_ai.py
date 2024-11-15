@@ -4,12 +4,11 @@ from typing import Any
 from llama_index.core.llms import LLM
 from llama_index.llms.openai import OpenAI
 from openai import APIError as OpenAIAPIError
-from openai import RateLimitError as OpenAIRateLimitError
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
-from unstract.sdk.exceptions import LLMError, RateLimitError
+from unstract.sdk.exceptions import LLMError
 
 
 class Constants:
@@ -90,11 +89,10 @@ class OpenAILLM(LLMAdapter):
         Returns:
             LLMError: Error to be sent to the user
         """
-        msg = "Error from OpenAI. "
         if hasattr(e, "body") and isinstance(e.body, dict) and "message" in e.body:
-            msg += e.body["message"]
+            msg = e.body["message"]
         else:
-            msg += e.message
-        if isinstance(e, OpenAIRateLimitError):
-            return RateLimitError(msg)
-        return LLMError(msg)
+            msg = e.message
+
+        status_code = e.status_code if hasattr(e, "status_code") else None
+        return LLMError(msg, actual_err=e, status_code=status_code)
