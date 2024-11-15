@@ -106,7 +106,7 @@ class ToolValidator:
             spec_schema = self.tool.spec
             DefaultsGeneratingValidator(spec_schema).validate(tool_settings)
         except JSONDecodeError as e:
-            self.tool.stream_error_and_exit(f"Settings are not a valid JSON: {str(e)}")
+            self.tool.stream_error_and_exit(f"Settings is not a valid JSON: {str(e)}")
         except ValidationError as e:
             self.tool.stream_error_and_exit(f"Invalid settings: {str(e)}")
 
