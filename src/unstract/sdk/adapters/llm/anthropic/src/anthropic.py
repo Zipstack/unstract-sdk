@@ -11,7 +11,7 @@ from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.exceptions import LLMError
 
-from .exceptions import get_anthropic_err
+from .exceptions import parse_anthropic_err
 
 
 class Constants:
@@ -89,7 +89,7 @@ class AnthropicLLM(LLMAdapter):
         """
         if hasattr(e, "body") and isinstance(e.body, dict) and "error" in e.body:
             err = e.body["error"]
-            msg = get_anthropic_err(err)
+            msg = parse_anthropic_err(err)
         else:
             msg = e.message
 

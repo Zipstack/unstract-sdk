@@ -38,6 +38,7 @@ def parse_llm_err(e: Exception, llm_adapter: LLMAdapter) -> LLMError:
     else:
         err = LLMError(str(e), actual_err=e)
 
+    # TODO: Review if markdown can be supported
     msg = f"Error from LLM provider '{llm_adapter.get_name()}'.\n```{str(err)}\n```"
     err.message = msg
     return err
