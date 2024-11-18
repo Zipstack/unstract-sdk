@@ -37,15 +37,14 @@ class LLM:
         adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
-        """
-
-        Notes:
-            - "Azure OpenAI" : Environment variables required
-            OPENAI_API_KEY,OPENAI_API_BASE, OPENAI_API_VERSION,
-            OPENAI_API_ENGINE, OPENAI_API_MODEL
+        """Creates an instance of this LLM class.
 
         Args:
-            tool (AbstractTool): Instance of AbstractTool
+            tool (BaseTool): Instance of BaseTool to expose function to stream logs
+            adapter_instance_id (Optional[str], optional): UUID of the adapter in
+                Unstract. Defaults to None.
+            usage_kwargs (dict[Any, Any], optional): Dict to capture token usage with
+                callbacks. Defaults to {}.
         """
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
