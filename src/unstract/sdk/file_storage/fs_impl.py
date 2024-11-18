@@ -48,10 +48,11 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode=mode, encoding=encoding) as file_handle:
-                self.fs.glob()
                 if seek_position > 0:
                     file_handle.seek(seek_position)
                 return file_handle.read(length)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -263,7 +264,7 @@ class FileStorage(FileStorageInterface):
 
         Args:
             from_path (str): Path of the file to be uploaded (local)
-            to_path (str): Path where the file is on the local system
+            to_path (str): Path where the file is to be uploaded (usually remote)
 
         Returns:
             NA
@@ -293,23 +294,6 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def _open_with_no_buffering(self, path, mode="rb"):
-        """Opens a file using fsspec with no buffering.
-
-        Args:
-            fs: The fsspec filesystem object.
-            path: The path to the file.
-            mode: The file mode (default: 'rb' for binary read).
-
-        Returns:
-            A file-like object with no buffering.
-        """
-        try:
-            with self.fs.open(path, mode) as f:
-                return open(f.raw.name, mode, buffering=0)
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
-
     def get_hash_from_file(self, path: str) -> str:
         """Computes the hash for a file.
 
@@ -326,7 +310,7 @@ class FileStorage(FileStorageInterface):
             h = sha256()
             b = bytearray(128 * 1024)
             mv = memoryview(b)
-            with self._open_with_no_buffering(path=path) as f:
+            with self.fs.open(path) as f:
                 while n := f.readinto(mv):
                     h.update(mv[:n])
             return str(h.hexdigest())
