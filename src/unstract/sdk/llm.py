@@ -96,18 +96,18 @@ class LLM:
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             process_text_output = {}
+            if extract_json:
+                match = LLM.json_regex.search(response.text)
+                if match:
+                    response.text = match.group(0)
             if process_text:
                 try:
-                    process_text_output = process_text(response)
+                    process_text_output = process_text(response, extract_json)
                     if not isinstance(process_text_output, dict):
                         process_text_output = {}
                 except Exception as e:
                     logger.error(f"Error occured inside function 'process_text': {e}")
                     process_text_output = {}
-            if extract_json:
-                match = LLM.json_regex.search(response.text)
-                if match:
-                    response.text = match.group(0)
             return {LLM.RESPONSE: response, **process_text_output}
         except Exception as e:
             raise parse_llm_err(e) from e
