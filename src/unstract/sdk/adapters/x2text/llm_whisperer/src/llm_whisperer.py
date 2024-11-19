@@ -27,7 +27,6 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhisperStatus,
 )
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -176,13 +175,13 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
             WhispererConfig.MARK_VERTICAL_LINES: self.config.get(
-                WhispererConfig.MARK_VERTICAL_LINES,
-                WhispererDefaults.MARK_VERTICAL_LINES,
-            ),
+                        WhispererConfig.MARK_VERTICAL_LINES,
+                        WhispererDefaults.MARK_VERTICAL_LINES,
+                    ),
             WhispererConfig.MARK_HORIZONTAL_LINES: self.config.get(
-                WhispererConfig.MARK_HORIZONTAL_LINES,
-                WhispererDefaults.MARK_HORIZONTAL_LINES,
-            ),
+                        WhispererConfig.MARK_HORIZONTAL_LINES,
+                        WhispererDefaults.MARK_HORIZONTAL_LINES,
+                    ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(
@@ -306,10 +305,7 @@ class LLMWhisperer(X2TextAdapter):
             )
 
     def _send_whisper_request(
-        self,
-        input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-        enable_highlight: bool = False,
+        self, input_file_path: str, enable_highlight: bool = False
     ) -> requests.Response:
         headers = self._get_request_headers()
         headers["Content-Type"] = "application/octet-stream"
@@ -317,23 +313,21 @@ class LLMWhisperer(X2TextAdapter):
 
         response: requests.Response
         try:
-            response = self._make_request(
-                request_method=HTTPMethod.POST,
-                request_endpoint=WhispererEndpoint.WHISPER,
-                headers=headers,
-                params=params,
-                data=fs.read(path=input_file_path, mode="rb"),
-            )
+            with open(input_file_path, "rb") as input_f:
+                response = self._make_request(
+                    request_method=HTTPMethod.POST,
+                    request_endpoint=WhispererEndpoint.WHISPER,
+                    headers=headers,
+                    params=params,
+                    data=input_f.read(),
+                )
         except OSError as e:
             logger.error(f"OS error while reading {input_file_path}: {e}")
             raise ExtractorError(str(e))
         return response
 
     def _extract_text_from_response(
-        self,
-        output_file_path: Optional[str],
-        response: requests.Response,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+        self, output_file_path: Optional[str], response: requests.Response
     ) -> str:
         output_json = {}
         if response.status_code == 200:
@@ -350,12 +344,7 @@ class LLMWhisperer(X2TextAdapter):
             )
         return output_json.get("text", "")
 
-    def _write_output_to_file(
-        self,
-        output_json: dict,
-        output_file_path: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> None:
+    def _write_output_to_file(self, output_json: dict, output_file_path: Path) -> None:
         """Writes the extracted text and metadata to the specified output file
         and metadata file.
 
@@ -371,12 +360,7 @@ class LLMWhisperer(X2TextAdapter):
         try:
             text_output = output_json.get("text", "")
             logger.info(f"Writing output to {output_file_path}")
-            fs.write(
-                path=output_file_path.name,
-                mode="w",
-                encoding="utf-8",
-                data=text_output,
-            )
+            output_file_path.write_text(text_output, encoding="utf-8")
             try:
                 # Define the directory of the output file and metadata paths
                 output_dir = output_file_path.parent
@@ -384,20 +368,14 @@ class LLMWhisperer(X2TextAdapter):
                 metadata_file_name = output_file_path.with_suffix(".json").name
                 metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
-                fs.mkdir(metadata_dir, create_parents=True)
+                metadata_dir.mkdir(parents=True, exist_ok=True)
                 # Remove the "text" key from the metadata
                 metadata = {
                     key: value for key, value in output_json.items() if key != "text"
                 }
                 metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
                 logger.info(f"Writing metadata to {metadata_file_path}")
-
-                fs.write(
-                    path=metadata_file_path.name,
-                    mode="w",
-                    encoding="utf-8",
-                    data=metadata_json,
-                )
+                metadata_file_path.write_text(metadata_json, encoding="utf-8")
             except Exception as e:
                 logger.error(
                     f"Error while writing metadata to {metadata_file_path}: {e}"
@@ -411,7 +389,6 @@ class LLMWhisperer(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         """Used to extract text from documents.
@@ -428,7 +405,6 @@ class LLMWhisperer(X2TextAdapter):
 
         response: requests.Response = self._send_whisper_request(
             input_file_path,
-            fs,
             bool(kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)),
         )
 
@@ -437,8 +413,6 @@ class LLMWhisperer(X2TextAdapter):
         )
 
         return TextExtractionResult(
-            extracted_text=self._extract_text_from_response(
-                output_file_path, response, fs
-            ),
+            extracted_text=self._extract_text_from_response(output_file_path, response),
             extraction_metadata=metadata,
         )

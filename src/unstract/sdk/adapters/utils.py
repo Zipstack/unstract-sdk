@@ -6,7 +6,6 @@ from requests import Response
 from requests.exceptions import RequestException
 
 from unstract.sdk.adapters.constants import Common
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 
 class AdapterUtils:
@@ -35,13 +34,8 @@ class AdapterUtils:
                 return err_response.text  # type: ignore
         return default_err
 
-    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
-    # FileStorage has mime_type() which could be used instead.
     @staticmethod
-    def get_file_mime_type(
-        input_file: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> str:
+    def get_file_mime_type(input_file: Path) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
 
@@ -51,15 +45,15 @@ class AdapterUtils:
         Returns:
             str: MIME type of the file
         """
-        sample_contents = fs.read(path=input_file, mode="rb", length=100)
-        input_file_mime = magic.from_buffer(sample_contents, mime=True)
+        input_file_mime = ""
+        with open(input_file, mode="rb") as input_file_obj:
+            sample_contents = input_file_obj.read(100)
+            input_file_mime = magic.from_buffer(sample_contents, mime=True)
+            input_file_obj.seek(0)
         return input_file_mime
 
     @staticmethod
-    def guess_extention(
-        input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> str:
+    def guess_extention(input_file_path: str) -> str:
         """Returns the extention of the file passed.
 
         Args:
@@ -69,8 +63,8 @@ class AdapterUtils:
             str: File extention
         """
         input_file_extention = ""
-        sample_contents = fs.read(path=input_file_path, mode="rb", length=100)
-        if sample_contents:
+        with open(input_file_path, mode="rb") as file_obj:
+            sample_contents = file_obj.read(100)
             file_type = filetype.guess(sample_contents)
             input_file_extention = file_type.EXTENSION
         return input_file_extention
