@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Union
+from typing import Any, Union
 
 from fsspec import AbstractFileSystem
 
@@ -84,5 +84,21 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def json_dump(self, path, mode, encoding, data, **kwargs):
+    def json_dump(
+        self,
+        path: str,
+        data: Union[str, bytes],
+        **kwargs: dict[Any, Any],
+    ):
+        pass
+
+    @abstractmethod
+    def yaml_dump(
+        self,
+        path: str,
+        data: Union[str, bytes],
+        mode: str = "w",
+        encoding: str = "utf-8",
+        **kwargs: dict[Any, Any],
+    ):
         pass

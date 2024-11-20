@@ -6,6 +6,7 @@ from typing import Any, Union
 
 import fsspec
 import magic
+import yaml
 
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
@@ -317,18 +318,44 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def json_dump(self, path, mode, encoding, data, **kwargs):
+    def json_dump(
+        self,
+        path: str,
+        data: Union[str, bytes],
+        **kwargs: dict[Any, Any],
+    ):
         """Dumps data into the given file specified by path.
 
         Args:
             path (str): Path to file where JSON is to be dumped
-            mode (str): write modes
-            encoding (str): Encoding to be used while writing the file
             data (bytes|str): data to be written to the file
             **kwargs (dict): Any other additional arguments
         """
         try:
-            with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
+            with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
                 json.dump(data, f, **kwargs)
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def yaml_dump(
+        self,
+        path: str,
+        data: Union[str, bytes],
+        mode: str = "w",
+        encoding: str = "utf-8",
+        **kwargs: dict[Any, Any],
+    ):
+        """Dumps data into the given file specified by path.
+
+        Args:
+            path (str): Path to file where yml is to be dumped
+            data (bytes|str): data to be written to the file
+            mode (str): write modes
+            encoding (str): Encoding to be used while writing the file
+            **kwargs (dict): Any other additional arguments
+        """
+        try:
+            with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
+                yaml.dump(data, f, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e)) from e
