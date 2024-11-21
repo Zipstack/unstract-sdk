@@ -106,6 +106,8 @@ class FileStorage(FileStorageInterface):
         try:
             with self.fs.open(path=path, mode="rb") as file_handle:
                 return file_handle.seek(location, position)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -149,6 +151,8 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.ls(path)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -183,6 +187,8 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.cp(src, dest, overwrite=overwrite)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -198,6 +204,8 @@ class FileStorage(FileStorageInterface):
         try:
             file_info = self.fs.info(path)
             return file_info["size"]
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -216,6 +224,8 @@ class FileStorage(FileStorageInterface):
             if not isinstance(file_mtime, datetime):
                 file_mtime = datetime.fromtimestamp(file_mtime)
             return file_mtime
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -233,6 +243,8 @@ class FileStorage(FileStorageInterface):
             sample_contents = self.read(path=path, mode="rb", length=100)
             mime_type = magic.from_buffer(sample_contents, mime=True)
             return mime_type
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -315,6 +327,8 @@ class FileStorage(FileStorageInterface):
                 while n := f.readinto(mv):
                     h.update(mv[:n])
             return str(h.hexdigest())
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
