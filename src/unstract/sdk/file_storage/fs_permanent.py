@@ -35,7 +35,7 @@ class PermanentFileStorage(FileStorage):
         else:
             raise NotImplementedError
 
-    def _copy_on_read(self, path, legacy_storage_path):
+    def _copy_on_read(self, path: str, legacy_storage_path: str):
         """Copies the file to the remote storage lazily if not present already.
         Checks if the file is present in the Local File system. If yes, copies
         the file to the mentioned path using the remote file system. This is a
@@ -43,6 +43,7 @@ class PermanentFileStorage(FileStorage):
 
         Args:
             path (str): Path to the file
+            legacy_storage_path (str): Legacy path to the same file
 
         Returns:
             NA
