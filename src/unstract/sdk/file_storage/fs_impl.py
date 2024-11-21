@@ -321,14 +321,14 @@ class FileStorage(FileStorageInterface):
     def json_dump(
         self,
         path: str,
-        data: Union[str, bytes],
+        data: dict[str, Any],
         **kwargs: dict[Any, Any],
     ):
         """Dumps data into the given file specified by path.
 
         Args:
             path (str): Path to file where JSON is to be dumped
-            data (bytes|str): data to be written to the file
+            data (dict): Object to be written to the file
             **kwargs (dict): Any other additional arguments
         """
         try:
@@ -340,22 +340,49 @@ class FileStorage(FileStorageInterface):
     def yaml_dump(
         self,
         path: str,
-        data: Union[str, bytes],
-        mode: str = "w",
-        encoding: str = "utf-8",
+        data: dict[str, Any],
         **kwargs: dict[Any, Any],
     ):
         """Dumps data into the given file specified by path.
 
         Args:
             path (str): Path to file where yml is to be dumped
-            data (bytes|str): data to be written to the file
-            mode (str): write modes
-            encoding (str): Encoding to be used while writing the file
+            data (dict): Object to be written to the file
             **kwargs (dict): Any other additional arguments
         """
         try:
-            with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
+            with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
                 yaml.dump(data, f, **kwargs)
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def json_load(self, path: str) -> dict[Any, Any]:
+        try:
+            with self.fs.open(path=path) as json_file:
+                data: dict[str, Any] = json.load(json_file)
+                return data
+        except FileNotFoundError as e:
+            raise e
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def yaml_load(
+        self,
+        path: str,
+    ) -> dict[Any, Any]:
+        """Loads data from a file as yaml.
+
+        Args:
+            path (str): Path to file where yml is to be loaded
+
+        Returns:
+            dict[Any, Any]: Data loaded as yaml
+        """
+        try:
+            with self.fs.open(path=path) as f:
+                data: dict[str, Any] = yaml.safe_load(f)
+                return data
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e

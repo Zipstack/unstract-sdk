@@ -87,7 +87,7 @@ class FileStorageInterface(ABC):
     def json_dump(
         self,
         path: str,
-        data: Union[str, bytes],
+        data: dict[str, Any],
         **kwargs: dict[Any, Any],
     ):
         pass
@@ -96,9 +96,18 @@ class FileStorageInterface(ABC):
     def yaml_dump(
         self,
         path: str,
-        data: Union[str, bytes],
-        mode: str = "w",
-        encoding: str = "utf-8",
+        data: dict[str, Any],
         **kwargs: dict[Any, Any],
     ):
+        pass
+
+    @abstractmethod
+    def json_load(self, path: str) -> dict[Any, Any]:
+        pass
+
+    @abstractmethod
+    def yaml_load(
+        self,
+        path: str,
+    ) -> dict[Any, Any]:
         pass
