@@ -648,3 +648,54 @@ def test_upload(file_storage, from_path, to_path):
         file_storage.rm(to_path, recursive=True)
     file_storage.upload(from_path, to_path)
     assert file_storage.exists(to_path) is True
+
+
+@pytest.mark.parametrize(
+    "file_storage, file_path, expected_result",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "4a08b5721f75657eb883202cae16c74ca62df2c605e4126e50f4bf341d4fd693",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "4a08b5721f75657eb883202cae16c74ca62df2c605e4126e50f4bf341d4fd693",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "4a08b5721f75657eb883202cae16c74ca62df2c605e4126e50f4bf341d4fd693",
+        ),
+    ],
+)
+def test_get_hash_from_file(file_storage, file_path, expected_result):
+    actual_file_hash = file_storage.get_hash_from_file(file_path)
+    assert actual_file_hash == expected_result
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path, expected_result",
+    [
+        (
+            file_storage(provider=FileStorageProvider.GCS),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
+            1,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.txt",
+            2,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
+            1,
+        ),
+    ],
+)
+def test_glob(file_storage, folder_path, expected_result):
+    file_list = file_storage.glob(path=folder_path)
+    print(f"Files: {file_list}")
+    assert len(file_list) == expected_result
