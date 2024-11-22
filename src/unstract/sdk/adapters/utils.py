@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import filetype
@@ -7,6 +8,8 @@ from requests.exceptions import RequestException
 
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+
+logger = logging.getLogger(__name__)
 
 
 class AdapterUtils:
@@ -25,14 +28,20 @@ class AdapterUtils:
         Returns:
             str: Error message returned by the server
         """
-        if hasattr(err, "response"):
-            err_response: Response = err.response  # type: ignore
-            if err_response.headers["Content-Type"] == "application/json":
-                err_json = err_response.json()
-                if message_key in err_json:
-                    return str(err_json[message_key])
-            elif err_response.headers["Content-Type"] == "text/plain":
-                return err_response.text  # type: ignore
+        if not hasattr(err, "response"):
+            return default_err
+        err_response: Response = err.response  # type: ignore
+        if err_response.headers["Content-Type"] == "application/json":
+            err_json = err_response.json()
+            if message_key in err_json:
+                return str(err_json[message_key])
+            else:
+                logger.warning(
+                    f"Unable to parse error with key '{message_key}' for "
+                    f"'{err_json}', returning '{default_err}' instead."
+                )
+        elif err_response.headers["Content-Type"] == "text/plain":
+            return err_response.text  # type: ignore
         return default_err
 
     # ToDo: get_file_mime_type() to be removed once migrated to FileStorage

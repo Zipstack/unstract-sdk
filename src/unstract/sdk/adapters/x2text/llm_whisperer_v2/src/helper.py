@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 
 class LLMWhispererHelper:
-
     @staticmethod
     def get_request_headers(config: dict[str, Any]) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLM Whisperer.
@@ -90,14 +89,14 @@ class LLMWhispererHelper:
                 "Unable to connect to LLM Whisperer service, please check the URL"
             )
         except Timeout as e:
-            msg = "Request to LLM whisperer has timed out"
+            msg = "Request to LLM Whisperer has timed out"
             logger.error(f"{msg}: {e}")
             raise ExtractorError(msg)
         except HTTPError as e:
             logger.error(f"Adapter error: {e}")
             default_err = "Error while calling the LLM Whisperer service"
             msg = AdapterUtils.get_msg_from_request_exc(
-                err=e, message_key="message", default_err=default_err
+                err=e, message_key="error", default_err=default_err
             )
             raise ExtractorError(msg)
         return response
@@ -195,14 +194,16 @@ class LLMWhispererHelper:
         """
         POLL_INTERVAL = WhispererDefaults.POLL_INTERVAL
         MAX_POLLS = WhispererDefaults.MAX_POLLS
+        STATUS_RETRY_THRESHOLD = WhispererDefaults.STATUS_RETRIES
+        status_retry_count = 0
         request_count = 0
 
         # Check status in fixed intervals upto max poll count.
         while True:
             request_count += 1
             logger.info(
-                f"Checking status with interval: {POLL_INTERVAL}s"
-                f", request count: {request_count} [max: {MAX_POLLS}]"
+                f"Checking status for whisper-hash '{whisper_hash}' with interval: "
+                f"{POLL_INTERVAL}s, request count: {request_count} [max: {MAX_POLLS}]"
             )
             status_response = LLMWhispererHelper.make_request(
                 config=config,
@@ -214,19 +215,28 @@ class LLMWhispererHelper:
             if status_response.status_code == 200:
                 status_data = status_response.json()
                 status = status_data.get(WhisperStatus.STATUS, WhisperStatus.UNKNOWN)
-                logger.info(f"Whisper status for {whisper_hash}: {status}")
+                logger.info(f"Whisper status for '{whisper_hash}': {status}")
                 if status in [WhisperStatus.PROCESSED, WhisperStatus.DELIVERED]:
                     break
             else:
-                raise ExtractorError(
-                    "Error checking LLMWhisperer status: "
-                    f"{status_response.status_code} - {status_response.text}"
-                )
+                if status_retry_count >= STATUS_RETRY_THRESHOLD:
+                    raise ExtractorError(
+                        "Error checking LLMWhisperer status: "
+                        f"{status_response.status_code} - {status_response.text}"
+                    )
+                else:
+                    status_retry_count += 1
+                    logger.warning(
+                        f"Whisper status for '{whisper_hash}' failed "
+                        f"{status_retry_count} time(s), retrying... "
+                        f"[threshold: {STATUS_RETRY_THRESHOLD}]: {status_response.text}"
+                    )
 
             # Exit with error if max poll count is reached
             if request_count >= MAX_POLLS:
                 raise ExtractorError(
-                    "Unable to extract text after attempting" f" {request_count} times"
+                    f"Unable to extract text for whisper-hash '{whisper_hash}' "
+                    f"after attempting {request_count} times"
                 )
             time.sleep(POLL_INTERVAL)
 
