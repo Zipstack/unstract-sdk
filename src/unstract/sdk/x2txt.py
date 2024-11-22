@@ -1,4 +1,3 @@
-import io
 from abc import ABCMeta
 from typing import Any, Optional
 
@@ -16,7 +15,6 @@ from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.audit import Audit
 from unstract.sdk.constants import LogLevel, MimeType, ToolEnv
 from unstract.sdk.exceptions import X2TextError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
@@ -58,20 +56,20 @@ class X2Text(metaclass=ABCMeta):
                 ][Common.ADAPTER]
                 x2text_metadata = x2text_config.get(Common.ADAPTER_METADATA)
                 # Add x2text service host, port and platform_service_key
-                x2text_metadata[
-                    X2TextConstants.X2TEXT_HOST
-                ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_HOST)
-                x2text_metadata[
-                    X2TextConstants.X2TEXT_PORT
-                ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
+                x2text_metadata[X2TextConstants.X2TEXT_HOST] = (
+                    self._tool.get_env_or_die(X2TextConstants.X2TEXT_HOST)
+                )
+                x2text_metadata[X2TextConstants.X2TEXT_PORT] = (
+                    self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
+                )
 
                 if not SdkHelper.is_public_adapter(
                     adapter_id=self._adapter_instance_id
                 ):
-                    x2text_metadata[
-                        X2TextConstants.PLATFORM_SERVICE_API_KEY
-                    ] = self._tool.get_env_or_die(
-                        X2TextConstants.PLATFORM_SERVICE_API_KEY
+                    x2text_metadata[X2TextConstants.PLATFORM_SERVICE_API_KEY] = (
+                        self._tool.get_env_or_die(
+                            X2TextConstants.PLATFORM_SERVICE_API_KEY
+                        )
                     )
 
                 self._x2text_instance = x2text_adapter(x2text_metadata)
@@ -89,7 +87,6 @@ class X2Text(metaclass=ABCMeta):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         if self._tool.workflow_filestorage:
@@ -97,15 +94,16 @@ class X2Text(metaclass=ABCMeta):
         mime_type = ToolUtils.get_file_mime_type(input_file_path, fs)
         text_extraction_result: TextExtractionResult = None
         if mime_type == MimeType.TEXT:
-            extracted_text = fs.read(path=input_file_path, mode="r", encoding="utf-8")
-            text_extraction_result = TextExtractionResult(
-                extracted_text=extracted_text, extraction_metadata=None
-            )
+            with open(input_file_path, encoding="utf-8") as file:
+                extracted_text = file.read()
+                text_extraction_result = TextExtractionResult(
+                    extracted_text=extracted_text, extraction_metadata=None
+                )
         text_extraction_result = self._x2text_instance.process(
-            input_file_path, output_file_path, fs, **kwargs
+            input_file_path, output_file_path, **kwargs
         )
         # The will be executed each and every time text extraction takes place
-        self.push_usage_details(input_file_path, mime_type, fs)
+        self.push_usage_details(input_file_path, mime_type, fs=fs)
         return text_extraction_result
 
     @deprecated("Instantiate X2Text and call process() instead")
@@ -115,19 +113,13 @@ class X2Text(metaclass=ABCMeta):
             self._initialise()
         return self._x2text_instance
 
-    def push_usage_details(
-        self,
-        input_file_path: str,
-        mime_type: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> None:
-        file_size = ToolUtils.get_file_size(input_file_path, fs)
+    def push_usage_details(self, input_file_path: str, mime_type: str) -> None:
+        file_size = ToolUtils.get_file_size(input_file_path)
 
         self._x2text_instance
 
         if mime_type == MimeType.PDF:
-            pdf_contents = io.BytesIO(fs.read(path=input_file_path, mode="rb"))
-            with pdfplumber.open(pdf_contents) as pdf:
+            with pdfplumber.open(input_file_path) as pdf:
                 # calculate the number of pages
                 page_count = len(pdf.pages)
             if isinstance(self._x2text_instance, LLMWhisperer):

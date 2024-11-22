@@ -12,7 +12,6 @@ from google.oauth2.service_account import Credentials
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.ocr.constants import FileType
 from unstract.sdk.adapters.ocr.ocr_adapter import OCRAdapter
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -96,13 +95,10 @@ class GoogleDocumentAI(OCRAdapter):
 
     """ Detect the mime type from the file content """
 
-    def _get_input_file_type_mime(
-        self,
-        input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> str:
-        sample_contents = fs.read(path=input_file_path, mode="rb", length=100)
-        file_type = filetype.guess(sample_contents)
+    def _get_input_file_type_mime(self, input_file_path: str) -> str:
+        with open(input_file_path, mode="rb") as file_obj:
+            sample_contents = file_obj.read(100)
+            file_type = filetype.guess(sample_contents)
 
         file_type_mime: str = file_type.MIME if file_type else FileType.TEXT_PLAIN
 
@@ -114,15 +110,13 @@ class GoogleDocumentAI(OCRAdapter):
         return file_type_mime
 
     def process(
-        self,
-        input_file_path: str,
-        output_file_path: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+        self, input_file_path: str, output_file_path: Optional[str] = None
     ) -> str:
         try:
             file_type_mime = self._get_input_file_type_mime(input_file_path)
-            if fs.exists(input_file_path):
-                file_content_in_bytes = fs.read(path=input_file_path, mode="rb")
+            if os.path.isfile(input_file_path):
+                with open(input_file_path, "rb") as fop:
+                    file_content_in_bytes: bytes = fop.read()
             else:
                 raise AdapterError(f"File not found {input_file_path}")
             processor_url = self.config.get(Constants.URL, "") + ":process"
@@ -137,7 +131,9 @@ class GoogleDocumentAI(OCRAdapter):
             response_json: dict[str, Any] = response.json()
             result_text: str = response_json["document"]["text"]
             if output_file_path is not None:
-                fs.write(path=output_file_path, mode="w", encoding="utf-8")
+                with open(output_file_path, "w", encoding="utf-8") as f:
+                    f.write(result_text)
+                    f.close()
             return result_text
         except Exception as e:
             logger.error(f"Error while processing document {e}")
@@ -145,6 +141,9 @@ class GoogleDocumentAI(OCRAdapter):
                 raise AdapterError(str(e))
             else:
                 raise e
+        finally:
+            if fop is not None:
+                fop.close()
 
     def test_connection(self) -> bool:
         try:
