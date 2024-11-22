@@ -23,14 +23,6 @@ PY_TO_UNSTRACT_LOG_LEVEL = {
     logging.ERROR: LogLevel.ERROR,
 }
 
-# Mapping from Unstract log level to python counterpart
-UNSTRACT_TO_PY_LOG_LEVEL = {
-    LogLevel.DEBUG: logging.DEBUG,
-    LogLevel.INFO: logging.INFO,
-    LogLevel.WARN: logging.WARNING,
-    LogLevel.ERROR: logging.ERROR,
-}
-
 
 def log_elapsed(operation):
     """Adds an elapsed time log.
