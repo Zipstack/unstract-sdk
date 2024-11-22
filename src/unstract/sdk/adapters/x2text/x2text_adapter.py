@@ -4,6 +4,7 @@ from typing import Any, Optional
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 
 class X2TextAdapter(Adapter, ABC):
@@ -42,9 +43,9 @@ class X2TextAdapter(Adapter, ABC):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-
         return TextExtractionResult(
             extracted_text="extracted text", extraction_metadata=None
         )

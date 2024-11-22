@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 from abc import ABC, abstractmethod
 from json import JSONDecodeError, loads
 from pathlib import Path
@@ -13,6 +14,7 @@ from unstract.sdk.constants import (
     ToolEnv,
     ToolExecKey,
 )
+from unstract.sdk.file_storage.fs_shared_temporary import SharedTemporaryFileStorage
 from unstract.sdk.tool.mixin import ToolConfigHelper
 from unstract.sdk.tool.parser import ToolArgsParser
 from unstract.sdk.tool.stream import StreamMixin
@@ -38,6 +40,29 @@ class BaseTool(ABC, StreamMixin):
         self.execution_id = ""
         self.org_id = ""
         self._exec_metadata = {}
+        self.filestorage_provider = None
+        self.workflow_filestorage = None
+        self.execution_dir = None
+        filestorage_provider_env = os.environ.get(
+            ToolEnv.WORKFLOW_EXECUTION_FS_PROVIDER
+        )
+        if filestorage_provider_env:
+            self.execution_dir = Path(self.get_env_or_die(ToolEnv.EXECUTION_DATA_DIR))
+            self.filestorage_provider = ToolUtils.get_filestorage_provider(
+                var_name=ToolEnv.WORKFLOW_EXECUTION_FS_PROVIDER
+            )
+            try:
+                self.filestorage_credentials = ToolUtils.get_filestorage_credentials(
+                    ToolEnv.WORKFLOW_EXECUTION_FS_CREDENTIAL
+                )
+            except json.JSONDecodeError:
+                raise ValueError(
+                    "File storage credentials are not set properly. "
+                    "Please check your settings."
+                )
+            self.workflow_filestorage = SharedTemporaryFileStorage(
+                provider=self.filestorage_provider, **self.filestorage_credentials
+            )
 
     @classmethod
     def from_tool_args(cls, args: list[str]) -> "BaseTool":
@@ -107,10 +132,18 @@ class BaseTool(ABC, StreamMixin):
         return base_path.absolute()
 
     def _get_file_from_data_dir(self, file_to_get: str, raise_err: bool = False) -> str:
-        base_path: Path = self._get_data_dir()
-        file_path = base_path / file_to_get
-        if raise_err and not file_path.exists():
-            self.stream_error_and_exit(f"{file_to_get} is missing in TOOL_DATA_DIR")
+        if self.workflow_filestorage:
+            base_path = self.execution_dir
+            file_path = base_path / file_to_get
+            if raise_err and not self.workflow_filestorage.exists(path=file_path):
+                self.stream_error_and_exit(
+                    f"{file_to_get} is missing in EXECUTION_DATA_DIR"
+                )
+        else:
+            base_path: Path = self._get_data_dir()
+            file_path = base_path / file_to_get
+            if raise_err and not file_path.exists():
+                self.stream_error_and_exit(f"{file_to_get} is missing in TOOL_DATA_DIR")
         return str(file_path)
 
     def get_source_file(self) -> str:
@@ -139,7 +172,10 @@ class BaseTool(ABC, StreamMixin):
         Returns:
             str: Absolute path to the output directory.
         """
-        base_path: Path = self._get_data_dir()
+        if self.workflow_filestorage:
+            base_path = self.execution_dir
+        else:
+            base_path: Path = self._get_data_dir()
         return str(base_path / ToolExecKey.OUTPUT_DIR)
 
     @property
@@ -158,12 +194,20 @@ class BaseTool(ABC, StreamMixin):
         Returns:
             dict[str, Any]: Contents of METADATA.json
         """
-        base_path: Path = self._get_data_dir()
+        if self.workflow_filestorage:
+            base_path = self.execution_dir
+        else:
+            base_path: Path = self._get_data_dir()
         metadata_path = base_path / ToolExecKey.METADATA_FILE
         metadata_json = {}
         try:
-            with open(metadata_path, encoding="utf-8") as f:
-                metadata_json = loads(f.read())
+            if self.workflow_filestorage:
+                metadata_json = ToolUtils.load_json(
+                    file_to_load=metadata_path, fs=self.workflow_filestorage
+                )
+            else:
+                with open(metadata_path, encoding="utf-8") as f:
+                    metadata_json = loads(f.read())
         except JSONDecodeError as e:
             self.stream_error_and_exit(f"JSON decode error for {metadata_path}: {e}")
         except FileNotFoundError:
@@ -178,10 +222,19 @@ class BaseTool(ABC, StreamMixin):
         Args:
             metadata (dict[str, Any]): Metadata to write
         """
-        base_path: Path = self._get_data_dir()
-        metadata_path = base_path / ToolExecKey.METADATA_FILE
-        with metadata_path.open("w", encoding="utf-8") as f:
-            f.write(ToolUtils.json_to_str(metadata))
+        if self.workflow_filestorage:
+            base_path = self.execution_dir
+            metadata_path = base_path / ToolExecKey.METADATA_FILE
+            ToolUtils.dump_json(
+                file_to_dump=metadata_path,
+                json_to_dump=metadata,
+                fs=self.workflow_filestorage,
+            )
+        else:
+            base_path: Path = self._get_data_dir()
+            metadata_path = base_path / ToolExecKey.METADATA_FILE
+            with metadata_path.open("w", encoding="utf-8") as f:
+                f.write(ToolUtils.json_to_str(metadata))
 
     def _update_exec_metadata(self) -> None:
         """Updates the execution metadata after a tool executes.
@@ -253,8 +306,15 @@ class BaseTool(ABC, StreamMixin):
         json_data = json.dumps(data)
         # INFILE is overwritten for next tool to run
         input_file_path: Path = Path(self.get_input_file())
-        with input_file_path.open("w", encoding="utf-8") as f:
-            f.write(json_data)
+        if self.workflow_filestorage:
+            ToolUtils.dump_json(
+                file_to_dump=input_file_path,
+                json_to_dump=data,
+                fs=self.workflow_filestorage,
+            )
+        else:
+            with input_file_path.open("w", encoding="utf-8") as f:
+                f.write(json_data)
 
     def validate(self, input_file: str, settings: dict[str, Any]) -> None:
         """Override to implement custom validation for the tool.

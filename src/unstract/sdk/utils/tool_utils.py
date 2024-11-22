@@ -1,9 +1,18 @@
 import json
+import logging
+import os
+import warnings
 from hashlib import md5, sha256
 from pathlib import Path
 from typing import Any
 
 import magic
+
+from unstract.sdk.exceptions import FileStorageError
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.file_storage.fs_shared_temporary import SharedTemporaryFileStorage
+
+logger = logging.getLogger(__name__)
 
 
 class ToolUtils:
@@ -36,7 +45,10 @@ class ToolUtils:
             raise ValueError(f"Unsupported hash_method: {hash_method}")
 
     @staticmethod
-    def get_hash_from_file(file_path: str) -> str:
+    def get_hash_from_file(
+        file_path: str,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> str:
         """Computes the hash for a file.
 
         Uses sha256 to compute the file hash through a buffered read.
@@ -47,16 +59,21 @@ class ToolUtils:
         Returns:
             str: SHA256 hash of the file
         """
-        h = sha256()
-        b = bytearray(128 * 1024)
-        mv = memoryview(b)
-        with open(file_path, "rb", buffering=0) as f:
-            while n := f.readinto(mv):
-                h.update(mv[:n])
-        return str(h.hexdigest())
+
+        # Adding the following DeprecationWarning manually as the package "deprecated"
+        # does not support deprecation on static methods.
+        warnings.warn(
+            "`get_hash_from_file` is deprecated. "
+            "Use `FileStorage get_hash_from_file()` instead.",
+            DeprecationWarning,
+        )
+        return fs.get_hash_from_file(path=file_path)
 
     @staticmethod
-    def load_json(file_to_load: str) -> dict[str, Any]:
+    def load_json(
+        file_to_load: str,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> dict[str, Any]:
         """Loads and returns a JSON from a file.
 
         Args:
@@ -65,9 +82,24 @@ class ToolUtils:
         Returns:
             dict[str, Any]: The JSON loaded from file
         """
-        with open(file_to_load, encoding="utf-8") as f:
-            loaded_json: dict[str, Any] = json.load(f)
-            return loaded_json
+        file_contents: str = fs.read(path=file_to_load, mode="r", encoding="utf-8")
+        loaded_json: dict[str, Any] = json.loads(file_contents)
+        return loaded_json
+
+    @staticmethod
+    def dump_json(
+        json_to_dump: dict[str, Any],
+        file_to_dump: str,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> None:
+        """Helps dump the JSON to a file.
+
+        Args:
+            json_to_dump (dict[str, Any]): Input JSON to dump
+            file_to_dump (str): Path to the file to dump the JSON to
+        """
+        compact_json = json.dumps(json_to_dump, separators=(", ", ":"))
+        fs.write(path=file_to_dump, mode="w", data=compact_json)
 
     @staticmethod
     def json_to_str(json_to_dump: dict[str, Any]) -> str:
@@ -83,8 +115,13 @@ class ToolUtils:
         compact_json = json.dumps(json_to_dump, separators=(",", ":"))
         return compact_json
 
+    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
+    # FileStorage has mime_type() which could be used instead.
     @staticmethod
-    def get_file_mime_type(input_file: Path) -> str:
+    def get_file_mime_type(
+        input_file: Path,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
 
@@ -95,14 +132,15 @@ class ToolUtils:
             str: MIME type of the file
         """
         input_file_mime = ""
-        with open(input_file, mode="rb") as input_file_obj:
-            sample_contents = input_file_obj.read(100)
-            input_file_mime = magic.from_buffer(sample_contents, mime=True)
-            input_file_obj.seek(0)
+        sample_contents = fs.read(path=input_file, mode="rb", length=100)
+        input_file_mime = magic.from_buffer(sample_contents, mime=True)
         return input_file_mime
 
     @staticmethod
-    def get_file_size(input_file: Path) -> int:
+    def get_file_size(
+        input_file: Path,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> int:
         """Gets the file size in bytes for an input file.
         Args:
             input_file (Path): Path object of the input file
@@ -110,12 +148,7 @@ class ToolUtils:
         Returns:
             str: MIME type of the file
         """
-        with open(input_file, mode="rb") as input_file_obj:
-            input_file_obj.seek(0, 2)  # Move the cursor to the end of the file
-            file_length = (
-                input_file_obj.tell()
-            )  # Get the current position of the cursor, which is the file length
-            input_file_obj.seek(0)
+        file_length = fs.size(path=input_file)
         return file_length
 
     @staticmethod
@@ -185,3 +218,44 @@ class ToolUtils:
             else:
                 pages_list.append(int(part))
         return len(pages_list)
+
+    @staticmethod
+    def get_filestorage_provider(
+        var_name: str, default: str = "minio"
+    ) -> FileStorageProvider:
+        """Retrieve the file storage provider based on an environment
+        variable."""
+        provider_name = os.environ.get(var_name, default).upper()
+        try:
+            # Attempt to map the provider name to an enum value, case-insensitively
+            return FileStorageProvider[provider_name]
+        except KeyError:
+            allowed_providers = ", ".join(
+                [provider.name for provider in FileStorageProvider]
+            )
+            logger.error(
+                f"Invalid provider '{provider_name}'. Allowed providers: "
+                f"{allowed_providers}"
+            )
+            raise FileStorageError(f"Invalid provider '{provider_name}'")
+
+    @staticmethod
+    def get_filestorage_credentials(var_name: str) -> dict[str, Any]:
+        """Retrieve the file storage credentials based on an environment
+        variable."""
+        credentials = os.environ.get(var_name, "{}")
+        try:
+            return json.loads(credentials)
+        except json.JSONDecodeError:
+            raise ValueError(
+                "File storage credentials are not set properly. "
+                "Please check your settings."
+            )
+
+    @staticmethod
+    def get_workflow_filestorage(
+        provider: FileStorageProvider,
+        credentials: dict[str, Any] = {},
+    ) -> SharedTemporaryFileStorage:
+        """Get the file storage for the workflow."""
+        return SharedTemporaryFileStorage(provider=provider, **credentials)
