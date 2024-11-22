@@ -92,6 +92,8 @@ class X2Text(metaclass=ABCMeta):
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
+        if self._tool.workflow_filestorage:
+            fs = self._tool.workflow_filestorage
         mime_type = ToolUtils.get_file_mime_type(input_file_path, fs)
         text_extraction_result: TextExtractionResult = None
         if mime_type == MimeType.TEXT:

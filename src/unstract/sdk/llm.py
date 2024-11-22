@@ -37,15 +37,14 @@ class LLM:
         adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
-        """
-
-        Notes:
-            - "Azure OpenAI" : Environment variables required
-            OPENAI_API_KEY,OPENAI_API_BASE, OPENAI_API_VERSION,
-            OPENAI_API_ENGINE, OPENAI_API_MODEL
+        """Creates an instance of this LLM class.
 
         Args:
-            tool (AbstractTool): Instance of AbstractTool
+            tool (BaseTool): Instance of BaseTool to expose function to stream logs
+            adapter_instance_id (Optional[str], optional): UUID of the adapter in
+                Unstract. Defaults to None.
+            usage_kwargs (dict[Any, Any], optional): Dict to capture token usage with
+                callbacks. Defaults to {}.
         """
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
@@ -96,18 +95,18 @@ class LLM:
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             process_text_output = {}
+            if extract_json:
+                match = LLM.json_regex.search(response.text)
+                if match:
+                    response.text = match.group(0)
             if process_text:
                 try:
-                    process_text_output = process_text(response, LLM.json_regex)
+                    process_text_output = process_text(response, extract_json)
                     if not isinstance(process_text_output, dict):
                         process_text_output = {}
                 except Exception as e:
                     logger.error(f"Error occured inside function 'process_text': {e}")
                     process_text_output = {}
-            if extract_json:
-                match = LLM.json_regex.search(response.text)
-                if match:
-                    response.text = match.group(0)
             return {LLM.RESPONSE: response, **process_text_output}
         except Exception as e:
             raise parse_llm_err(e) from e
