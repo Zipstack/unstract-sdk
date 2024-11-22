@@ -92,6 +92,8 @@ class X2Text(metaclass=ABCMeta):
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
+        if self._tool.workflow_filestorage:
+            fs = self._tool.workflow_filestorage
         mime_type = ToolUtils.get_file_mime_type(input_file_path, fs)
         text_extraction_result: TextExtractionResult = None
         if mime_type == MimeType.TEXT:
@@ -103,7 +105,7 @@ class X2Text(metaclass=ABCMeta):
             input_file_path, output_file_path, fs, **kwargs
         )
         # The will be executed each and every time text extraction takes place
-        self.push_usage_details(input_file_path, mime_type)
+        self.push_usage_details(input_file_path, mime_type, fs)
         return text_extraction_result
 
     @deprecated("Instantiate X2Text and call process() instead")
