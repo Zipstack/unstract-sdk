@@ -24,7 +24,6 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
 from unstract.sdk.utils.common_utils import log_elapsed
@@ -118,7 +117,6 @@ class Index:
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
-        fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
     ) -> str:
         """Extracts text from a document.
 
@@ -155,7 +153,6 @@ class Index:
                     input_file_path=file_path,
                     output_file_path=output_file_path,
                     enable_highlight=enable_highlight,
-                    fs=fs,
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
 
@@ -165,7 +162,8 @@ class Index:
 
             else:
                 process_response: TextExtractionResult = x2text.process(
-                    input_file_path=file_path, output_file_path=output_file_path, fs=fs
+                    input_file_path=file_path,
+                    output_file_path=output_file_path,
                 )
 
             extracted_text = process_response.extracted_text
@@ -199,7 +197,6 @@ class Index:
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -219,7 +216,6 @@ class Index:
                 Defaults to None. If None, the hash is generated.
             output_file_path (Optional[str], optional): File path to write
                 the extracted contents into. Defaults to None.
-            fs (FileStorage): file storage object to perfrom file operations
 
         Returns:
             str: A unique ID for the file and indexing arguments combination
@@ -232,7 +228,6 @@ class Index:
             chunk_overlap=str(chunk_overlap),
             file_path=file_path,
             file_hash=file_hash,
-            fs=fs,
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
@@ -297,7 +292,6 @@ class Index:
                 enable_highlight=enable_highlight,
                 usage_kwargs=usage_kwargs,
                 process_text=process_text,
-                fs=fs,
             )
 
             if not extracted_text:
@@ -422,7 +416,6 @@ class Index:
         chunk_overlap: str,
         file_path: Optional[str] = None,
         file_hash: Optional[str] = None,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
 
@@ -436,7 +429,6 @@ class Index:
                 Defaults to None. One of file_path or file_hash needs to be specified.
             file_hash (Optional[str], optional): SHA256 hash of the file.
                 Defaults to None. If None, the hash is generated with file_path.
-            fs (FileStorage): file storage object to perfrom file operations
 
         Returns:
             str: Key representing unique ID for a file
@@ -445,7 +437,7 @@ class Index:
             raise ValueError("One of `file_path` or `file_hash` need to be provided")
 
         if not file_hash:
-            file_hash = fs.get_hash_from_file(path=file_path)
+            file_hash = ToolUtils.get_hash_from_file(file_path=file_path)
 
         # Whole adapter config is used currently even though it contains some keys
         # which might not be relevant to indexing. This is easier for now than
@@ -485,10 +477,8 @@ class Index:
             chunk_overlap,
             file_path,
             file_hash,
-            fs=FileStorage(provider=FileStorageProvider.LOCAL),
         )
 
-    @deprecated(version="0.50.0", reason="Use index() instead")
     def index_file(
         self,
         tool_id: str,
