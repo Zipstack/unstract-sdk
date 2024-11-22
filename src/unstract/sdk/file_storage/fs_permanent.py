@@ -51,12 +51,11 @@ class PermanentFileStorage(FileStorage):
         # If path does not exist on remote storage
         if not self.exists(path):
             local_file_storage = FileStorage(provider=FileStorageProvider.LOCAL)
-            if legacy_storage_path:
-                local_file_path = legacy_storage_path
-                # If file exists on local storage, then migrate the file
-                # to remote storage
-                if local_file_storage.exists(local_file_path):
-                    self.upload(local_file_path, path)
+            local_file_path = legacy_storage_path
+            # If file exists on local storage, then migrate the file
+            # to remote storage
+            if local_file_storage.exists(local_file_path):
+                self.upload(local_file_path, path)
 
     def read(
         self,
@@ -83,7 +82,8 @@ class PermanentFileStorage(FileStorage):
         """
         try:
             # Lazy copy to the destination/remote file system
-            self._copy_on_read(path, legacy_storage_path)
+            if legacy_storage_path:
+                self._copy_on_read(path, legacy_storage_path)
             return super().read(path, mode, encoding, seek_position, length)
         except FileNotFoundError:
             logger.warning(f"File {path} not found. Ignoring.")
