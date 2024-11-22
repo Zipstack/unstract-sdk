@@ -1,5 +1,5 @@
 {
-  "title": "LLM Whisperer X2Text v2",
+  "title": "LLMWhisperer X2Text v2",
   "type": "object",
   "required": [
     "adapter_name",
@@ -11,14 +11,14 @@
       "type": "string",
       "title": "Name",
       "default": "llm-whisperer-v2",
-      "description": "Provide a unique name for this adapter instance. Example: LLM Whisperer 1"
+      "description": "Provide a unique name for this adapter instance. Example: LLMWhisperer 1"
     },
     "url": {
       "type": "string",
       "title": "URL",
       "format": "uri",
       "default": "https://llmwhisperer-api.unstract.com",
-      "description": "Provide the URL of the LLM Whisperer service."
+      "description": "Provide the URL of the LLMWhisperer service."
     },
     "unstract_key": {
       "type": "string",

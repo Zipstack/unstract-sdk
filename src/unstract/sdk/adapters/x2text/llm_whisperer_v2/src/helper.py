@@ -221,8 +221,8 @@ class LLMWhispererHelper:
             else:
                 if status_retry_count >= STATUS_RETRY_THRESHOLD:
                     raise ExtractorError(
-                        "Error checking LLMWhisperer status: "
-                        f"{status_response.status_code} - {status_response.text}"
+                        f"Error checking LLMWhisperer status for whisper-hash "
+                        f"'{whisper_hash}': {status_response.text}"
                     )
                 else:
                     status_retry_count += 1

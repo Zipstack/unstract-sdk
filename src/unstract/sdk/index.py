@@ -123,7 +123,7 @@ class Index:
         """Extracts text from a document.
 
         Uses the configured service to perform the extraction
-        - LLM Whisperer
+        - LLMWhisperer
         - Unstructured IO Community / Enterprise
         - Llama Parse
 

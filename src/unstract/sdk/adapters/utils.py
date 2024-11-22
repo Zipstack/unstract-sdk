@@ -30,8 +30,10 @@ class AdapterUtils:
         """
         if not hasattr(err, "response"):
             return default_err
+
         err_response: Response = err.response  # type: ignore
-        if err_response.headers["Content-Type"] == "application/json":
+        err_content_type = err_response.headers["Content-Type"]
+        if err_content_type == "application/json":
             err_json = err_response.json()
             if message_key in err_json:
                 return str(err_json[message_key])
@@ -40,11 +42,15 @@ class AdapterUtils:
                     f"Unable to parse error with key '{message_key}' for "
                     f"'{err_json}', returning '{default_err}' instead."
                 )
-        elif err_response.headers["Content-Type"] == "text/plain":
+        elif err_content_type == "text/plain":
             return err_response.text  # type: ignore
+        else:
+            logger.warning(
+                f"Unhandled err_response type '{err_content_type}' for {err_response}"
+            )
         return default_err
 
-    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
+    # TODO: get_file_mime_type() to be removed once migrated to FileStorage
     # FileStorage has mime_type() which could be used instead.
     @staticmethod
     def get_file_mime_type(
