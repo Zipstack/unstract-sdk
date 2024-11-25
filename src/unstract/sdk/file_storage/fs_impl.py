@@ -12,7 +12,10 @@ from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 from unstract.sdk.file_storage.fs_interface import FileStorageInterface
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
-from unstract.sdk.file_storage.helper import FileStorageHelper
+from unstract.sdk.file_storage.helper import (
+    FileStorageHelper,
+    invalidate_cache_when_file_not_found,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +28,7 @@ class FileStorage(FileStorageInterface):
     def __init__(self, provider: FileStorageProvider, **storage_config: dict[str, Any]):
         self.fs = FileStorageHelper.file_storage_init(provider, **storage_config)
 
+    @invalidate_cache_when_file_not_found
     def read(
         self,
         path: str,
@@ -47,15 +51,10 @@ class FileStorage(FileStorageInterface):
         Returns:
             Union[bytes, str] - File contents in bytes/string based on the opened mode
         """
-        try:
-            with self.fs.open(path=path, mode=mode, encoding=encoding) as file_handle:
-                if seek_position > 0:
-                    file_handle.seek(seek_position)
-                return file_handle.read(length)
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        with self.fs.open(path=path, mode=mode, encoding=encoding) as file_handle:
+            if seek_position > 0:
+                file_handle.seek(seek_position)
+            return file_handle.read(length)
 
     def write(
         self,
@@ -84,6 +83,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
+    @invalidate_cache_when_file_not_found
     def seek(
         self,
         path: str,
@@ -103,13 +103,8 @@ class FileStorage(FileStorageInterface):
         Returns:
             int: file pointer location after seeking to the mentioned position
         """
-        try:
-            with self.fs.open(path=path, mode="rb") as file_handle:
-                return file_handle.seek(location, position)
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        with self.fs.open(path=path, mode="rb") as file_handle:
+            return file_handle.seek(location, position)
 
     def mkdir(self, path: str, create_parents: bool = True):
         """Create a directory.
@@ -140,6 +135,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
+    @invalidate_cache_when_file_not_found
     def ls(self, path: str) -> list[str]:
         """List the directory path.
 
@@ -149,13 +145,9 @@ class FileStorage(FileStorageInterface):
         Returns:
             List[str]: List of files / directories under the path
         """
-        try:
-            return self.fs.ls(path)
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        return self.fs.ls(path)
 
+    @invalidate_cache_when_file_not_found
     def rm(self, path: str, recursive: bool = True):
         """Removes a file or directory mentioned in path.
 
@@ -167,14 +159,9 @@ class FileStorage(FileStorageInterface):
         Returns:
             NA
         """
-        try:
-            return self.fs.rm(path=path, recursive=recursive)
-        except FileNotFoundError as e:
-            logger.debug(f"Path {path} does not exist.")
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        return self.fs.rm(path=path, recursive=recursive)
 
+    @invalidate_cache_when_file_not_found
     def cp(self, src: str, dest: str, overwrite: bool = True):
         """Copies files from source(lpath) path to the destination(rpath) path.
 
@@ -185,13 +172,9 @@ class FileStorage(FileStorageInterface):
         Returns:
             NA
         """
-        try:
-            return self.fs.cp(src, dest, overwrite=overwrite)
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        return self.fs.cp(src, dest, overwrite=overwrite)
 
+    @invalidate_cache_when_file_not_found
     def size(self, path: str) -> int:
         """Get the size of the file specified in path.
 
@@ -201,14 +184,10 @@ class FileStorage(FileStorageInterface):
         Returns:
             int: Size of the file in bytes
         """
-        try:
-            file_info = self.fs.info(path)
-            return file_info["size"]
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        file_info = self.fs.info(path)
+        return file_info["size"]
 
+    @invalidate_cache_when_file_not_found
     def modification_time(self, path: str) -> datetime:
         """Get the last modification time of the file specified in path.
 
@@ -218,17 +197,13 @@ class FileStorage(FileStorageInterface):
         Returns:
             datetime: Last modified time in datetime
         """
-        try:
-            file_info = self.fs.info(path)
-            file_mtime = file_info["mtime"]
-            if not isinstance(file_mtime, datetime):
-                file_mtime = datetime.fromtimestamp(file_mtime)
-            return file_mtime
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        file_info = self.fs.info(path)
+        file_mtime = file_info["mtime"]
+        if not isinstance(file_mtime, datetime):
+            file_mtime = datetime.fromtimestamp(file_mtime)
+        return file_mtime
 
+    @invalidate_cache_when_file_not_found
     def mime_type(self, path: str) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -239,15 +214,11 @@ class FileStorage(FileStorageInterface):
         Returns:
             str: MIME type of the file
         """
-        try:
-            sample_contents = self.read(path=path, mode="rb", length=100)
-            mime_type = magic.from_buffer(sample_contents, mime=True)
-            return mime_type
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        sample_contents = self.read(path=path, mode="rb", length=100)
+        mime_type = magic.from_buffer(sample_contents, mime=True)
+        return mime_type
 
+    @invalidate_cache_when_file_not_found
     def download(self, from_path: str, to_path: str):
         """Downloads the file mentioned in from_path to to_path on the local
         system. The instance calling the method needs to be the FileStorage
@@ -261,14 +232,9 @@ class FileStorage(FileStorageInterface):
         Returns:
             NA
         """
-        try:
-            self.fs.get(rpath=from_path, lpath=to_path)
-        except FileNotFoundError as e:
-            logger.error(f"Path {from_path} does not exist.")
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        self.fs.get(rpath=from_path, lpath=to_path)
 
+    @invalidate_cache_when_file_not_found
     def upload(self, from_path: str, to_path: str):
         """Uploads the file mentioned in from_path (local system) to to_path
         (remote system). The instance calling the method needs to be the
@@ -282,13 +248,7 @@ class FileStorage(FileStorageInterface):
         Returns:
             NA
         """
-        try:
-            self.fs.put(from_path, to_path)
-        except FileNotFoundError as e:
-            logger.error(f"Path {from_path} does not exist.")
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        self.fs.put(from_path, to_path)
 
     def glob(self, path: str) -> list[str]:
         """Lists files under path matching the pattern sepcified as part of
@@ -307,6 +267,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
+    @invalidate_cache_when_file_not_found
     def get_hash_from_file(self, path: str) -> str:
         """Computes the hash for a file.
 
@@ -319,18 +280,13 @@ class FileStorage(FileStorageInterface):
             str: SHA256 hash of the file
         """
 
-        try:
-            h = sha256()
-            b = bytearray(128 * 1024)
-            mv = memoryview(b)
-            with self.fs.open(path) as f:
-                while n := f.readinto(mv):
-                    h.update(mv[:n])
-            return str(h.hexdigest())
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        h = sha256()
+        b = bytearray(128 * 1024)
+        mv = memoryview(b)
+        with self.fs.open(path) as f:
+            while n := f.readinto(mv):
+                h.update(mv[:n])
+        return str(h.hexdigest())
 
     def json_dump(
         self,
@@ -370,16 +326,13 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
+    @invalidate_cache_when_file_not_found
     def json_load(self, path: str) -> dict[Any, Any]:
-        try:
-            with self.fs.open(path=path) as json_file:
-                data: dict[str, Any] = json.load(json_file)
-                return data
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        with self.fs.open(path=path) as json_file:
+            data: dict[str, Any] = json.load(json_file)
+            return data
 
+    @invalidate_cache_when_file_not_found
     def yaml_load(
         self,
         path: str,
@@ -392,11 +345,6 @@ class FileStorage(FileStorageInterface):
         Returns:
             dict[Any, Any]: Data loaded as yaml
         """
-        try:
-            with self.fs.open(path=path) as f:
-                data: dict[str, Any] = yaml.safe_load(f)
-                return data
-        except FileNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise FileOperationError(str(e)) from e
+        with self.fs.open(path=path) as f:
+            data: dict[str, Any] = yaml.safe_load(f)
+            return data

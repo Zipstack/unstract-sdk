@@ -91,11 +91,27 @@ def test_file_read(file_storage, path, mode, read_length, expected_read_length):
 
 
 @pytest.mark.parametrize(
+    "file_storage, path, mode, read_length",
+    [
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            "1.txt",
+            "rb",
+            -1,
+        ),
+    ],
+)
+def test_file_read_exception(file_storage, path, mode, read_length):
+    with pytest.raises(FileNotFoundError):
+        file_storage.read(path=path, mode=mode, length=read_length)
+
+
+@pytest.mark.parametrize(
     "file_storage, read_file_path, read_mode, file_contents, "
     "write_file_path, write_mode, read_length, expected_write_length",
     [
         (
-            file_storage(provider=FileStorageProvider.GCS),
+            file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_PDF_FILE,
             "rb",
             None,
