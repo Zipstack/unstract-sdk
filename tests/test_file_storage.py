@@ -111,7 +111,7 @@ def test_file_read_exception(file_storage, path, mode, read_length):
     "write_file_path, write_mode, read_length, expected_write_length",
     [
         (
-            file_storage(provider=FileStorageProvider.LOCAL),
+            file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_PDF_FILE,
             "rb",
             None,
