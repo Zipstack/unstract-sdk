@@ -96,7 +96,7 @@ class LLMWhispererHelper:
             logger.error(f"Adapter error: {e}")
             default_err = "Error while calling the LLMWhisperer service"
             msg = AdapterUtils.get_msg_from_request_exc(
-                err=e, message_key="error", default_err=default_err
+                err=e, message_key="message", default_err=default_err
             )
             raise ExtractorError(msg)
         return response
