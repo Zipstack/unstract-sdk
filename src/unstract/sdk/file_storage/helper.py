@@ -69,7 +69,7 @@ class FileStorageHelper:
             raise FileStorageError(str(e)) from e
 
 
-def invalidate_cache_when_file_not_found(func):
+def skip_local_cache(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)

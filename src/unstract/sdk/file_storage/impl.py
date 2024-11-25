@@ -12,10 +12,7 @@ from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 from unstract.sdk.file_storage.fs_interface import FileStorageInterface
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
-from unstract.sdk.file_storage.helper import (
-    FileStorageHelper,
-    invalidate_cache_when_file_not_found,
-)
+from unstract.sdk.file_storage.helper import FileStorageHelper, skip_local_cache
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +25,7 @@ class FileStorage(FileStorageInterface):
     def __init__(self, provider: FileStorageProvider, **storage_config: dict[str, Any]):
         self.fs = FileStorageHelper.file_storage_init(provider, **storage_config)
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def read(
         self,
         path: str,
@@ -83,7 +80,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def seek(
         self,
         path: str,
@@ -135,7 +132,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def ls(self, path: str) -> list[str]:
         """List the directory path.
 
@@ -147,7 +144,7 @@ class FileStorage(FileStorageInterface):
         """
         return self.fs.ls(path)
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def rm(self, path: str, recursive: bool = True):
         """Removes a file or directory mentioned in path.
 
@@ -161,7 +158,7 @@ class FileStorage(FileStorageInterface):
         """
         return self.fs.rm(path=path, recursive=recursive)
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def cp(self, src: str, dest: str, overwrite: bool = True):
         """Copies files from source(lpath) path to the destination(rpath) path.
 
@@ -174,7 +171,7 @@ class FileStorage(FileStorageInterface):
         """
         return self.fs.cp(src, dest, overwrite=overwrite)
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def size(self, path: str) -> int:
         """Get the size of the file specified in path.
 
@@ -187,7 +184,7 @@ class FileStorage(FileStorageInterface):
         file_info = self.fs.info(path)
         return file_info["size"]
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def modification_time(self, path: str) -> datetime:
         """Get the last modification time of the file specified in path.
 
@@ -203,7 +200,7 @@ class FileStorage(FileStorageInterface):
             file_mtime = datetime.fromtimestamp(file_mtime)
         return file_mtime
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def mime_type(self, path: str) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -218,7 +215,7 @@ class FileStorage(FileStorageInterface):
         mime_type = magic.from_buffer(sample_contents, mime=True)
         return mime_type
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def download(self, from_path: str, to_path: str):
         """Downloads the file mentioned in from_path to to_path on the local
         system. The instance calling the method needs to be the FileStorage
@@ -234,7 +231,7 @@ class FileStorage(FileStorageInterface):
         """
         self.fs.get(rpath=from_path, lpath=to_path)
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def upload(self, from_path: str, to_path: str):
         """Uploads the file mentioned in from_path (local system) to to_path
         (remote system). The instance calling the method needs to be the
@@ -267,7 +264,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def get_hash_from_file(self, path: str) -> str:
         """Computes the hash for a file.
 
@@ -326,13 +323,13 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def json_load(self, path: str) -> dict[Any, Any]:
         with self.fs.open(path=path) as json_file:
             data: dict[str, Any] = json.load(json_file)
             return data
 
-    @invalidate_cache_when_file_not_found
+    @skip_local_cache
     def yaml_load(
         self,
         path: str,
