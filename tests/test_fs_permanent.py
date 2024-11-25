@@ -42,23 +42,54 @@ def permanent_file_storage(provider: FileStorageProvider):
 
 
 @pytest.mark.parametrize(
-    "file_storage, file_read_path, read_mode, file_write_path, write_mode",
+    "file_storage, file_read_path, read_mode",
     [
         (
             permanent_file_storage(provider=FileStorageProvider.GCS),
             "fsspec-test/input/3.txt",
             "r",
-            "fsspec-test/output/copy_on_write.txt",
+        )
+    ],
+)
+def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
+    if file_storage.exists(file_read_path):
+        file_storage.rm(file_read_path)
+    file_read_contents = file_storage.read(
+        file_read_path,
+        read_mode,
+    )
+    print(file_read_contents)
+    # File in the path does not exist. So no contents can be read
+    assert file_read_contents is None
+
+
+@pytest.mark.parametrize(
+    "file_storage, file_read_path, read_mode, legacy_storage_path, "
+    "file_write_path, write_mode",
+    [
+        (
+            permanent_file_storage(provider=FileStorageProvider.GCS),
+            "fsspec-test/input/3.txt",
+            "r",
+            "fsspec-test/legacy_storage/3.txt",
+            "fsspec-test/output/copy_on_read_legacy_storage.txt",
             "w",
         )
     ],
 )
-def test_permanent_fs_copy_on_write(
-    file_storage, file_read_path, read_mode, file_write_path, write_mode
+def test_permanent_fs_copy_on_read_with_legacy_storage(
+    file_storage,
+    file_read_path,
+    read_mode,
+    legacy_storage_path,
+    file_write_path,
+    write_mode,
 ):
     if file_storage.exists(file_read_path):
         file_storage.rm(file_read_path)
-    file_read_contents = file_storage.read(file_read_path, read_mode)
+    file_read_contents = file_storage.read(
+        file_read_path, read_mode, legacy_storage_path=legacy_storage_path
+    )
     print(file_read_contents)
     if file_storage.exists(file_write_path):
         file_storage.rm(file_write_path)
@@ -88,7 +119,6 @@ def test_permanent_fs_copy(
     if file_storage.exists(file_write_path):
         file_storage.rm(file_write_path)
     file_storage.write(file_write_path, write_mode, data=file_read_contents)
-
     file_write_contents = file_storage.read(file_write_path, read_mode)
     assert len(file_read_contents) == len(file_write_contents)
 

@@ -101,14 +101,6 @@ unstract-sdk @ git+https://github.com/Zipstack/unstract-sdk@feature-branch
 
 - Or try installing a [local PyPI server](https://pypi.org/project/pypiserver/) and upload / download your package from this server
 
-### Environment variables required for various LLMs (deprecated)
-
-- Azure OpenAI
-  - `OPENAI_API_KEY`
-  - `OPENAI_API_BASE`
-  - `OPENAI_API_VERSION`
-  - `OPENAI_API_ENGINE`
-  - `OPENAI_API_MODEL`
 
 ### Documentation generation
 

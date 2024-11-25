@@ -20,6 +20,8 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererHeader,
     WhisperStatus,
 )
+from unstract.sdk.file_storage.fs_impl import FileStorage
+from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +276,9 @@ class LLMWhispererHelper:
 
     @staticmethod
     def send_whisper_request(
-        input_file_path: str, config: dict[str, Any]
+        input_file_path: str,
+        config: dict[str, Any],
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> requests.Response:
         headers = LLMWhispererHelper.get_request_headers(config)
         headers["Content-Type"] = "application/octet-stream"
@@ -282,15 +286,15 @@ class LLMWhispererHelper:
 
         response: requests.Response
         try:
-            with open(input_file_path, "rb") as input_f:
-                response = LLMWhispererHelper.make_request(
-                    config=config,
-                    request_method=HTTPMethod.POST,
-                    request_endpoint=WhispererEndpoint.WHISPER,
-                    headers=headers,
-                    params=params,
-                    data=input_f.read(),
-                )
+            input_file_data = fs.read(input_file_path, "rb")
+            response = LLMWhispererHelper.make_request(
+                config=config,
+                request_method=HTTPMethod.POST,
+                request_endpoint=WhispererEndpoint.WHISPER,
+                headers=headers,
+                params=params,
+                data=input_file_data,
+            )
         except OSError as e:
             logger.error(f"OS error while reading {input_file_path}: {e}")
             raise ExtractorError(str(e))
