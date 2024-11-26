@@ -5,7 +5,7 @@ import fsspec
 from fsspec import AbstractFileSystem
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 

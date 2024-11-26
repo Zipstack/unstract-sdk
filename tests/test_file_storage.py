@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
 from unstract.sdk.exceptions import FileOperationError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.file_storage.constants import StorageType
+from unstract.sdk.file_storage.env_helper import EnvHelper
+from unstract.sdk.file_storage.impl import FileStorage
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 load_dotenv()
 
@@ -715,3 +718,24 @@ def test_glob(file_storage, folder_path, expected_result):
     file_list = file_storage.glob(path=folder_path)
     print(f"Files: {file_list}")
     assert len(file_list) == expected_result
+
+
+@pytest.mark.parametrize(
+    "storage_type, env_name, expected",
+    [
+        (
+            StorageType.PERMANENT.value,
+            "TEST_PERMANENT_STORAGE",
+            FileStorageProvider.GCS,
+        ),
+        (
+            StorageType.TEMPORARY.value,
+            "TEST_TEMPORARY_STORAGE",
+            FileStorageProvider.MINIO,
+        ),
+    ],
+)
+def test_get_storage(storage_type, env_name, expected):
+    file_storage = EnvHelper.get_storage(storage_type, env_name)
+    assert file_storage.provider == expected
+    print(file_storage)

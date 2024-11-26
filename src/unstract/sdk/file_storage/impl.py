@@ -10,9 +10,9 @@ import yaml
 
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
-from unstract.sdk.file_storage.fs_interface import FileStorageInterface
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 from unstract.sdk.file_storage.helper import FileStorageHelper, skip_local_cache
+from unstract.sdk.file_storage.interface import FileStorageInterface
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +21,11 @@ class FileStorage(FileStorageInterface):
     # This class integrates fsspec library for file operations
 
     fs: fsspec  # fsspec file system handle
+    provider: FileStorageProvider
 
     def __init__(self, provider: FileStorageProvider, **storage_config: dict[str, Any]):
         self.fs = FileStorageHelper.file_storage_init(provider, **storage_config)
+        self.provider = provider
 
     @skip_local_cache
     def read(
