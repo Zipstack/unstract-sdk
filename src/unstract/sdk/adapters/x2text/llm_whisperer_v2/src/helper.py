@@ -20,8 +20,8 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererHeader,
     WhisperStatus,
 )
-from unstract.sdk.file_storage.fs_impl import FileStorage
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.constants import MimeType
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class LLMWhispererHelper:
             str: Request headers
         """
         return {
-            "accept": "application/json",
+            "accept": MimeType.JSON,
             WhispererHeader.UNSTRACT_KEY: config.get(WhispererConfig.UNSTRACT_KEY),
         }
 

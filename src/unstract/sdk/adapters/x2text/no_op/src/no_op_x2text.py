@@ -5,8 +5,7 @@ from typing import Any, Optional
 
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.sdk.file_storage.fs_impl import FileStorage
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 

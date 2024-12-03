@@ -8,6 +8,7 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
+from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
@@ -111,7 +112,7 @@ class UnstructuredHelper:
             X2TextConstants.PLATFORM_SERVICE_API_KEY
         )
         headers = {
-            "accept": "application/json",
+            "accept": MimeType.JSON,
             "Authorization": f"Bearer {platform_service_api_key}",
         }
         body = {

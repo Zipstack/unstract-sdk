@@ -7,6 +7,7 @@ from requests import Response
 from requests.exceptions import RequestException
 
 from unstract.sdk.adapters.constants import Common
+from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,16 @@ class AdapterUtils:
             return default_err
 
         err_response: Response = err.response  # type: ignore
-        err_content_type = err_response.headers["Content-Type"]
-        if err_content_type == "application/json":
+        err_content_type = err_response.headers.get("Content-Type")
+
+        if not err_content_type:
+            logger.warning(
+                f"Content-Type header not found in {err_response}, "
+                f"returning {default_err}"
+            )
+            return default_err
+
+        if err_content_type == MimeType.JSON:
             err_json = err_response.json()
             if message_key in err_json:
                 return str(err_json[message_key])
@@ -42,11 +51,12 @@ class AdapterUtils:
                     f"Unable to parse error with key '{message_key}' for "
                     f"'{err_json}', returning '{default_err}' instead."
                 )
-        elif err_content_type == "text/plain":
+        elif err_content_type == MimeType.TEXT:
             return err_response.text  # type: ignore
         else:
             logger.warning(
-                f"Unhandled err_response type '{err_content_type}' for {err_response}"
+                f"Unhandled err_response type '{err_content_type}' "
+                f"for {err_response}, returning {default_err}"
             )
         return default_err
 

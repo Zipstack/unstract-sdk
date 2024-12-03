@@ -4,7 +4,7 @@ from typing import Any, Optional
 import requests
 from requests import ConnectionError, RequestException, Response
 
-from unstract.sdk.constants import LogLevel, PromptStudioKeys, ToolEnv
+from unstract.sdk.constants import LogLevel, MimeType, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.common_utils import log_elapsed
@@ -112,7 +112,7 @@ class PromptTool:
             # Extract error information from the response if available
             error_message = str(e)
             content_type = response.headers.get("Content-Type", "").lower()
-            if "application/json" in content_type:
+            if MimeType.JSON in content_type:
                 response_json = response.json()
                 if "error" in response_json:
                     error_message = response_json["error"]

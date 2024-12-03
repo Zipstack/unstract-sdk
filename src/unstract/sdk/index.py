@@ -237,29 +237,17 @@ class Index:
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
-        try:
-            embedding = Embedding(
-                tool=self.tool,
-                adapter_instance_id=embedding_instance_id,
-                usage_kwargs=usage_kwargs,
-            )
-        except SdkError as e:
-            self.tool.stream_log(
-                f"Error loading {embedding_instance_id}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {embedding_instance_id}: {e}")
+        embedding = Embedding(
+            tool=self.tool,
+            adapter_instance_id=embedding_instance_id,
+            usage_kwargs=usage_kwargs,
+        )
 
-        try:
-            vector_db = VectorDB(
-                tool=self.tool,
-                adapter_instance_id=vector_db_instance_id,
-                embedding=embedding,
-            )
-        except SdkError as e:
-            self.tool.stream_log(
-                f"Error loading {vector_db_instance_id}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {vector_db_instance_id}: {e}")
+        vector_db = VectorDB(
+            tool=self.tool,
+            adapter_instance_id=vector_db_instance_id,
+            embedding=embedding,
+        )
 
         try:
             # Checking if document is already indexed against doc_id
