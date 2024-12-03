@@ -27,6 +27,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhisperStatus,
 )
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
+from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
@@ -61,13 +62,13 @@ class LLMWhisperer(X2TextAdapter):
         return schema
 
     def _get_request_headers(self) -> dict[str, Any]:
-        """Obtains the request headers to authenticate with LLM Whisperer.
+        """Obtains the request headers to authenticate with LLMWhisperer.
 
         Returns:
             str: Request headers
         """
         return {
-            "accept": "application/json",
+            "accept": MimeType.JSON,
             WhispererHeader.UNSTRACT_KEY: self.config.get(WhispererConfig.UNSTRACT_KEY),
         }
 
@@ -79,11 +80,11 @@ class LLMWhisperer(X2TextAdapter):
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
     ) -> Response:
-        """Makes a request to LLM whisperer service.
+        """Makes a request to LLMWhisperer service.
 
         Args:
             request_method (HTTPMethod): HTTPMethod to call. Can be GET or POST
-            request_endpoint (str): LLM whisperer endpoint to hit
+            request_endpoint (str): LLMWhisperer endpoint to hit
             headers (Optional[dict[str, Any]], optional): Headers to pass.
                 Defaults to None.
             params (Optional[dict[str, Any]], optional): Query params to pass.
@@ -119,15 +120,15 @@ class LLMWhisperer(X2TextAdapter):
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
             raise ExtractorError(
-                "Unable to connect to LLM Whisperer service, please check the URL"
+                "Unable to connect to LLMWhisperer service, please check the URL"
             )
         except Timeout as e:
-            msg = "Request to LLM whisperer has timed out"
+            msg = "Request to LLMWhisperer has timed out"
             logger.error(f"{msg}: {e}")
             raise ExtractorError(msg)
         except HTTPError as e:
             logger.error(f"Adapter error: {e}")
-            default_err = "Error while calling the LLM Whisperer service"
+            default_err = "Error while calling the LLMWhisperer service"
             msg = AdapterUtils.get_msg_from_request_exc(
                 err=e, message_key="message", default_err=default_err
             )

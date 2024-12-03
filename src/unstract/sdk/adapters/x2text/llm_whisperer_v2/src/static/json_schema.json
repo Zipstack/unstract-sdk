@@ -1,5 +1,5 @@
 {
-  "title": "LLM Whisperer X2Text v2",
+  "title": "LLMWhisperer X2Text v2",
   "type": "object",
   "required": [
     "adapter_name",
@@ -11,7 +11,7 @@
       "type": "string",
       "title": "Name",
       "default": "llm-whisperer-v2",
-      "description": "Provide a unique name for this adapter instance. Example: LLM Whisperer 1"
+      "description": "Provide a unique name for this adapter instance. Example: LLMWhisperer 1"
     },
     "url": {
       "type": "string",

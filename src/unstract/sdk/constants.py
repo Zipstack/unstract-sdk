@@ -166,3 +166,4 @@ class PublicAdapterKeys:
 class MimeType:
     PDF = "application/pdf"
     TEXT = "text/plain"
+    JSON = "application/json"

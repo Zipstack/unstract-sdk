@@ -165,7 +165,7 @@ class ToolUtils:
         """
         return string.lower() == "true"
 
-    # Used the same function from LLM Whisperer
+    # Used the same function from LLMWhisperer
     @staticmethod
     def calculate_page_count(
         pages_string: str, max_page: int = 0, min_page: int = 1

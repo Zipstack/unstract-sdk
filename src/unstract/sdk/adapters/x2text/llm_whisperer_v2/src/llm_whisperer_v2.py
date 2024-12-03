@@ -16,8 +16,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.helper import LLMWhispererHelper
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
-from unstract.sdk.file_storage.fs_impl import FileStorage
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 

@@ -36,6 +36,10 @@ class X2Text(metaclass=ABCMeta):
         self._usage_kwargs = usage_kwargs
         self._initialise()
 
+    @property
+    def x2text_instance(self):
+        return self._x2text_instance
+
     def _initialise(self):
         if self._adapter_instance_id:
             self._x2text_instance = self._get_x2text()
@@ -43,9 +47,7 @@ class X2Text(metaclass=ABCMeta):
     def _get_x2text(self) -> X2TextAdapter:
         try:
             if not self._adapter_instance_id:
-                raise X2TextError(
-                    "Adapter instance ID not set. " "Initialisation failed"
-                )
+                raise X2TextError("Adapter instance ID not set. Initialisation failed")
 
             x2text_config = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
