@@ -72,7 +72,12 @@ class LlamaParseAdapter(X2TextAdapter):
                     text_content = fs.read(
                         path=input_file_path_copy, mode="rb", encoding="utf-8"
                     )
-                    fs.write(path=input_file_path, data=text_content)
+                    fs.write(
+                        path=input_file_path,
+                        data=text_content,
+                        mode="w",
+                        encoding="utf-8",
+                    )
                 except OSError as os_err:
                     logger.error("Exception raised while handling input file.")
                     raise AdapterError(str(os_err))

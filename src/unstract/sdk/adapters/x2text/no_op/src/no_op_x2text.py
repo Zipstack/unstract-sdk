@@ -52,7 +52,9 @@ class NoOpX2Text(X2TextAdapter):
         )
         time.sleep(self.config.get("wait_time"))
         if output_file_path:
-            fs.write(data=extracted_text, encoding="utf-8")
+            fs.write(
+                path=output_file_path, mode="w", data=extracted_text, encoding="utf-8"
+            )
         return TextExtractionResult(extracted_text=extracted_text)
 
     def test_connection(self) -> bool:

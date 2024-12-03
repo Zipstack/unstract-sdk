@@ -347,7 +347,9 @@ class LLMWhispererHelper:
         try:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
-            fs.write(data=text_output, encoding="utf-8")
+            fs.write(
+                path=output_file_path, mode="w", data=text_output, encoding="utf-8"
+            )
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
             raise ExtractorError(str(e))
@@ -365,6 +367,8 @@ class LLMWhispererHelper:
             }
             metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
             logger.info(f"Writing metadata to {metadata_file_path}")
-            fs.write(data=metadata_json, encoding="utf-8")
+            fs.write(
+                path=metadata_file_path, mode="w", data=metadata_json, encoding="utf-8"
+            )
         except Exception as e:
             logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")
