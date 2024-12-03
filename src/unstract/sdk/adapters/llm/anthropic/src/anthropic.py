@@ -93,5 +93,4 @@ class AnthropicLLM(LLMAdapter):
         else:
             msg = e.message
 
-        status_code = e.status_code if hasattr(e, "status_code") else None
-        return LLMError(msg, actual_err=e, status_code=status_code)
+        return LLMError(msg, actual_err=e)

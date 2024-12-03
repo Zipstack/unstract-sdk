@@ -25,6 +25,10 @@ def parse_llm_err(e: Exception, llm_adapter: LLMAdapter) -> LLMError:
     Returns:
         LLMError: Unstract's LLMError object
     """
+    # Avoid wrapping LLMError objects again
+    if isinstance(e, LLMError):
+        return e
+
     if isinstance(e, ResponseValidationError):
         err = VertexAILLM.parse_llm_err(e)
     elif isinstance(e, OpenAIAPIError):
@@ -38,7 +42,12 @@ def parse_llm_err(e: Exception, llm_adapter: LLMAdapter) -> LLMError:
     else:
         err = LLMError(str(e), actual_err=e)
 
-    # TODO: Review if markdown can be supported
-    msg = f"Error from LLM provider '{llm_adapter.get_name()}'.\n```{str(err)}\n```"
+    msg = f"Error from LLM provider '{llm_adapter.get_name()}'."
+
+    # Add a code block only for errors from clients
+    if err.actual_err:
+        msg += f"\n```\n{str(err)}\n```"
+    else:
+        msg += str(err)
     err.message = msg
     return err

@@ -9,8 +9,11 @@ from typing import Any
 import magic
 
 from unstract.sdk.exceptions import FileStorageError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
-from unstract.sdk.file_storage.fs_shared_temporary import SharedTemporaryFileStorage
+from unstract.sdk.file_storage import (
+    FileStorage,
+    FileStorageProvider,
+    SharedTemporaryFileStorage,
+)
 
 logger = logging.getLogger(__name__)
 

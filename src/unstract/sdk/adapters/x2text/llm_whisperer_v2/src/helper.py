@@ -83,17 +83,21 @@ class LLMWhispererHelper:
                     data=data,
                 )
             else:
-                raise ExtractorError(f"Unsupported request method: {request_method}")
+                raise ExtractorError(
+                    f"Unsupported request method: {request_method}", status_code=500
+                )
             response.raise_for_status()
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
             raise ExtractorError(
-                "Unable to connect to LLMWhisperer service, please check the URL"
+                "Unable to connect to LLMWhisperer service, please check the URL",
+                actual_err=e,
+                status_code=503,
             )
         except Timeout as e:
             msg = "Request to LLMWhisperer has timed out"
             logger.error(f"{msg}: {e}")
-            raise ExtractorError(msg)
+            raise ExtractorError(msg, actual_err=e, status_code=504)
         except HTTPError as e:
             logger.error(f"Adapter error: {e}")
             default_err = "Error while calling the LLMWhisperer service"

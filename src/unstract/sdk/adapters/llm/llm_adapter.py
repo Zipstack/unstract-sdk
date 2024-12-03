@@ -58,7 +58,7 @@ class LLMAdapter(Adapter, ABC):
         Returns:
             LLMError: Error to be sent to the user
         """
-        return LLMError(str(e))
+        return LLMError(str(e), actual_err=e)
 
     def get_llm_instance(self) -> LLM:
         """Instantiate the llama index LLM class.
@@ -72,7 +72,10 @@ class LLMAdapter(Adapter, ABC):
     @staticmethod
     def _test_llm_instance(llm: Optional[LLM]) -> bool:
         if llm is None:
-            return False
+            raise LLMError(
+                message="Unable to connect to LLM, please recheck the configuration",
+                status_code=400,
+            )
         response = llm.complete(
             "The capital of Tamilnadu is ",
             temperature=0.003,
@@ -82,12 +85,16 @@ class LLMAdapter(Adapter, ABC):
         if find_match:
             return True
         else:
-            return False
+            msg = (
+                "LLM based test failed. The credentials was valid however a sane "
+                "response was not obtained from the LLM provider, please recheck "
+                "the configuration."
+            )
+            raise LLMError(message=msg, status_code=400)
 
     def test_connection(self) -> bool:
         try:
-            llm = self.get_llm_instance()
-            test_result: bool = self._test_llm_instance(llm=llm)
+            test_result: bool = self._test_llm_instance(llm=self.get_llm_instance())
         except Exception as e:
             # Avoids circular import errors
             from unstract.sdk.adapters.llm.exceptions import parse_llm_err
