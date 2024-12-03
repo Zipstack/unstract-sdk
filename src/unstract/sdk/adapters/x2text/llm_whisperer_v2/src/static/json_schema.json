@@ -17,14 +17,14 @@
       "type": "string",
       "title": "URL",
       "format": "uri",
-      "default": "https://llmwhisperer-api.unstract.com",
-      "description": "Provide the URL of the LLMWhisperer service."
+      "default": "https://llmwhisperer-api.us-central.unstract.com",
+      "description": "Provide the base URL of the LLM Whisperer service based on your region."
     },
     "unstract_key": {
       "type": "string",
       "title": "Unstract Key",
       "format": "password",
-      "description": "API key obtained from the Unstract developer portal (https://us-central.unstract.com/llm-whisperer)"
+      "description": "API key obtained from the Unstract developer portal (https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)"
     },
     "mode": {
       "type": "string",
@@ -36,7 +36,7 @@
         "form"
       ],
       "default": "form",
-      "description": "Native text : Extract text from native text PDFs. (not scanned). Use this mode when:  You have low latency requirement, All documents are PDFs, PDFs are native text PDFs, Cost sensitive application\n Low cost : Cost effective extraction. Use this mode when:  High quality scanned PDFs,  High quality scanned images, No handwritten documents  \n High quality : High quality extraction. Use this mode when: Medium/low quality scanned PDFs, Medium/low quality scanned images, Handwritten documents \n Form: High quality extraction + Checkbox and Radio button detection. Use this mode when: Checkbox and radio button detection, Medium/low quality scanned PDFs, Medium/low quality scanned images, Handwritten documents."
+      "description": "Processing mode to use, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
     },
     "output_mode": {
       "type": "string",
@@ -46,7 +46,7 @@
         "text"
       ],
       "default": "layout_preserving",
-      "description": "The output format. Valid options are layout_preserving and text. Layout preserving mode tries to extract the text from the document as is, maintaining the structural layout of the document. This works very well for LLM consumption. Text (text) mode extracts the text from the document without applying any processing or intelligence. This mode is useful when the layout_preserving mode is not able to extract the text properly. This can happen if the document contains too many different fonts and font sizes."
+      "description": "Output format, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
     },
     "line_splitter_tolerance": {
       "type": "number",

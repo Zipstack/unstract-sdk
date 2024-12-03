@@ -345,8 +345,7 @@ class LLMWhisperer(X2TextAdapter):
             raise ExtractorError("Couldn't extract text from file")
         if output_file_path:
             self._write_output_to_file(
-                output_json=output_json,
-                output_file_path=Path(output_file_path),
+                output_json=output_json, output_file_path=Path(output_file_path), fs=fs
             )
         return output_json.get("text", "")
 
@@ -372,7 +371,7 @@ class LLMWhisperer(X2TextAdapter):
             text_output = output_json.get("text", "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=output_file_path.name,
+                path=output_file_path,
                 mode="w",
                 encoding="utf-8",
                 data=text_output,
@@ -384,7 +383,7 @@ class LLMWhisperer(X2TextAdapter):
                 metadata_file_name = output_file_path.with_suffix(".json").name
                 metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
-                fs.mkdir(metadata_dir, create_parents=True)
+                fs.mkdir(str(metadata_dir), create_parents=True)
                 # Remove the "text" key from the metadata
                 metadata = {
                     key: value for key, value in output_json.items() if key != "text"
@@ -393,7 +392,7 @@ class LLMWhisperer(X2TextAdapter):
                 logger.info(f"Writing metadata to {metadata_file_path}")
 
                 fs.write(
-                    path=metadata_file_path.name,
+                    path=metadata_file_path,
                     mode="w",
                     encoding="utf-8",
                     data=metadata_json,

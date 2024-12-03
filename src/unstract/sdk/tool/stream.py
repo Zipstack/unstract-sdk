@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 from typing import Any
 
@@ -7,6 +8,7 @@ from deprecated import deprecated
 
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
 from unstract.sdk.utils import ToolUtils
+from unstract.sdk.utils.common_utils import UNSTRACT_TO_PY_LOG_LEVEL
 
 
 class StreamMixin:
@@ -30,7 +32,34 @@ class StreamMixin:
         self._exec_by_tool = ToolUtils.str_to_bool(
             os.environ.get(ToolEnv.EXECUTION_BY_TOOL, "False")
         )
+        if self.is_exec_by_tool:
+            self._configure_logger()
         super().__init__(**kwargs)
+
+    @property
+    def is_exec_by_tool(self):
+        """Flag to determine if SDK library is used in a tool's context.
+
+        Returns:
+            bool: True if SDK is used by a tool else False
+        """
+        return self._exec_by_tool
+
+    def _configure_logger(self) -> None:
+        """Helps configure the logger for the tool run."""
+        rootlogger = logging.getLogger("")
+        # Avoids adding multiple handlers
+        if rootlogger.hasHandlers():
+            return
+        handler = logging.StreamHandler()
+        handler.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
+        handler.setFormatter(
+            logging.Formatter(
+                "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            )
+        )
+        rootlogger.addHandler(handler)
+        rootlogger.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
 
     def stream_log(
         self,

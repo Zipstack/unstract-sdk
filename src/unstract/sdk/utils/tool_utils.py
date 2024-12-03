@@ -1,4 +1,6 @@
 import json
+import logging
+import os
 import warnings
 from hashlib import md5, sha256
 from pathlib import Path
@@ -6,7 +8,11 @@ from typing import Any
 
 import magic
 
+from unstract.sdk.exceptions import FileStorageError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.file_storage.fs_shared_temporary import SharedTemporaryFileStorage
+
+logger = logging.getLogger(__name__)
 
 
 class ToolUtils:
@@ -79,6 +85,21 @@ class ToolUtils:
         file_contents: str = fs.read(path=file_to_load, mode="r", encoding="utf-8")
         loaded_json: dict[str, Any] = json.loads(file_contents)
         return loaded_json
+
+    @staticmethod
+    def dump_json(
+        json_to_dump: dict[str, Any],
+        file_to_dump: str,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> None:
+        """Helps dump the JSON to a file.
+
+        Args:
+            json_to_dump (dict[str, Any]): Input JSON to dump
+            file_to_dump (str): Path to the file to dump the JSON to
+        """
+        compact_json = json.dumps(json_to_dump, separators=(", ", ":"))
+        fs.write(path=file_to_dump, mode="w", data=compact_json)
 
     @staticmethod
     def json_to_str(json_to_dump: dict[str, Any]) -> str:
@@ -197,3 +218,44 @@ class ToolUtils:
             else:
                 pages_list.append(int(part))
         return len(pages_list)
+
+    @staticmethod
+    def get_filestorage_provider(
+        var_name: str, default: str = "minio"
+    ) -> FileStorageProvider:
+        """Retrieve the file storage provider based on an environment
+        variable."""
+        provider_name = os.environ.get(var_name, default).upper()
+        try:
+            # Attempt to map the provider name to an enum value, case-insensitively
+            return FileStorageProvider[provider_name]
+        except KeyError:
+            allowed_providers = ", ".join(
+                [provider.name for provider in FileStorageProvider]
+            )
+            logger.error(
+                f"Invalid provider '{provider_name}'. Allowed providers: "
+                f"{allowed_providers}"
+            )
+            raise FileStorageError(f"Invalid provider '{provider_name}'")
+
+    @staticmethod
+    def get_filestorage_credentials(var_name: str) -> dict[str, Any]:
+        """Retrieve the file storage credentials based on an environment
+        variable."""
+        credentials = os.environ.get(var_name, "{}")
+        try:
+            return json.loads(credentials)
+        except json.JSONDecodeError:
+            raise ValueError(
+                "File storage credentials are not set properly. "
+                "Please check your settings."
+            )
+
+    @staticmethod
+    def get_workflow_filestorage(
+        provider: FileStorageProvider,
+        credentials: dict[str, Any] = {},
+    ) -> SharedTemporaryFileStorage:
+        """Get the file storage for the workflow."""
+        return SharedTemporaryFileStorage(provider=provider, **credentials)
