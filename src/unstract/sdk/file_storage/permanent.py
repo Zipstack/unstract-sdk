@@ -3,8 +3,8 @@ from typing import Any, Optional, Union
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import FileOperationParams
-from unstract.sdk.file_storage.fs_impl import FileStorage
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.file_storage.impl import FileStorage
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
