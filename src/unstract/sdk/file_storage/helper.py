@@ -4,8 +4,8 @@ from typing import Any
 import fsspec
 from fsspec import AbstractFileSystem
 
-from unstract.sdk.exceptions import FileStorageError
-from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+from unstract.sdk.exceptions import FileOperationError, FileStorageError
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -67,3 +67,24 @@ class FileStorageHelper:
                 f" file system {e}"
             )
             raise FileStorageError(str(e)) from e
+
+
+def skip_local_cache(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError:
+            try:
+                # FileNotFound could have been caused by stale cache.
+                # Hence invalidate cache and retry again
+                args[0].fs.invalidate_cache()
+                return func(*args, **kwargs)
+            except Exception as e:
+                if isinstance(e, FileNotFoundError):
+                    raise e
+                else:
+                    raise FileOperationError(str(e)) from e
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    return wrapper

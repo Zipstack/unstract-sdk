@@ -16,6 +16,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.helper import LLMWhispererHelper
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
+from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,7 @@ class LLMWhispererV2(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         """Used to extract text from documents.
@@ -75,7 +77,7 @@ class LLMWhispererV2(X2TextAdapter):
         """
 
         response: requests.Response = LLMWhispererHelper.send_whisper_request(
-            input_file_path, self.config
+            input_file_path, self.config, fs=fs
         )
         response_text = response.text
         reponse_dict = json.loads(response_text)
@@ -85,7 +87,7 @@ class LLMWhispererV2(X2TextAdapter):
 
         return TextExtractionResult(
             extracted_text=LLMWhispererHelper.extract_text_from_response(
-                self.config, output_file_path, reponse_dict, response
+                self.config, output_file_path, reponse_dict, response, fs=fs
             ),
             extraction_metadata=metadata,
         )

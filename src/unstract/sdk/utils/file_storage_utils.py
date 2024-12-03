@@ -1,6 +1,6 @@
 import logging
 
-from unstract.sdk.file_storage.fs_impl import FileStorage
+from unstract.sdk.file_storage.impl import FileStorage
 
 logger = logging.getLogger(__name__)
 

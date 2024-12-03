@@ -1,8 +1,8 @@
-# Unstract LLM Whisperer v2 X2Text Adapter
+# Unstract LLMWWhisperer v2 X2Text Adapter
 
 ## Env variables
 
-The below env variables are resolved by LLM Whisperer adapter
+The below env variables are resolved by LLMWhisperer adapter
 
 | Variable                     | Description                                                                                  |
 | ---------------------------- | -------------------------------------------------------------------------------------------- |

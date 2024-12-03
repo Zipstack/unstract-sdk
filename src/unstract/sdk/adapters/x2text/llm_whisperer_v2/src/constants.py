@@ -33,7 +33,7 @@ class WhispererEndpoint:
 
 
 class WhispererEnv:
-    """Env variables for LLM whisperer.
+    """Env variables for LLMWhisperer.
 
     Can be used to alter behaviour at runtime.
 
@@ -42,10 +42,13 @@ class WhispererEnv:
             LLMWhisperer's status API. Defaults to 30s
         MAX_POLLS: Total number of times to poll the status API.
             Set to -1 to poll indefinitely. Defaults to -1
+        STATUS_RETRIES: Number of times to retry calling LLLMWhisperer's status API
+            on failure during polling. Defaults to 5.
     """
 
     POLL_INTERVAL = "ADAPTER_LLMW_POLL_INTERVAL"
     MAX_POLLS = "ADAPTER_LLMW_MAX_POLLS"
+    STATUS_RETRIES = "ADAPTER_LLMW_STATUS_RETRIES"
 
 
 class WhispererConfig:
@@ -84,7 +87,7 @@ class WhisperStatus:
 
 
 class WhispererDefaults:
-    """Defaults meant for LLM whisperer."""
+    """Defaults meant for LLMWhisperer."""
 
     MEDIAN_FILTER_SIZE = 0
     GAUSSIAN_BLUR_RADIUS = 0.0
@@ -94,6 +97,7 @@ class WhispererDefaults:
     HORIZONTAL_STRETCH_FACTOR = 1.0
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
+    STATUS_RETRIES = int(os.getenv(WhispererEnv.STATUS_RETRIES, 5))
     PAGES_TO_EXTRACT = ""
     PAGE_SEPARATOR = "<<<"
     MARK_VERTICAL_LINES = False

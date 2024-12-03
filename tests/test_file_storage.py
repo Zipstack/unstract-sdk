@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
 from unstract.sdk.exceptions import FileOperationError
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.file_storage.constants import StorageType
+from unstract.sdk.file_storage.env_helper import EnvHelper
+from unstract.sdk.file_storage.impl import FileStorage
+from unstract.sdk.file_storage.provider import FileStorageProvider
 
 load_dotenv()
 
@@ -88,6 +91,22 @@ def file_storage(provider: FileStorageProvider):
 def test_file_read(file_storage, path, mode, read_length, expected_read_length):
     file_contents = file_storage.read(path=path, mode=mode, length=read_length)
     assert len(file_contents) == expected_read_length
+
+
+@pytest.mark.parametrize(
+    "file_storage, path, mode, read_length",
+    [
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            "1.txt",
+            "rb",
+            -1,
+        ),
+    ],
+)
+def test_file_read_exception(file_storage, path, mode, read_length):
+    with pytest.raises(FileNotFoundError):
+        file_storage.read(path=path, mode=mode, length=read_length)
 
 
 @pytest.mark.parametrize(
@@ -699,3 +718,24 @@ def test_glob(file_storage, folder_path, expected_result):
     file_list = file_storage.glob(path=folder_path)
     print(f"Files: {file_list}")
     assert len(file_list) == expected_result
+
+
+@pytest.mark.parametrize(
+    "storage_type, env_name, expected",
+    [
+        (
+            StorageType.PERMANENT.value,
+            "TEST_PERMANENT_STORAGE",
+            FileStorageProvider.GCS,
+        ),
+        (
+            StorageType.TEMPORARY.value,
+            "TEST_TEMPORARY_STORAGE",
+            FileStorageProvider.MINIO,
+        ),
+    ],
+)
+def test_get_storage(storage_type, env_name, expected):
+    file_storage = EnvHelper.get_storage(storage_type, env_name)
+    assert file_storage.provider == expected
+    print(file_storage)

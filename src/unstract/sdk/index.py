@@ -23,7 +23,7 @@ from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
-from unstract.sdk.exceptions import IndexingError, SdkError
+from unstract.sdk.exceptions import IndexingError, SdkError, X2TextError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
@@ -123,7 +123,7 @@ class Index:
         """Extracts text from a document.
 
         Uses the configured service to perform the extraction
-        - LLM Whisperer
+        - LLMWhisperer
         - Unstructured IO Community / Enterprise
         - Llama Parse
 
@@ -144,13 +144,13 @@ class Index:
         """
         self.tool.stream_log("Extracting text from input file")
         extracted_text = ""
+        x2text = X2Text(
+            tool=self.tool,
+            adapter_instance_id=x2text_instance_id,
+            usage_kwargs=usage_kwargs,
+        )
         try:
-            x2text = X2Text(
-                tool=self.tool,
-                adapter_instance_id=x2text_instance_id,
-                usage_kwargs=usage_kwargs,
-            )
-            if enable_highlight and isinstance(x2text._x2text_instance, LLMWhisperer):
+            if enable_highlight and isinstance(x2text.x2text_instance, LLMWhisperer):
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path,
                     output_file_path=output_file_path,
@@ -158,20 +158,18 @@ class Index:
                     fs=fs,
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
-
                 metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
-
                 self.tool.update_exec_metadata(metadata)
-
             else:
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path, output_file_path=output_file_path, fs=fs
                 )
-
             extracted_text = process_response.extracted_text
+        # TODO: Handle prepend of context where error is raised and remove this
         except AdapterError as e:
-            # Wrapping AdapterErrors with SdkError
-            raise IndexingError(str(e)) from e
+            msg = f"Error from text extractor '{x2text.x2text_instance.get_name()}'. "
+            msg += str(e)
+            raise X2TextError(msg) from e
         if process_text:
             try:
                 result = process_text(extracted_text)
@@ -180,7 +178,10 @@ class Index:
                 else:
                     logger.warning("'process_text' is expected to return an 'str'")
             except Exception as e:
-                logger.error(f"Error occured inside function 'process_text': {e}")
+                logger.error(
+                    f"Error occured inside callable 'process_text': {e}\n"
+                    "continuing processing..."
+                )
         return extracted_text
 
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
@@ -236,29 +237,17 @@ class Index:
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
 
-        try:
-            embedding = Embedding(
-                tool=self.tool,
-                adapter_instance_id=embedding_instance_id,
-                usage_kwargs=usage_kwargs,
-            )
-        except SdkError as e:
-            self.tool.stream_log(
-                f"Error loading {embedding_instance_id}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {embedding_instance_id}: {e}")
+        embedding = Embedding(
+            tool=self.tool,
+            adapter_instance_id=embedding_instance_id,
+            usage_kwargs=usage_kwargs,
+        )
 
-        try:
-            vector_db = VectorDB(
-                tool=self.tool,
-                adapter_instance_id=vector_db_instance_id,
-                embedding=embedding,
-            )
-        except SdkError as e:
-            self.tool.stream_log(
-                f"Error loading {vector_db_instance_id}", level=LogLevel.ERROR
-            )
-            raise SdkError(f"Error loading {vector_db_instance_id}: {e}")
+        vector_db = VectorDB(
+            tool=self.tool,
+            adapter_instance_id=vector_db_instance_id,
+            embedding=embedding,
+        )
 
         try:
             # Checking if document is already indexed against doc_id
