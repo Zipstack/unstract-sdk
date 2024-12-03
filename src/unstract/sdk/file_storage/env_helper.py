@@ -31,7 +31,7 @@ class EnvHelper:
                 raise NotImplementedError()
             return file_storage
         except KeyError as e:
-            logger.error(f"Required credentials is " f"missing in the env: {str(e)}")
+            logger.error(f"Required credentials is missing in the env: {str(e)}")
             raise e
         except FileStorageError as e:
             raise e
