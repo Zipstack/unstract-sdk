@@ -322,6 +322,7 @@ class LLMWhispererHelper:
             LLMWhispererHelper.write_output_to_file(
                 output_json=output_json,
                 output_file_path=Path(output_file_path),
+                fs=fs,
             )
         return output_json.get("result_text", "")
 
@@ -357,7 +358,7 @@ class LLMWhispererHelper:
             metadata_file_name = output_file_path.with_suffix(".json").name
             metadata_file_path = metadata_dir / metadata_file_name
             # Ensure the metadata directory exists
-            fs.mkdir(create_parents=True, path=metadata_dir, exist_ok=True)
+            fs.mkdir(create_parents=True, path=metadata_dir)
             # Remove the "result_text" key from the metadata
             metadata = {
                 key: value for key, value in output_json.items() if key != "result_text"
