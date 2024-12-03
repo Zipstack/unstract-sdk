@@ -5,6 +5,8 @@ from typing import Any, Optional
 
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
+from unstract.sdk.file_storage.fs_impl import FileStorage
+from unstract.sdk.file_storage.fs_provider import FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +43,7 @@ class NoOpX2Text(X2TextAdapter):
         self,
         input_file_path: str,
         output_file_path: Optional[str] = None,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
         extracted_text: str = (
@@ -49,8 +52,7 @@ class NoOpX2Text(X2TextAdapter):
         )
         time.sleep(self.config.get("wait_time"))
         if output_file_path:
-            with open(output_file_path, "w", encoding="utf-8") as f:
-                f.write(extracted_text)
+            fs.write(extracted_text, encoding="utf-8")
         return TextExtractionResult(extracted_text=extracted_text)
 
     def test_connection(self) -> bool:

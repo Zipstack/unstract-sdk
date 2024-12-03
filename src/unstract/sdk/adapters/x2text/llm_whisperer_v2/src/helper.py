@@ -306,6 +306,7 @@ class LLMWhispererHelper:
         output_file_path: Optional[str],
         response_dict: dict[str, Any],
         response: Response,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         output_json = {}
         if response.status_code == 200:
@@ -325,7 +326,11 @@ class LLMWhispererHelper:
         return output_json.get("result_text", "")
 
     @staticmethod
-    def write_output_to_file(output_json: dict, output_file_path: Path) -> None:
+    def write_output_to_file(
+        output_json: dict,
+        output_file_path: Path,
+        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+    ) -> None:
         """Writes the extracted text and metadata to the specified output file
         and metadata file.
 
@@ -341,7 +346,7 @@ class LLMWhispererHelper:
         try:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
-            output_file_path.write_text(text_output, encoding="utf-8")
+            fs.write(data=text_output, encoding="utf-8")
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
             raise ExtractorError(str(e))
@@ -352,13 +357,13 @@ class LLMWhispererHelper:
             metadata_file_name = output_file_path.with_suffix(".json").name
             metadata_file_path = metadata_dir / metadata_file_name
             # Ensure the metadata directory exists
-            metadata_dir.mkdir(parents=True, exist_ok=True)
+            fs.mkdir(create_parents=True, path=metadata_dir, exist_ok=True)
             # Remove the "result_text" key from the metadata
             metadata = {
                 key: value for key, value in output_json.items() if key != "result_text"
             }
             metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
             logger.info(f"Writing metadata to {metadata_file_path}")
-            metadata_file_path.write_text(metadata_json, encoding="utf-8")
+            fs.write(data=metadata_json, encoding="utf-8")
         except Exception as e:
             logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")
