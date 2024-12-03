@@ -74,10 +74,10 @@ def skip_local_cache(func):
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
-            # FileNotFound could have been caused by stale cache.
-            # Hence invalidate cache and retry again
-            args[0].fs.invalidate_cache()
             try:
+                # FileNotFound could have been caused by stale cache.
+                # Hence invalidate cache and retry again
+                args[0].fs.invalidate_cache()
                 return func(*args, **kwargs)
             except Exception as e:
                 if isinstance(e, FileNotFoundError):

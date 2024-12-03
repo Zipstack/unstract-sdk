@@ -20,11 +20,7 @@ class EnvHelper:
             provider = FileStorageProvider(
                 file_storage_creds[CredentialKeyword.PROVIDER]
             )
-            if CredentialKeyword.CREDENTIALS in file_storage_creds:
-                credentials = file_storage_creds[CredentialKeyword.CREDENTIALS]
-            else:
-                credentials = {}
-
+            credentials = file_storage_creds.get(CredentialKeyword.CREDENTIALS, {})
             if storage_type == StorageType.PERMANENT.value:
                 file_storage = PermanentFileStorage(provider=provider, **credentials)
             elif storage_type == StorageType.TEMPORARY.value:
@@ -32,15 +28,10 @@ class EnvHelper:
                     provider=provider, **credentials
                 )
             else:
-                raise NotImplementedError
+                raise NotImplementedError()
             return file_storage
         except KeyError as e:
             logger.error(f"Required credentials is " f"missing in the env: {str(e)}")
             raise e
         except FileStorageError as e:
-            logger.error(
-                "Error while initialising storage: %s",
-                e,
-                stack_info=True,
-                exc_info=True,
-            )
+            raise e
