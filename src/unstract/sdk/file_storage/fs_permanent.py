@@ -1,9 +1,12 @@
+import logging
 from typing import Any, Optional, Union
 
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import FileOperationParams
 from unstract.sdk.file_storage.fs_impl import FileStorage
 from unstract.sdk.file_storage.fs_provider import FileStorageProvider
+
+logger = logging.getLogger(__name__)
 
 
 class PermanentFileStorage(FileStorage):
@@ -17,7 +20,6 @@ class PermanentFileStorage(FileStorage):
     def __init__(
         self,
         provider: FileStorageProvider,
-        legacy_storage_path: Optional[str] = None,
         **storage_config: dict[str, Any],
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
@@ -32,22 +34,26 @@ class PermanentFileStorage(FileStorage):
             super().__init__(provider)
         else:
             raise NotImplementedError
-        self.legacy_storage_path = legacy_storage_path
 
-    def _copy_on_write(self, path):
-        """Copies the file to the lazily. Checks if the file is present in the
-        Local File system. If yes, copies the file to the mentioned path using
-        the remote file system. This is a silent copy done on need basis.
+    def _copy_on_read(self, path: str, legacy_storage_path: str):
+        """Copies the file to the remote storage lazily if not present already.
+        Checks if the file is present in the Local File system. If yes, copies
+        the file to the mentioned path using the remote file system. This is a
+        silent copy done on need basis.
 
         Args:
             path (str): Path to the file
+            legacy_storage_path (str): Legacy path to the same file
 
         Returns:
             NA
         """
+        # If path does not exist on remote storage
         if not self.exists(path):
             local_file_storage = FileStorage(provider=FileStorageProvider.LOCAL)
-            local_file_path = self.legacy_storage_path + "/" + path
+            local_file_path = legacy_storage_path
+            # If file exists on local storage, then migrate the file
+            # to remote storage
             if local_file_storage.exists(local_file_path):
                 self.upload(local_file_path, path)
 
@@ -58,6 +64,7 @@ class PermanentFileStorage(FileStorage):
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         length: int = FileOperationParams.READ_ENTIRE_LENGTH,
+        legacy_storage_path: Optional[str] = None,
     ) -> Union[bytes, str]:
         """Read the file pointed to by the file_handle.
 
@@ -75,7 +82,10 @@ class PermanentFileStorage(FileStorage):
         """
         try:
             # Lazy copy to the destination/remote file system
-            self._copy_on_write(path)
+            if legacy_storage_path:
+                self._copy_on_read(path, legacy_storage_path)
             return super().read(path, mode, encoding, seek_position, length)
+        except FileNotFoundError:
+            logger.warning(f"File {path} not found. Ignoring.")
         except Exception as e:
-            raise FileOperationError(str(e))
+            raise FileOperationError(str(e)) from e

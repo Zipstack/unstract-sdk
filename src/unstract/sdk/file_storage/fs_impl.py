@@ -6,6 +6,7 @@ from typing import Any, Union
 
 import fsspec
 import magic
+import yaml
 
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
@@ -51,6 +52,8 @@ class FileStorage(FileStorageInterface):
                 if seek_position > 0:
                     file_handle.seek(seek_position)
                 return file_handle.read(length)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -103,6 +106,8 @@ class FileStorage(FileStorageInterface):
         try:
             with self.fs.open(path=path, mode="rb") as file_handle:
                 return file_handle.seek(location, position)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -146,6 +151,8 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.ls(path)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -180,6 +187,8 @@ class FileStorage(FileStorageInterface):
         """
         try:
             return self.fs.cp(src, dest, overwrite=overwrite)
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -195,6 +204,8 @@ class FileStorage(FileStorageInterface):
         try:
             file_info = self.fs.info(path)
             return file_info["size"]
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -213,6 +224,8 @@ class FileStorage(FileStorageInterface):
             if not isinstance(file_mtime, datetime):
                 file_mtime = datetime.fromtimestamp(file_mtime)
             return file_mtime
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -230,6 +243,8 @@ class FileStorage(FileStorageInterface):
             sample_contents = self.read(path=path, mode="rb", length=100)
             mime_type = magic.from_buffer(sample_contents, mime=True)
             return mime_type
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -262,7 +277,7 @@ class FileStorage(FileStorageInterface):
 
         Args:
             from_path (str): Path of the file to be uploaded (local)
-            to_path (str): Path where the file is on the local system
+            to_path (str): Path where the file is to be uploaded (usually remote)
 
         Returns:
             NA
@@ -275,20 +290,20 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def _open_with_no_buffering(self, path, mode="rb"):
-        """Opens a file using fsspec with no buffering.
+    def glob(self, path: str) -> list[str]:
+        """Lists files under path matching the pattern sepcified as part of
+        path in the argument.
 
         Args:
-            fs: The fsspec filesystem object.
-            path: The path to the file.
-            mode: The file mode (default: 'rb' for binary read).
+            path (str): path to the directory where files matching the
+            specified pattern is to be found
+            Eg. a/b/c/*.txt will list all txt files under a/b/c/
 
         Returns:
-            A file-like object with no buffering.
+            list[str]: List of file names matching any pattern specified
         """
         try:
-            with self.fs.open(path, mode) as f:
-                return open(f.raw.name, mode, buffering=0)
+            return self.fs.glob(path)
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -308,25 +323,80 @@ class FileStorage(FileStorageInterface):
             h = sha256()
             b = bytearray(128 * 1024)
             mv = memoryview(b)
-            with self._open_with_no_buffering(path=path) as f:
+            with self.fs.open(path) as f:
                 while n := f.readinto(mv):
                     h.update(mv[:n])
             return str(h.hexdigest())
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def json_dump(self, path, mode, encoding, data, **kwargs):
+    def json_dump(
+        self,
+        path: str,
+        data: dict[str, Any],
+        **kwargs: dict[Any, Any],
+    ):
         """Dumps data into the given file specified by path.
 
         Args:
             path (str): Path to file where JSON is to be dumped
-            mode (str): write modes
-            encoding (str): Encoding to be used while writing the file
-            data (bytes|str): data to be written to the file
+            data (dict): Object to be written to the file
             **kwargs (dict): Any other additional arguments
         """
         try:
-            with self.fs.open(path=path, mode=mode, encoding=encoding) as f:
+            with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
                 json.dump(data, f, **kwargs)
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def yaml_dump(
+        self,
+        path: str,
+        data: dict[str, Any],
+        **kwargs: dict[Any, Any],
+    ):
+        """Dumps data into the given file specified by path.
+
+        Args:
+            path (str): Path to file where yml is to be dumped
+            data (dict): Object to be written to the file
+            **kwargs (dict): Any other additional arguments
+        """
+        try:
+            with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
+                yaml.dump(data, f, **kwargs)
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def json_load(self, path: str) -> dict[Any, Any]:
+        try:
+            with self.fs.open(path=path) as json_file:
+                data: dict[str, Any] = json.load(json_file)
+                return data
+        except FileNotFoundError as e:
+            raise e
+        except Exception as e:
+            raise FileOperationError(str(e)) from e
+
+    def yaml_load(
+        self,
+        path: str,
+    ) -> dict[Any, Any]:
+        """Loads data from a file as yaml.
+
+        Args:
+            path (str): Path to file where yml is to be loaded
+
+        Returns:
+            dict[Any, Any]: Data loaded as yaml
+        """
+        try:
+            with self.fs.open(path=path) as f:
+                data: dict[str, Any] = yaml.safe_load(f)
+                return data
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e
