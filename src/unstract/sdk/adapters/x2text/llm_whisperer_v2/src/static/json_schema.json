@@ -24,7 +24,7 @@
       "type": "string",
       "title": "Unstract Key",
       "format": "password",
-      "description": "API key obtained from the Unstract developer portal (https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)"
+      "description": "API key obtained from the [Unstract developer portal](https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)"
     },
     "mode": {
       "type": "string",
@@ -77,7 +77,7 @@
       "type": "string",
       "title": "Page separator",
       "default": "<<<",
-      "description": "Specify a pattern to separate the pages in the document (e.g., <<< {{page_no}} >>>, <<< >>>). This pattern will be inserted at the end of every page. Omit {{page_no}} if you don't want to include the page number in the separator."
+      "description": "Specify a pattern to separate the pages in the document. This pattern will be inserted at the end of every page (e.g., `<<< {{page_no}} >>>`, `<<< >>>`). Omit `{{page_no}}` if you don't want to include the page number in the separator."
     },
     "mark_vertical_lines": {
       "type": "boolean",

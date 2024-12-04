@@ -17,6 +17,7 @@ from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.vectordb import adapters
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
+from unstract.sdk.adapters.vectordb.exceptions import parse_vector_db_err
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import SdkError, VectorDBError
@@ -180,7 +181,10 @@ class VectorDB:
         return StorageContext.from_defaults(vector_store=self._vector_db_instance)
 
     def query(self, query) -> VectorStoreQueryResult:
-        return self._vector_db_instance.query(query=query)
+        try:
+            return self._vector_db_instance.query(query=query)
+        except Exception as e:
+            raise parse_vector_db_err(e, self.vector_db_adapter_class) from e
 
     def delete(self, ref_doc_id: str, **delete_kwargs: Any) -> None:
         if not self.vector_db_adapter_class:

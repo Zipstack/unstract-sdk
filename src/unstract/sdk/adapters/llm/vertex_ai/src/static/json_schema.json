@@ -12,25 +12,25 @@
       "type": "string",
       "title": "Name",
       "default": "",
-      "description": "Provide a unique name for this adapter instance. Example: vectorai-group-1"
+      "description": "Provide a unique name for this adapter instance. Example: vertexai-group-1"
     },
     "json_credentials": {
       "type": "string",
       "title": "Credentials",
       "default": "",
-      "description": "You can download credentials from Google Clouds's iam-admin/serviceaccounts/Keys. Click on Add keys."
+      "description": "Refer [GCloud docs](https://developers.google.com/workspace/guides/create-credentials#create_credentials_for_a_service_account) on adding keys for service account."
     },
     "model": {
       "type": "string",
       "title": "Model",
       "default": "",
-      "description": "Provide the name of the model you defined for vectorai"
+      "description": "Provide the name of the model you defined for Vertex AI"
     },
     "project": {
       "type": "string",
       "title": "Project",
       "default": "",
-      "description": "Provide the name of the deployment or project you defined for vectorai"
+      "description": "Provide the name of the deployment or project you defined for Vertex AI"
     },
     "max_retries": {
       "type": "number",
@@ -46,11 +46,12 @@
       "multipleOf": 1,
       "title": "Max output tokens",
       "default": 2048,
-      "description": "Maximum number of output tokens to generate. This is limited by the maximum supported by the model and will vary from model to model."
+      "description": "Maximum number of output tokens to generate. This is limited by the maximum supported by the model and will vary from model to model"
     },
     "safety_settings": {
       "type": "object",
       "title": "Safety Settings",
+      "description": "Vertex AI's configurable safety filters",
       "properties": {
         "type": "string",
         "dangerous_content": {
