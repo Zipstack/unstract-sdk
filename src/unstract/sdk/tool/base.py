@@ -14,7 +14,7 @@ from unstract.sdk.constants import (
     ToolEnv,
     ToolExecKey,
 )
-from unstract.sdk.file_storage.fs_shared_temporary import SharedTemporaryFileStorage
+from unstract.sdk.file_storage.shared_temporary import SharedTemporaryFileStorage
 from unstract.sdk.tool.mixin import ToolConfigHelper
 from unstract.sdk.tool.parser import ToolArgsParser
 from unstract.sdk.tool.stream import StreamMixin
@@ -61,7 +61,8 @@ class BaseTool(ABC, StreamMixin):
                     "Please check your settings."
                 )
             self.workflow_filestorage = SharedTemporaryFileStorage(
-                provider=self.filestorage_provider, **self.filestorage_credentials
+                provider=self.filestorage_provider,
+                **self.filestorage_credentials,
             )
 
     @classmethod
