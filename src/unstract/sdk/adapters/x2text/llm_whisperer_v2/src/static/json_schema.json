@@ -1,5 +1,5 @@
 {
-  "title": "LLMWhisperer X2Text v2",
+  "title": "LLMWhisperer v2 Text Extractor",
   "type": "object",
   "required": [
     "adapter_name",
@@ -18,7 +18,7 @@
       "title": "URL",
       "format": "uri",
       "default": "https://llmwhisperer-api.us-central.unstract.com",
-      "description": "Provide the base URL of the LLM Whisperer service based on your region."
+      "description": "Provide the base URL of the LLMWhisperer service based on your region, can be obtained from the [Unstract developer portal](https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)."
     },
     "unstract_key": {
       "type": "string",
@@ -36,7 +36,7 @@
         "form"
       ],
       "default": "form",
-      "description": "Processing mode to use, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
+      "description": "Processing mode to use, described in the [LLMWhisperer documentation](https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
     },
     "output_mode": {
       "type": "string",
@@ -46,7 +46,7 @@
         "text"
       ],
       "default": "layout_preserving",
-      "description": "Output format, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
+      "description": "Output format, described in the [LLMWhisperer documentation](https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
     },
     "line_splitter_tolerance": {
       "type": "number",

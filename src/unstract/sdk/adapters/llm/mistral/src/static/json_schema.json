@@ -1,5 +1,5 @@
 {
-  "title": "MistralAI LLM",
+  "title": "Mistral AI LLM",
   "type": "object",
   "required": [
     "adapter_name",

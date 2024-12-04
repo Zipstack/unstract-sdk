@@ -1,5 +1,5 @@
 {
-    "title": "Llama Parse X2Text",
+    "title": "Llama Parse Text Extractor",
     "type": "object",
     "required": [
       "api_key"
@@ -9,7 +9,7 @@
         "type": "string",
         "title": "Name",
         "default": "",
-        "description": "Provide a unique name for this adapter instance. Example: Llama parse1"
+        "description": "Provide a unique name for this adapter instance. Example: llama-parse-1"
       },
         "api_key": {
             "type": "string",
@@ -33,7 +33,7 @@
           "markdown"
         ],
         "default": "text",
-        "description": "Choose the type of result. Markdown or text."
+        "description": "Choose the type of result - `markdown` or `text`."
       },
       "verbose": {
         "type": "boolean",
@@ -43,4 +43,3 @@
       }
     }
   }
-  
