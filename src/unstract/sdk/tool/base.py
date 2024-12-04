@@ -61,7 +61,8 @@ class BaseTool(ABC, StreamMixin):
                     "Please check your settings."
                 )
             self.workflow_filestorage = SharedTemporaryFileStorage(
-                provider=self.filestorage_provider, **self.filestorage_credentials
+                provider=self.filestorage_provider,
+                **self.filestorage_credentials,
             )
 
     @classmethod
