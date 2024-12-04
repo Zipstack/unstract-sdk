@@ -17,7 +17,7 @@
       "type": "string",
       "title": "Model Name",
       "default": "models/embedding-gecko-001",
-      "description": "Provide the name of the model to use for embedding. Example: models/embedding-gecko-001"
+      "description": "Provide the name of the model to use for embedding. Example: `models/embedding-gecko-001`"
     },
     "api_key": {
       "type": "string",

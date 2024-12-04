@@ -1,5 +1,5 @@
 {
-  "title": "Unstructured IO Community X2Text",
+  "title": "Unstructured IO Community Text Extractor",
   "type": "object",
   "required": [
     "adapter_name",
