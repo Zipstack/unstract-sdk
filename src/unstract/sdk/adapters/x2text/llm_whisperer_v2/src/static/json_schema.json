@@ -24,7 +24,7 @@
       "type": "string",
       "title": "Unstract Key",
       "format": "password",
-      "description": "API key obtained from the Unstract developer portal (https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)"
+      "description": "API key obtained from the [Unstract developer portal](https://us-central.unstract.com/landing?selectedProduct=llm-whisperer)"
     },
     "mode": {
       "type": "string",
@@ -36,7 +36,7 @@
         "form"
       ],
       "default": "form",
-      "description": "Processing mode to use, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
+      "description": "Processing mode to use, described in the [LLM Whisperer documentation](https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
     },
     "output_mode": {
       "type": "string",
@@ -46,7 +46,7 @@
         "text"
       ],
       "default": "layout_preserving",
-      "description": "Output format, described in the LLM Whisperer documentation (https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
+      "description": "Output format, described in the [LLM Whisperer documentation](https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
     },
     "line_splitter_tolerance": {
       "type": "number",
@@ -77,7 +77,7 @@
       "type": "string",
       "title": "Page separator",
       "default": "<<<",
-      "description": "Specify a pattern to separate the pages in the document (e.g., <<< {{page_no}} >>>, <<< >>>). This pattern will be inserted at the end of every page. Omit {{page_no}} if you don't want to include the page number in the separator."
+      "description": "Specify a pattern to separate the pages in the document. This pattern will be inserted at the end of every page (e.g., `<<< {{page_no}} >>>`, `<<< >>>`). Omit `{{page_no}}` if you don't want to include the page number in the separator."
     },
     "mark_vertical_lines": {
       "type": "boolean",

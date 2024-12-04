@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any
+from typing import Any, Optional
 
 from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials
@@ -233,13 +233,27 @@ class VertexAILLM(LLMAdapter):
             ),
         }
 
+        reason_status_code = {
+            FinishReason.MAX_TOKENS: 429,
+            FinishReason.STOP: 200,
+            FinishReason.SAFETY: 403,
+            FinishReason.RECITATION: 403,
+            FinishReason.BLOCKLIST: 403,
+            FinishReason.PROHIBITED_CONTENT: 403,
+            FinishReason.SPII: 403,
+        }
+
         err_list = []
+        status_code: Optional[int] = None
         for candidate in candidates:
             reason: FinishReason = candidate.finish_reason
+
             if candidate.finish_message:
                 err_msg = candidate.finish_message
             else:
                 err_msg = reason_messages.get(reason, str(candidate))
+
+            status_code = reason_status_code.get(reason)
             err_list.append(err_msg)
         msg = "\n\nAnother error: \n".join(err_list)
-        return LLMError(msg)
+        return LLMError(msg, actual_err=e, status_code=status_code)

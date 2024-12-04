@@ -23,7 +23,7 @@ from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
-from unstract.sdk.exceptions import IndexingError, SdkError, X2TextError
+from unstract.sdk.exceptions import IndexingError, SdkError, VectorDBError, X2TextError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
@@ -50,52 +50,47 @@ class Index:
         doc_id: str,
         usage_kwargs: dict[Any, Any] = {},
     ):
-        try:
-            embedding = Embedding(
-                tool=self.tool,
-                adapter_instance_id=embedding_instance_id,
-                usage_kwargs=usage_kwargs,
-            )
-        except SdkError as e:
-            self.tool.stream_log(embedding_instance_id)
-            raise SdkError(f"Error loading {embedding_instance_id}: {e}")
+        embedding = Embedding(
+            tool=self.tool,
+            adapter_instance_id=embedding_instance_id,
+            usage_kwargs=usage_kwargs,
+        )
+
+        vector_db = VectorDB(
+            tool=self.tool,
+            adapter_instance_id=vector_db_instance_id,
+            embedding=embedding,
+        )
 
         try:
-            vector_db = VectorDB(
-                tool=self.tool,
-                adapter_instance_id=vector_db_instance_id,
-                embedding=embedding,
-            )
-
-        except SdkError as e:
             self.tool.stream_log(
-                f"Error loading {vector_db_instance_id}", level=LogLevel.ERROR
+                f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
             )
-            raise SdkError(f"Error loading {vector_db_instance_id}: {e}")
-        try:
-            try:
-                self.tool.stream_log(f">>> Querying {vector_db_instance_id}...")
-                self.tool.stream_log(f">>> {doc_id}")
-                doc_id_eq_filter = MetadataFilter.from_dict(
-                    {
-                        "key": "doc_id",
-                        "operator": FilterOperator.EQ,
-                        "value": doc_id,
-                    }
-                )
-                filters = MetadataFilters(filters=[doc_id_eq_filter])
-                q = VectorStoreQuery(
-                    query_embedding=embedding.get_query_embedding(" "),
-                    doc_ids=[doc_id],
-                    filters=filters,
-                    similarity_top_k=Constants.TOP_K,
-                )
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
-                )
-                raise SdkError(f"Error building query {vector_db}: {e}")
+            doc_id_eq_filter = MetadataFilter.from_dict(
+                {
+                    "key": "doc_id",
+                    "operator": FilterOperator.EQ,
+                    "value": doc_id,
+                }
+            )
+            filters = MetadataFilters(filters=[doc_id_eq_filter])
+            q = VectorStoreQuery(
+                query_embedding=embedding.get_query_embedding(" "),
+                doc_ids=[doc_id],
+                filters=filters,
+                similarity_top_k=Constants.TOP_K,
+            )
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
+            )
+            raise VectorDBError(
+                f"Error building query for {vector_db}: {e}", actual_err=e
+            )
+        finally:
+            vector_db.close()
 
+        try:
             n: VectorStoreQueryResult = vector_db.query(query=q)
             if len(n.nodes) > 0:
                 self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")

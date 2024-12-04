@@ -109,7 +109,7 @@ class LLM:
                     process_text_output = {}
             return {LLM.RESPONSE: response, **process_text_output}
         except Exception as e:
-            raise parse_llm_err(e) from e
+            raise parse_llm_err(e, self._llm_instance) from e
 
     def stream_complete(
         self,
@@ -122,7 +122,7 @@ class LLM:
             )
             return response
         except Exception as e:
-            raise parse_llm_err(e) from e
+            raise parse_llm_err(e, self._llm_instance) from e
 
     def _get_llm(self, adapter_instance_id: str) -> LlamaIndexLLM:
         """Returns the LLM object for the tool.
