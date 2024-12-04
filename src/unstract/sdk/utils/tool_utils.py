@@ -10,7 +10,6 @@ import magic
 
 from unstract.sdk.exceptions import FileStorageError
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider, SharedTemporaryFileStorage
-from unstract.sdk.file_storage.shared_temporary import SharedTemporaryFileStorage
 
 logger = logging.getLogger(__name__)
 
