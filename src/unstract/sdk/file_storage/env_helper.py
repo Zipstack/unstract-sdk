@@ -13,8 +13,24 @@ logger = logging.getLogger(__name__)
 
 
 class EnvHelper:
+    ENV_CONFIG_FORMAT = (
+        '{"provider": "gcs", ' '"credentials": {"token": "/path/to/google/creds.json"}}'
+    )
+
     @staticmethod
     def get_storage(storage_type: StorageType, env_name: str) -> FileStorage:
+        """Helper function for clients to pick up remote storage configuration
+        from env, initialise the file storage for the same and return the
+        instance.
+
+        Args:
+            storage_type: Permanent / Temporary file storage
+            env_name: Name of the env which has the file storage config
+
+        Returns:
+            FileStorage: FIleStorage instance initialised using the provider
+            and credentials configured in the env
+        """
         try:
             file_storage_creds = json.loads(os.environ.get(env_name))
             provider = FileStorageProvider(
@@ -31,7 +47,8 @@ class EnvHelper:
                 raise NotImplementedError()
             return file_storage
         except KeyError as e:
-            logger.error(f"Required credentials is missing in the env: {str(e)}")
+            logger.error(f"Required credentials are missing in the env: {str(e)}")
+            logger.error(f"The configuration format is {EnvHelper.ENV_CONFIG_FORMAT}")
             raise e
         except FileStorageError as e:
             raise e

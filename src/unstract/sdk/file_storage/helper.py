@@ -70,21 +70,46 @@ class FileStorageHelper:
 
 
 def skip_local_cache(func):
+    """Helper function/decorator for handling FileNotFound exception and making
+    sure that the error is not because of stale cache.
+
+    Args:
+        func: The original function that is called in the context
+
+    Returns:
+        NA
+    """
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
-            try:
-                # FileNotFound could have been caused by stale cache.
-                # Hence invalidate cache and retry again
-                args[0].fs.invalidate_cache()
-                return func(*args, **kwargs)
-            except Exception as e:
-                if isinstance(e, FileNotFoundError):
-                    raise e
-                else:
-                    raise FileOperationError(str(e)) from e
+            _handle_file_not_found(func, *args, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
     return wrapper
+
+
+def _handle_file_not_found(func, *args, **kwargs):
+    """Helper function for handling FileNotFound exception and making sure that
+    the error is not because of stale cache.
+
+    Args:
+        func: The original function that is called in the context
+        args: The context of the function call as an array
+        kwargs: args to the function being called in this context
+
+    Returns:
+        NA
+    """
+    try:
+        # FileNotFound could have been caused by stale cache.
+        # Hence invalidate cache and retry again
+        args[0].fs.invalidate_cache()
+        return func(*args, **kwargs)
+    except Exception as e:
+        if isinstance(e, FileNotFoundError):
+            raise e
+        else:
+            raise FileOperationError(str(e)) from e
