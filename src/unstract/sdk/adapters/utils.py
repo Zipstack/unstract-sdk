@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import filetype
@@ -6,7 +7,10 @@ from requests import Response
 from requests.exceptions import RequestException
 
 from unstract.sdk.adapters.constants import Common
+from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+
+logger = logging.getLogger(__name__)
 
 
 class AdapterUtils:
@@ -25,17 +29,38 @@ class AdapterUtils:
         Returns:
             str: Error message returned by the server
         """
-        if hasattr(err, "response"):
-            err_response: Response = err.response  # type: ignore
-            if err_response.headers["Content-Type"] == "application/json":
-                err_json = err_response.json()
-                if message_key in err_json:
-                    return str(err_json[message_key])
-            elif err_response.headers["Content-Type"] == "text/plain":
-                return err_response.text  # type: ignore
+        if not hasattr(err, "response"):
+            return default_err
+
+        err_response: Response = err.response  # type: ignore
+        err_content_type = err_response.headers.get("Content-Type")
+
+        if not err_content_type:
+            logger.warning(
+                f"Content-Type header not found in {err_response}, "
+                f"returning {default_err}"
+            )
+            return default_err
+
+        if err_content_type == MimeType.JSON:
+            err_json = err_response.json()
+            if message_key in err_json:
+                return str(err_json[message_key])
+            else:
+                logger.warning(
+                    f"Unable to parse error with key '{message_key}' for "
+                    f"'{err_json}', returning '{default_err}' instead."
+                )
+        elif err_content_type == MimeType.TEXT:
+            return err_response.text  # type: ignore
+        else:
+            logger.warning(
+                f"Unhandled err_response type '{err_content_type}' "
+                f"for {err_response}, returning {default_err}"
+            )
         return default_err
 
-    # ToDo: get_file_mime_type() to be removed once migrated to FileStorage
+    # TODO: get_file_mime_type() to be removed once migrated to FileStorage
     # FileStorage has mime_type() which could be used instead.
     @staticmethod
     def get_file_mime_type(

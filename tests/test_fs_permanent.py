@@ -5,8 +5,7 @@ from json import JSONDecodeError
 import pytest
 from dotenv import load_dotenv
 
-from unstract.sdk.file_storage import FileStorageProvider
-from unstract.sdk.file_storage.fs_permanent import PermanentFileStorage
+from unstract.sdk.file_storage import FileStorageProvider, PermanentFileStorage
 
 load_dotenv()
 

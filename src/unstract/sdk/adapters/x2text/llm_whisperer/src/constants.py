@@ -39,7 +39,7 @@ class WhispererEndpoint:
 
 
 class WhispererEnv:
-    """Env variables for LLM whisperer.
+    """Env variables for LLMWhisperer.
 
     Can be used to alter behaviour at runtime.
 
@@ -89,7 +89,7 @@ class WhisperStatus:
 
 
 class WhispererDefaults:
-    """Defaults meant for LLM whisperer."""
+    """Defaults meant for LLMWhisperer."""
 
     MEDIAN_FILTER_SIZE = 0
     GAUSSIAN_BLUR_RADIUS = 0.0
@@ -104,4 +104,3 @@ class WhispererDefaults:
     PAGE_SEPARATOR = "<<< >>>"
     MARK_VERTICAL_LINES = False
     MARK_HORIZONTAL_LINES = False
-

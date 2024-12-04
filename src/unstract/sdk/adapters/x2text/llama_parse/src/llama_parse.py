@@ -69,12 +69,23 @@ class LlamaParseAdapter(X2TextAdapter):
                     input_file_path = ".".join(
                         (input_file_path_copy, input_file_extension)
                     )
+                    text_content = fs.read(
+                        path=input_file_path_copy, mode="rb", encoding="utf-8"
+                    )
+                    fs.write(
+                        path=input_file_path,
+                        data=text_content,
+                        mode="w",
+                        encoding="utf-8",
+                    )
                 except OSError as os_err:
                     logger.error("Exception raised while handling input file.")
                     raise AdapterError(str(os_err))
 
             file_bytes = fs.read(path=input_file_path, mode="rb")
-            documents = parser.load_data(file_bytes)
+            documents = parser.load_data(
+                file_bytes, extra_info={"file_name": input_file_path}
+            )
 
         except ConnectError as connec_err:
             logger.error(f"Invalid Base URL given. : {connec_err}")
