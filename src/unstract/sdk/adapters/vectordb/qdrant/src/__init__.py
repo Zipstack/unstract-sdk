@@ -7,3 +7,5 @@ metadata = {
     "description": "Qdrant VectorDB adapter",
     "is_active": True,
 }
+
+__all__ = ["Qdrant"]

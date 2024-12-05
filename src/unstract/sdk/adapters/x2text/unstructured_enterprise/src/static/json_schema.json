@@ -1,5 +1,5 @@
 {
-  "title": "Unstructured IO Enterprise X2Text",
+  "title": "Unstructured IO Enterprise Text Extractor",
   "type": "object",
   "required": [
     "adapter_name",

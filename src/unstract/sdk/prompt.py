@@ -91,6 +91,7 @@ class PromptTool:
             "error": "",
             "cost": 0,
             "structure_output": "",
+            "status_code": 500,
         }
         url: str = f"{self.base_url}/{url_path}"
         headers: dict[str, str] = {}
@@ -104,6 +105,7 @@ class PromptTool:
             response.raise_for_status()
             result["status"] = "OK"
             result["structure_output"] = response.text
+            result["status_code"] = 200
         except ConnectionError as connect_err:
             msg = "Unable to connect to prompt service. Please contact admin."
             self._stringify_and_stream_err(connect_err, msg)
@@ -119,6 +121,7 @@ class PromptTool:
             elif response.text:
                 error_message = response.text
             result["error"] = error_message
+            result["status_code"] = response.status_code
             self.tool.stream_log(
                 f"Error while fetching response for prompt: {result['error']}",
                 level=LogLevel.ERROR,

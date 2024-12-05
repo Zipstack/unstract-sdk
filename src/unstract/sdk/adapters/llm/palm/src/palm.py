@@ -63,13 +63,12 @@ class PaLMLLM(LLMAdapter):
                 api_type=Constants.API_TYPE,
                 temperature=0,
             )
-
             return llm
         except Exception as e:
             # To avoid circular import errors
             from unstract.sdk.adapters.llm.exceptions import parse_llm_err
 
-            raise parse_llm_err(e)
+            raise parse_llm_err(e, llm_adapter=self)
 
     @staticmethod
     def parse_llm_err(e: GoogleAPICallError) -> LLMError:
@@ -83,4 +82,4 @@ class PaLMLLM(LLMAdapter):
         Returns:
             LLMError: Error to be sent to the user
         """
-        return LLMError(f"Error from PaLM. {e.message}")
+        return LLMError(f"{e.message}", actual_err=e)

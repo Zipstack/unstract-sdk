@@ -11,8 +11,8 @@ from llama_index.core import (
 from llama_index.core.llms import MockLLM
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
 
-from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
+from unstract.sdk.exceptions import VectorDBError
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class VectorDBHelper:
 
         except Exception as e:
             logger.error(f"Error occured while testing adapter {e}")
-            raise AdapterError(str(e))
+            raise VectorDBError(message=str(e), actual_err=e)
 
     @staticmethod
     def get_collection_name(
@@ -101,5 +101,5 @@ class VectorDBHelper:
             vector_db_collection_name = (
                 collection_name_prefix + "_" + vector_db_collection_name
             )
-        logger.info(f"Vector DB name: {vector_db_collection_name}")
+        logger.debug(f"Resolved vectorDB name: {vector_db_collection_name}")
         return vector_db_collection_name
