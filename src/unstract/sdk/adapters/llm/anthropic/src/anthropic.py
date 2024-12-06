@@ -6,9 +6,12 @@ from llama_index.core.llms import LLM
 from llama_index.llms.anthropic import Anthropic
 from llama_index.llms.anthropic.base import DEFAULT_ANTHROPIC_MAX_TOKENS
 
-from unstract.sdk.adapters.exceptions import AdapterError, LLMError
+from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
+from unstract.sdk.exceptions import LLMError
+
+from .exceptions import parse_anthropic_err
 
 
 class Constants:
@@ -84,11 +87,10 @@ class AnthropicLLM(LLMAdapter):
         Returns:
             LLMError: Error to be sent to the user
         """
-        msg = "Error from Anthropic. "
-        if hasattr(e, "body"):
-            if isinstance(e.body, dict) and "error" in e.body:
-                err = e.body["error"]
-                msg += err.get("message", e.message)
+        if hasattr(e, "body") and isinstance(e.body, dict) and "error" in e.body:
+            err = e.body["error"]
+            msg = parse_anthropic_err(err)
         else:
-            msg += e.message
-        return LLMError(msg)
+            msg = e.message
+
+        return LLMError(msg, actual_err=e)

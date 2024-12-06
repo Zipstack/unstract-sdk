@@ -7,6 +7,7 @@ from llama_index.core.vector_stores.types import BasePydanticVectorStore, Vector
 
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
+from unstract.sdk.exceptions import VectorDBError
 
 
 class VectorDBAdapter(Adapter, ABC):
@@ -17,9 +18,9 @@ class VectorDBAdapter(Adapter, ABC):
     ):
         super().__init__(name)
         self.name = name
-        self._vector_db_instance: Union[VectorStore, BasePydanticVectorStore] = (
-            vector_db_instance
-        )
+        self._vector_db_instance: Union[
+            VectorStore, BasePydanticVectorStore
+        ] = vector_db_instance
 
     @staticmethod
     def get_id() -> str:
@@ -44,6 +45,20 @@ class VectorDBAdapter(Adapter, ABC):
     @staticmethod
     def get_adapter_type() -> AdapterTypes:
         return AdapterTypes.VECTOR_DB
+
+    @staticmethod
+    def parse_vector_db_err(e: Exception) -> VectorDBError:
+        """Parse the error from a vector DB.
+
+        Helps parse errors from a vector DB and wraps with custom exception.
+
+        Args:
+            e (Exception): Exception from vector DB
+
+        Returns:
+            VectorDBError: Error to be sent to the user
+        """
+        return VectorDBError(str(e), actual_err=e)
 
     def get_vector_db_instance(
         self, vector_db_config: dict[str, Any]

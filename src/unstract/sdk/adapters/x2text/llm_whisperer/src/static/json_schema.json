@@ -1,11 +1,12 @@
 {
-  "title": "LLMWhisperer X2Text",
+  "title": "LLMWhisperer v1 Text Extractor",
   "type": "object",
   "required": [
     "adapter_name",
     "unstract_key",
     "url"
   ],
+  "description": "LLMWhisperer v1 is deprecated, use the cheaper and faster [LLMWhisperer v2](https://docs.unstract.com/llmwhisperer/llm_whisperer/faqs/v1_to_v2/) instead.",
   "properties": {
     "adapter_name": {
       "type": "string",
@@ -24,7 +25,7 @@
       "type": "string",
       "title": "Unstract Key",
       "format": "password",
-      "description": "API key obtained from the Unstract developer portal (https://unstract-api-resource.developer.azure-api.net)"
+      "description": "API key obtained from the [Unstract developer portal](https://unstract-api-resource.developer.azure-api.net)"
     },
     "mode": {
       "type": "string",
@@ -36,7 +37,7 @@
         "form"
       ],
       "default": "form",
-      "description": "Native text : Extracts text from PDF without OCR. This is very fast and cost effective. Use this mode if you are sure all your PDFs are native text pdfs (not scanned documents). Note that some scanned PDFs are \"searchable\" PDFs. Use the OCR modes for these PDFs as the quality of text in these documents are often poor. \n Low cost : Extracts text from scanned and native PDFs, images and office documents. This OCR mode cannot handle handwriting and low quality scanned pdfs and images. \n High quality : Extracts text from scanned and native PDFs, images and office documents. This OCR mode can handle handwriting and low quality scanned pdfs and images. \n Form:  Extracts text from scanned and native PDFs, images and office documents. This OCR mode can handle handwriting and low quality scanned pdfs and images. Can also extract information about checkboxes and radio button"
+      "description": "Processing mode to use, described in the [LLMWhisperer v1 documentation](https://docs.unstract.com/llmwhisperer/1.0.0/llm_whisperer/apis/llm_whisperer_text_extraction_api/#processing-modes)"
     },
     "output_mode": {
       "type": "string",
@@ -47,7 +48,7 @@
         "text"
       ],
       "default": "line-printer",
-      "description": "The output format. Valid options are line-printer, dump-text and text. The line-printer mode tries to maintain the layout of the original text and works very well as inputs to LLMs. dump-text just dumps each page as paragraphs. text extracts text into groups as it sees in the original page. text and dump-text are treated as same in ocr processing mode."
+      "description": "Output mode to use, described in the [LLMWhisperer v1 documentation](https://docs.unstract.com/llmwhisperer/1.0.0/llm_whisperer/apis/llm_whisperer_text_extraction_api/#output-modes)"
     },
 
     "line_splitter_tolerance": {

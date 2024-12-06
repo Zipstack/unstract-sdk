@@ -5,11 +5,12 @@ from typing import Any, Optional
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import UnexpectedResponse
 
-from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
 from unstract.sdk.adapters.vectordb.vectordb_adapter import VectorDBAdapter
+from unstract.sdk.exceptions import VectorDBError
 
 logger = logging.getLogger(__name__)
 
@@ -73,18 +74,42 @@ class Qdrant(VectorDBAdapter):
             )
             return vector_db
         except Exception as e:
-            raise AdapterError(str(e))
+            raise self.parse_qdrant_err(e) from e
 
     def test_connection(self) -> bool:
-        vector_db = self.get_vector_db_instance()
-        test_result: bool = VectorDBHelper.test_vector_db_instance(
-            vector_store=vector_db
-        )
-        # Delete the collection that was created for testing
-        if self._client is not None:
-            self._client.delete_collection(self._collection_name)
-        return test_result
+        try:
+            vector_db = self.get_vector_db_instance()
+            test_result: bool = VectorDBHelper.test_vector_db_instance(
+                vector_store=vector_db
+            )
+            # Delete the collection that was created for testing
+            if self._client is not None:
+                self._client.delete_collection(self._collection_name)
+            return test_result
+        except Exception as e:
+            raise self.parse_vector_db_err(e) from e
 
     def close(self, **kwargs: Any) -> None:
         if self._client:
             self._client.close(**kwargs)
+
+    @staticmethod
+    def parse_vector_db_err(e: Exception) -> VectorDBError:
+        # Avoid wrapping VectorDBError objects again
+        if isinstance(e, VectorDBError):
+            return e
+
+        if isinstance(e, UnexpectedResponse):
+            msg = str(e)
+            if e.reason_phrase == "Not Found":
+                msg = "Unable to connect to Qdrant, please check vector DB settings."
+            elif e.reason_phrase == "Forbidden":
+                msg = "Unable to access Qdrant, please check the API key provided."
+            return VectorDBError(message=msg, actual_err=e)
+        else:
+            status_code = None
+            if "client has been closed" in str(e):
+                status_code = 503
+            elif "timeout" in str(e):
+                status_code = 504
+            return VectorDBError(message=str(e), actual_err=e, status_code=status_code)
