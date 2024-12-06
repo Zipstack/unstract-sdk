@@ -203,17 +203,23 @@ class FileStorage(FileStorageInterface):
         return file_mtime
 
     @skip_local_cache
-    def mime_type(self, path: str) -> str:
+    def mime_type(
+        self,
+        path: str,
+        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+    ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
 
         Args:
             path (str): Path of the input file
+            read_length (int): Length(bytes) to be read from the file for in
+            order to identify the mime type
 
         Returns:
             str: MIME type of the file
         """
-        sample_contents = self.read(path=path, mode="rb", length=100)
+        sample_contents = self.read(path=path, mode="rb", length=read_length)
         mime_type = magic.from_buffer(sample_contents, mime=True)
         return mime_type
 
