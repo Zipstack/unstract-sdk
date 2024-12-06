@@ -101,6 +101,16 @@ unstract-sdk @ git+https://github.com/Zipstack/unstract-sdk@feature-branch
 
 - Or try installing a [local PyPI server](https://pypi.org/project/pypiserver/) and upload / download your package from this server
 
+#### Additonal dependencies for tool
+Tools may need to be backed up by a file storage. unstract.sdk.file_storage contains the required interfaces for the 
+same. fssepc is being used underneath to implement these interfaces. Hence, one can choose to use a file_system 
+supported by fsspec for this. However, the required dependencies need to be added in the tool dependency manager. 
+Eg. If the tool is using Minio as the underlying file storage, then s3fs can be added to support it. 
+Similarly, for Google Cloud Storage, gcsfs is to be added. 
+The following versions are tested in the SDK using unit test cases for the above package.
+    gcsfs==2024.10.0
+    s3fs==2024.10.0
+
 
 ### Documentation generation
 
