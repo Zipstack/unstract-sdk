@@ -161,17 +161,25 @@ class FileStorage(FileStorageInterface):
         return self.fs.rm(path=path, recursive=recursive)
 
     @skip_local_cache
-    def cp(self, src: str, dest: str, overwrite: bool = True):
+    def cp(
+        self,
+        src: str,
+        dest: str,
+        recursive: bool = False,
+        overwrite: bool = True,
+    ):
         """Copies files from source(lpath) path to the destination(rpath) path.
 
         Args:
             src (str): Path to the source
             dest (str): Path to the destination
+            recursive (bool): Copy recursively when set to True
+            overwrite (bool): Overwrite existing path with same name
 
         Returns:
             NA
         """
-        return self.fs.cp(src, dest, overwrite=overwrite)
+        return self.fs.cp(src, dest, recursive=recursive, overwrite=overwrite)
 
     @skip_local_cache
     def size(self, path: str) -> int:
@@ -308,7 +316,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                json.dump(data, f, **kwargs)
+                json.dump(obj=data, fp=f, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -327,7 +335,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                yaml.dump(data, f, **kwargs)
+                yaml.dump(data=data, stream=f, **kwargs)
         except Exception as e:
             raise FileOperationError(str(e)) from e
 

@@ -488,29 +488,51 @@ def test_file(provider):
 
 
 @pytest.mark.parametrize(
-    "file_storage, lpath, rpath",
+    "file_storage, lpath, rpath, recursive, expected_result",
     [
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
         ),
         (
             file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH,
+            TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH,
+            TEST_CONSTANTS.TEST_FOLDER,
+            False,
+            False,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
         ),
     ],
 )
-def test_cp(file_storage, lpath, rpath):
-    file_storage.cp(lpath, rpath, overwrite=True)
-    assert file_storage.exists(rpath) is True
-    file_storage.rm(rpath, recursive=True)
+def test_cp(file_storage, lpath, rpath, recursive, expected_result):
+    file_storage.cp(lpath, rpath, recursive=recursive, overwrite=True)
+    actual_result = file_storage.exists(rpath)
+    assert actual_result == expected_result
+    if actual_result:
+        file_storage.rm(rpath, recursive=True)
     assert file_storage.exists(rpath) is False
 
 

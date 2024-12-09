@@ -56,7 +56,13 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def cp(self, lpath: str, rpath: str):
+    def cp(
+        self,
+        lpath: str,
+        rpath: str,
+        recursive: bool = False,
+        overwrite: bool = True,
+    ):
         pass
 
     @abstractmethod
