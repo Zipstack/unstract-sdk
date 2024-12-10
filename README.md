@@ -19,7 +19,7 @@ They also contain helper methods/classes to aid with other tasks such as indexin
   - Linux
 
     ```
-    sudo apt install build-essential pkg-config libmagic-dev tesseract-ocr pandoc
+    sudo apt install build-essential pkg-config libmagic-dev
     ```
 
   - Mac
