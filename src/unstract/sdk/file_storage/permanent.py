@@ -85,7 +85,7 @@ class PermanentFileStorage(FileStorage):
             if legacy_storage_path:
                 self._copy_on_read(path, legacy_storage_path)
             return super().read(path, mode, encoding, seek_position, length)
-        except FileNotFoundError:
-            logger.warning(f"File {path} not found. Ignoring.")
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             raise FileOperationError(str(e)) from e

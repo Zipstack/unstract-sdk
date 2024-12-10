@@ -32,7 +32,7 @@ class EnvHelper:
             and credentials configured in the env
         """
         try:
-            file_storage_creds = json.loads(os.environ.get(env_name))
+            file_storage_creds = json.loads(os.environ.get(env_name, ""))
             provider = FileStorageProvider(
                 file_storage_creds[CredentialKeyword.PROVIDER]
             )
