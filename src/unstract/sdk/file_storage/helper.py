@@ -29,7 +29,8 @@ class FileStorageHelper:
         try:
             protocol = provider.value
             if provider == FileStorageProvider.LOCAL:
-                storage_config.update({"auto_mkdir": True})
+                # Hard set auto_mkdir to True as default
+                storage_config.update({"auto_mkdir": True})  # type: ignore
             elif provider in [FileStorageProvider.MINIO]:
                 # Initialise using s3 for Minio
                 protocol = FileStorageProvider.S3.value

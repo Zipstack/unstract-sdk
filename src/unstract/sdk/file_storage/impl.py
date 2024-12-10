@@ -161,17 +161,25 @@ class FileStorage(FileStorageInterface):
         return self.fs.rm(path=path, recursive=recursive)
 
     @skip_local_cache
-    def cp(self, src: str, dest: str, overwrite: bool = True):
+    def cp(
+        self,
+        src: str,
+        dest: str,
+        recursive: bool = False,
+        overwrite: bool = True,
+    ):
         """Copies files from source(lpath) path to the destination(rpath) path.
 
         Args:
             src (str): Path to the source
             dest (str): Path to the destination
+            recursive (bool): Copy recursively when set to True
+            overwrite (bool): Overwrite existing path with same name
 
         Returns:
             NA
         """
-        return self.fs.cp(src, dest, overwrite=overwrite)
+        return self.fs.cp(src, dest, recursive=recursive, overwrite=overwrite)
 
     @skip_local_cache
     def size(self, path: str) -> int:
@@ -203,17 +211,23 @@ class FileStorage(FileStorageInterface):
         return file_mtime
 
     @skip_local_cache
-    def mime_type(self, path: str) -> str:
+    def mime_type(
+        self,
+        path: str,
+        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+    ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
 
         Args:
             path (str): Path of the input file
+            read_length (int): Length(bytes) to be read from the file for in
+            order to identify the mime type
 
         Returns:
             str: MIME type of the file
         """
-        sample_contents = self.read(path=path, mode="rb", length=100)
+        sample_contents = self.read(path=path, mode="rb", length=read_length)
         mime_type = magic.from_buffer(sample_contents, mime=True)
         return mime_type
 
@@ -291,7 +305,7 @@ class FileStorage(FileStorageInterface):
         self,
         path: str,
         data: dict[str, Any],
-        **kwargs: dict[Any, Any],
+        **kwargs: dict[Any, Any],  # type: ignore
     ):
         """Dumps data into the given file specified by path.
 
@@ -302,7 +316,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                json.dump(data, f, **kwargs)
+                json.dump(obj=data, fp=f, **kwargs)  # type: ignore
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
@@ -310,7 +324,7 @@ class FileStorage(FileStorageInterface):
         self,
         path: str,
         data: dict[str, Any],
-        **kwargs: dict[Any, Any],
+        **kwargs: dict[Any, Any],  # type: ignore
     ):
         """Dumps data into the given file specified by path.
 
@@ -321,7 +335,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                yaml.dump(data, f, **kwargs)
+                yaml.dump(data=data, stream=f, **kwargs)  # type: ignore
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
