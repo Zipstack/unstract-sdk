@@ -301,7 +301,12 @@ class FileStorage(FileStorageInterface):
                 h.update(mv[:n])
         return str(h.hexdigest())
 
-    def json_dump(self, path: str, data: dict[str, Any], **kwargs):
+    def json_dump(
+        self,
+        path: str,
+        data: dict[str, Any],
+        **kwargs: dict[Any, Any],  # type: ignore
+    ):
         """Dumps data into the given file specified by path.
 
         Args:
@@ -311,11 +316,16 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                json.dump(obj=data, fp=f, **kwargs)
+                json.dump(obj=data, fp=f, **kwargs)  # type: ignore
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def yaml_dump(self, path: str, data: dict[str, Any], **kwargs):
+    def yaml_dump(
+        self,
+        path: str,
+        data: dict[str, Any],
+        **kwargs: dict[Any, Any],  # type: ignore
+    ):
         """Dumps data into the given file specified by path.
 
         Args:
@@ -325,7 +335,7 @@ class FileStorage(FileStorageInterface):
         """
         try:
             with self.fs.open(path=path, mode="w", encoding="utf-8") as f:
-                yaml.dump(data=data, stream=f, **kwargs)
+                yaml.dump(data=data, stream=f, **kwargs)  # type: ignore
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
