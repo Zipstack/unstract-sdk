@@ -76,6 +76,7 @@ class PermanentFileStorage(FileStorage):
             seek_position (int): Position to start reading from
             length (int): Number of bytes to be read. Default is full
             file content.
+            legacy_storage_path (str):  Legacy path to the same file
 
         Returns:
             Union[bytes, str] - File contents in bytes/string based on the opened mode
@@ -85,7 +86,7 @@ class PermanentFileStorage(FileStorage):
             if legacy_storage_path:
                 self._copy_on_read(path, legacy_storage_path)
             return super().read(path, mode, encoding, seek_position, length)
-        except FileNotFoundError as e:
-            raise e
         except Exception as e:
+            if isinstance(e, FileNotFoundError) or isinstance(e, FileOperationError):
+                raise e
             raise FileOperationError(str(e)) from e
