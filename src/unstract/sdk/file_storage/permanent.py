@@ -28,10 +28,8 @@ class PermanentFileStorage(FileStorage):
                 f"supported in Permanent mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
-        if provider == FileStorageProvider.GCS:
+        if provider == FileStorageProvider.GCS or provider == FileStorageProvider.LOCAL:
             super().__init__(provider, **storage_config)
-        elif provider == FileStorageProvider.LOCAL:
-            super().__init__(provider)
         else:
             raise NotImplementedError
 

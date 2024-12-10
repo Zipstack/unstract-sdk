@@ -33,9 +33,7 @@ def permanent_file_storage(provider: FileStorageProvider):
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
     except JSONDecodeError:
         creds = {}
-    file_storage = PermanentFileStorage(
-        provider=provider, legacy_storage_path="./prompt_studio_data", **creds
-    )
+    file_storage = PermanentFileStorage(provider=provider, **creds)
     assert file_storage is not None
     return file_storage
 
