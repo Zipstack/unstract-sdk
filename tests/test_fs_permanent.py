@@ -53,13 +53,11 @@ def permanent_file_storage(provider: FileStorageProvider):
 def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
     if file_storage.exists(file_read_path):
         file_storage.rm(file_read_path)
-    file_read_contents = file_storage.read(
-        file_read_path,
-        read_mode,
-    )
-    print(file_read_contents)
-    # File in the path does not exist. So no contents can be read
-    assert file_read_contents is None
+    with pytest.raises(FileNotFoundError):
+        file_storage.read(
+            file_read_path,
+            read_mode,
+        )
 
 
 @pytest.mark.parametrize(
