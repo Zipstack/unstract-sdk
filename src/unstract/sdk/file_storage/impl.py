@@ -301,12 +301,7 @@ class FileStorage(FileStorageInterface):
                 h.update(mv[:n])
         return str(h.hexdigest())
 
-    def json_dump(
-        self,
-        path: str,
-        data: dict[str, Any],
-        **kwargs: dict[Any, Any],
-    ):
+    def json_dump(self, path: str, data: dict[str, Any], **kwargs):
         """Dumps data into the given file specified by path.
 
         Args:
@@ -320,12 +315,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
-    def yaml_dump(
-        self,
-        path: str,
-        data: dict[str, Any],
-        **kwargs: dict[Any, Any],
-    ):
+    def yaml_dump(self, path: str, data: dict[str, Any], **kwargs):
         """Dumps data into the given file specified by path.
 
         Args:

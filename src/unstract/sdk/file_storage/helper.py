@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 import fsspec
 from fsspec import AbstractFileSystem
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 class FileStorageHelper:
     @staticmethod
     def file_storage_init(
-        provider: FileStorageProvider, **storage_config: dict[str, Any]
+        provider: FileStorageProvider, **storage_config
     ) -> AbstractFileSystem:
         """Initialises file storage based on provider.
 
@@ -29,6 +28,7 @@ class FileStorageHelper:
         try:
             protocol = provider.value
             if provider == FileStorageProvider.LOCAL:
+                # Hard set auto_mkdir to True as default
                 storage_config.update({"auto_mkdir": True})
             elif provider in [FileStorageProvider.MINIO]:
                 # Initialise using s3 for Minio
