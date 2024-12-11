@@ -31,7 +31,7 @@ class PermanentFileStorage(FileStorage):
         if provider == FileStorageProvider.GCS or provider == FileStorageProvider.LOCAL:
             super().__init__(provider, **storage_config)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"Provider {provider.value} is not implemented")
 
     def _copy_on_read(self, path: str, legacy_storage_path: str):
         """Copies the file to the remote storage lazily if not present already.
