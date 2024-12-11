@@ -32,11 +32,11 @@ class EnvHelper:
             and credentials configured in the env
         """
         try:
-            file_storage_creds = json.loads(os.environ.get(env_name))
+            file_storage_creds = json.loads(os.environ.get(env_name, ""))
             provider = FileStorageProvider(
                 file_storage_creds[CredentialKeyword.PROVIDER]
             )
-            credentials = file_storage_creds.get(CredentialKeyword.CREDENTIALS, {})
+            credentials = file_storage_creds.get(CredentialKeyword.CREDENTIALS, "{}")
             if storage_type == StorageType.PERMANENT.value:
                 file_storage = PermanentFileStorage(provider=provider, **credentials)
             elif storage_type == StorageType.TEMPORARY.value:

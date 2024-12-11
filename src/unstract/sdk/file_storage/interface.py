@@ -56,7 +56,13 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def cp(self, lpath: str, rpath: str):
+    def cp(
+        self,
+        lpath: str,
+        rpath: str,
+        recursive: bool = False,
+        overwrite: bool = True,
+    ):
         pass
 
     @abstractmethod
@@ -68,7 +74,11 @@ class FileStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def mime_type(self, path: str) -> str:
+    def mime_type(
+        self,
+        path: str,
+        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+    ) -> str:
         pass
 
     @abstractmethod
