@@ -44,12 +44,17 @@ class MetricsMixin:
         Returns:
             dict: The calculated time taken and the associated run_id and op_id.
         """
+        # Check if the key exists in Redis
+        if not self.redis_client.exists(self.redis_key):
+            # If the key is missing, return an empty metrics dictionary
+            return {self.TIME_TAKEN_KEY: None}
+
         start_time = float(
             self.redis_client.get(self.redis_key)
         )  # Get the stored timestamp
-        time_taken = round(time.time() - float(start_time), 3)
+        time_taken = round(time.time() - start_time, 3)
 
         # Delete the Redis key after use
         self.redis_client.delete(self.redis_key)
 
-        return {"time_taken(s)": time_taken}
+        return {self.TIME_TAKEN_KEY: time_taken}
