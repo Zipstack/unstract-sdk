@@ -27,7 +27,7 @@ from unstract.sdk.exceptions import IndexingError, SdkError, VectorDBError, X2Te
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.common_utils import log_elapsed
+from unstract.sdk.utils.common_utils import capture_metrics, log_elapsed
 from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
 
@@ -39,10 +39,19 @@ class Constants:
 
 
 class Index:
-    def __init__(self, tool: BaseTool):
+    def __init__(
+        self,
+        tool: BaseTool,
+        run_id: Optional[str] = None,
+        capture_metrics: bool = False,
+    ):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
+        self._run_id = run_id
+        self._capture_metrics = capture_metrics
+        self._metrics = {}
 
+    @capture_metrics
     def query_index(
         self,
         embedding_instance_id: str,
@@ -180,6 +189,7 @@ class Index:
         return extracted_text
 
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
+    @capture_metrics
     def index(
         self,
         tool_id: str,
@@ -448,6 +458,9 @@ class Index:
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
+
+    def get_metrics(self):
+        return self._metrics
 
     @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
     def generate_file_id(
