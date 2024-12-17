@@ -462,6 +462,9 @@ class Index:
     def get_metrics(self):
         return self._metrics
 
+    def clear_metrics(self):
+        self._metrics = {}
+
     @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
     def generate_file_id(
         self,
