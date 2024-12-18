@@ -88,12 +88,14 @@ def capture_metrics(func):
                     and time_taken_key in self._metrics
                     and time_taken_key in new_metrics
                 ):
-                    time_taken_self = self._metrics.get(time_taken_key)
-                    time_taken_new = new_metrics.get(time_taken_key)
+                    previously_measured_time = self._metrics.get(time_taken_key)
+                    newly_measured_time = new_metrics.get(time_taken_key)
 
                     # Only sum if both are valid
-                    if time_taken_self and time_taken_new:
-                        self._metrics[time_taken_key] = time_taken_self + time_taken_new
+                    if previously_measured_time and newly_measured_time:
+                        self._metrics[time_taken_key] = (
+                            previously_measured_time + newly_measured_time
+                        )
                     else:
                         self._metrics[time_taken_key] = None
                 else:
