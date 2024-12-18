@@ -756,12 +756,12 @@ def test_glob(file_storage, folder_path, expected_result):
     "storage_type, env_name, expected",
     [
         (
-            StorageType.PERMANENT.value,
+            StorageType.PERMANENT,
             "TEST_PERMANENT_STORAGE",
             FileStorageProvider.GCS,
         ),
         (
-            StorageType.TEMPORARY.value,
+            StorageType.TEMPORARY,
             "TEST_TEMPORARY_STORAGE",
             FileStorageProvider.MINIO,
         ),
