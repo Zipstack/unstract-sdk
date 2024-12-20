@@ -19,6 +19,7 @@ from unstract.sdk.exceptions import LLMError, RateLimitError, SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.callback_manager import CallbackManager
+from unstract.sdk.utils.common_utils import capture_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class LLM:
         tool: BaseTool,
         adapter_instance_id: Optional[str] = None,
         usage_kwargs: dict[Any, Any] = {},
+        capture_metrics: bool = False,
     ):
         """Creates an instance of this LLM class.
 
@@ -50,6 +52,10 @@ class LLM:
         self._adapter_instance_id = adapter_instance_id
         self._llm_instance: LlamaIndexLLM = None
         self._usage_kwargs = usage_kwargs
+        self._capture_metrics = capture_metrics
+        self._run_id = usage_kwargs.get("run_id")
+        self._usage_reason = usage_kwargs.get("llm_usage_reason")
+        self._metrics = {}
         self._initialise()
 
     def _initialise(self):
@@ -65,6 +71,7 @@ class LLM:
                     kwargs=self._usage_kwargs,
                 )
 
+    @capture_metrics
     def complete(
         self,
         prompt: str,
@@ -72,7 +79,8 @@ class LLM:
         process_text: Optional[Callable[[str], str]] = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """Generates a completion response for the given prompt.
+        """Generates a completion response for the given prompt and captures
+        metrics if run_id is provided.
 
         Args:
             prompt (str): The input text prompt for generating the completion.
@@ -85,12 +93,8 @@ class LLM:
             **kwargs (Any): Additional arguments passed to the completion function.
 
         Returns:
-            dict[str, Any]: A dictionary containing the result of the completion
-                and any processed output.
-
-        Raises:
-            LLMError: If an error occurs during the completion process, it will be
-                raised after being processed by `parse_llm_err`.
+            dict[str, Any]: A dictionary containing the result of the completion,
+                any processed output, and the captured metrics (if applicable).
         """
         try:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
@@ -105,11 +109,18 @@ class LLM:
                     if not isinstance(process_text_output, dict):
                         process_text_output = {}
                 except Exception as e:
-                    logger.error(f"Error occured inside function 'process_text': {e}")
+                    logger.error(f"Error occurred inside function 'process_text': {e}")
                     process_text_output = {}
-            return {LLM.RESPONSE: response, **process_text_output}
+            response_data = {LLM.RESPONSE: response, **process_text_output}
+            return response_data
         except Exception as e:
             raise parse_llm_err(e, self._llm_adapter_class) from e
+
+    def get_metrics(self):
+        return self._metrics
+
+    def get_usage_reason(self):
+        return self._usage_reason
 
     def stream_complete(
         self,
