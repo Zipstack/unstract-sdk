@@ -89,17 +89,8 @@ class Index:
                 filters=filters,
                 similarity_top_k=Constants.TOP_K,
             )
-        except Exception as e:
-            self.tool.stream_log(
-                f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
-            )
-            raise VectorDBError(
-                f"Error building query for {vector_db}: {e}", actual_err=e
-            )
-        finally:
-            vector_db.close()
 
-        try:
+            # Execute query with the open connection
             n: VectorStoreQueryResult = vector_db.query(query=q)
             if len(n.nodes) > 0:
                 self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
@@ -110,7 +101,16 @@ class Index:
             else:
                 self.tool.stream_log(f"No nodes found for {doc_id}")
                 return None
+
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
+            )
+            raise VectorDBError(
+                f"Error building query for {vector_db}: {e}", actual_err=e
+            )
         finally:
+            # Close connection only once at the end
             vector_db.close()
 
     @log_elapsed(operation="EXTRACTION")
