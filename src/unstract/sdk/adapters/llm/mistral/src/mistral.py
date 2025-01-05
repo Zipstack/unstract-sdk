@@ -4,7 +4,7 @@ from typing import Any
 from llama_index.core.llms import LLM
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.mistralai.base import DEFAULT_MISTRALAI_MAX_TOKENS
-from mistralai.exceptions import MistralException
+from mistralai.models import SDKError
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
@@ -75,7 +75,7 @@ class MistralLLM(LLMAdapter):
             raise AdapterError(str(e))
 
     @staticmethod
-    def parse_llm_err(e: MistralException) -> LLMError:
+    def parse_llm_err(e: SDKError) -> LLMError:
         """Parse the error from MistralAI.
 
         Helps parse errors from MistralAI and wraps with custom exception.
