@@ -72,10 +72,10 @@ class Index:
         )
 
         try:
-            try:
-                self.tool.stream_log(
+            self.tool.stream_log(
                     f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
                 )
+            try:
                 doc_id_eq_filter = MetadataFilter.from_dict(
                     {
                         "key": "doc_id",
