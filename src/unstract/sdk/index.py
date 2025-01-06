@@ -73,43 +73,48 @@ class Index:
 
         try:
             self.tool.stream_log(
-                f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
-            )
-            doc_id_eq_filter = MetadataFilter.from_dict(
-                {
-                    "key": "doc_id",
-                    "operator": FilterOperator.EQ,
-                    "value": doc_id,
-                }
-            )
-            filters = MetadataFilters(filters=[doc_id_eq_filter])
-            q = VectorStoreQuery(
-                query_embedding=embedding.get_query_embedding(" "),
-                doc_ids=[doc_id],
-                filters=filters,
-                similarity_top_k=Constants.TOP_K,
-            )
-        except Exception as e:
-            self.tool.stream_log(
-                f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
-            )
-            raise VectorDBError(
-                f"Error building query for {vector_db}: {e}", actual_err=e
-            )
-        finally:
-            vector_db.close()
-
-        try:
-            n: VectorStoreQueryResult = vector_db.query(query=q)
-            if len(n.nodes) > 0:
-                self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
-                all_text = ""
-                for node in n.nodes:
-                    all_text += node.get_content()
-                return all_text
-            else:
-                self.tool.stream_log(f"No nodes found for {doc_id}")
-                return None
+                    f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
+                )
+            try:
+                doc_id_eq_filter = MetadataFilter.from_dict(
+                    {
+                        "key": "doc_id",
+                        "operator": FilterOperator.EQ,
+                        "value": doc_id,
+                    }
+                )
+                filters = MetadataFilters(filters=[doc_id_eq_filter])
+                q = VectorStoreQuery(
+                    query_embedding=embedding.get_query_embedding(" "),
+                    doc_ids=[doc_id],
+                    filters=filters,
+                    similarity_top_k=Constants.TOP_K,
+                )
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error while building vector DB query: {e}", level=LogLevel.ERROR
+                )
+                raise VectorDBError(
+                    f"Failed to construct query for {vector_db}: {e}", actual_err=e
+                )
+            try:
+                n: VectorStoreQueryResult = vector_db.query(query=q)
+                if len(n.nodes) > 0:
+                    self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
+                    all_text = ""
+                    for node in n.nodes:
+                        all_text += node.get_content()
+                    return all_text
+                else:
+                    self.tool.stream_log(f"No nodes found for {doc_id}")
+                    return None
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error while executing vector DB query: {e}", level=LogLevel.ERROR
+                )
+                raise VectorDBError(
+                    f"Failed to execute query on {vector_db}: {e}", actual_err=e
+                )
         finally:
             vector_db.close()
 
