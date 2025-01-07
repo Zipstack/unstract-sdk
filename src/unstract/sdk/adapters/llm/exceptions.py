@@ -1,6 +1,6 @@
 from anthropic import APIError as AnthropicAPIError
 from google.api_core.exceptions import GoogleAPICallError
-from mistralai.models import SDKError
+from mistralai.models import SDKError as MistralError
 from openai import APIError as OpenAIAPIError
 from vertexai.generative_models import ResponseValidationError
 
