@@ -74,7 +74,7 @@ class Qdrant(VectorDBAdapter):
             )
             return vector_db
         except Exception as e:
-            raise self.parse_qdrant_err(e) from e
+            raise self.parse_vector_db_err(e) from e
 
     def test_connection(self) -> bool:
         try:

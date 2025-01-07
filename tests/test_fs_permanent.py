@@ -33,9 +33,7 @@ def permanent_file_storage(provider: FileStorageProvider):
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
     except JSONDecodeError:
         creds = {}
-    file_storage = PermanentFileStorage(
-        provider=provider, legacy_storage_path="./prompt_studio_data", **creds
-    )
+    file_storage = PermanentFileStorage(provider=provider, **creds)
     assert file_storage is not None
     return file_storage
 
@@ -53,13 +51,11 @@ def permanent_file_storage(provider: FileStorageProvider):
 def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
     if file_storage.exists(file_read_path):
         file_storage.rm(file_read_path)
-    file_read_contents = file_storage.read(
-        file_read_path,
-        read_mode,
-    )
-    print(file_read_contents)
-    # File in the path does not exist. So no contents can be read
-    assert file_read_contents is None
+    with pytest.raises(FileNotFoundError):
+        file_storage.read(
+            file_read_path,
+            read_mode,
+        )
 
 
 @pytest.mark.parametrize(

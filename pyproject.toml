@@ -41,7 +41,6 @@ dependencies = [
     #Unable to import llm adapters : No module named 'mistralai.models.chat_completion'
     #Looks like mistralai>0.4.2 is not backward compatible
     "mistralai==0.4.2",
-
     "llama-index-llms-anyscale==0.1.4",
     "llama-index-llms-anthropic==0.1.16",
     "llama-index-llms-azure-openai==0.1.10",
@@ -58,6 +57,7 @@ dependencies = [
     "singleton-decorator~=1.0.0",
     "httpx>=0.25.2",
     "pdfplumber>=0.11.2",
+    "redis>=5.2.1",
 ]
 readme = "README.md"
 urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }
@@ -120,4 +120,6 @@ path = "src/unstract/sdk/__init__.py"
 # Adding the following override to resolve dependency version
 # for environs. Otherwise, it stays stuck while resolving pins
 [tool.pdm.resolution.overrides]
-grpcio = ">=1.62.1"
+grpcio = "1.62.3"
+grpcio-tools = "1.62.3"
+grpcio-health-checking = "1.62.3"

@@ -27,7 +27,7 @@ from unstract.sdk.exceptions import IndexingError, SdkError, VectorDBError, X2Te
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils import ToolUtils
-from unstract.sdk.utils.common_utils import log_elapsed
+from unstract.sdk.utils.common_utils import capture_metrics, log_elapsed
 from unstract.sdk.vector_db import VectorDB
 from unstract.sdk.x2txt import X2Text
 
@@ -39,10 +39,19 @@ class Constants:
 
 
 class Index:
-    def __init__(self, tool: BaseTool):
+    def __init__(
+        self,
+        tool: BaseTool,
+        run_id: Optional[str] = None,
+        capture_metrics: bool = False,
+    ):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
         self.tool = tool
+        self._run_id = run_id
+        self._capture_metrics = capture_metrics
+        self._metrics = {}
 
+    @capture_metrics
     def query_index(
         self,
         embedding_instance_id: str,
@@ -64,43 +73,48 @@ class Index:
 
         try:
             self.tool.stream_log(
-                f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
-            )
-            doc_id_eq_filter = MetadataFilter.from_dict(
-                {
-                    "key": "doc_id",
-                    "operator": FilterOperator.EQ,
-                    "value": doc_id,
-                }
-            )
-            filters = MetadataFilters(filters=[doc_id_eq_filter])
-            q = VectorStoreQuery(
-                query_embedding=embedding.get_query_embedding(" "),
-                doc_ids=[doc_id],
-                filters=filters,
-                similarity_top_k=Constants.TOP_K,
-            )
-        except Exception as e:
-            self.tool.stream_log(
-                f"Error building query {vector_db}: {e}", level=LogLevel.ERROR
-            )
-            raise VectorDBError(
-                f"Error building query for {vector_db}: {e}", actual_err=e
-            )
-        finally:
-            vector_db.close()
-
-        try:
-            n: VectorStoreQueryResult = vector_db.query(query=q)
-            if len(n.nodes) > 0:
-                self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
-                all_text = ""
-                for node in n.nodes:
-                    all_text += node.get_content()
-                return all_text
-            else:
-                self.tool.stream_log(f"No nodes found for {doc_id}")
-                return None
+                    f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
+                )
+            try:
+                doc_id_eq_filter = MetadataFilter.from_dict(
+                    {
+                        "key": "doc_id",
+                        "operator": FilterOperator.EQ,
+                        "value": doc_id,
+                    }
+                )
+                filters = MetadataFilters(filters=[doc_id_eq_filter])
+                q = VectorStoreQuery(
+                    query_embedding=embedding.get_query_embedding(" "),
+                    doc_ids=[doc_id],
+                    filters=filters,
+                    similarity_top_k=Constants.TOP_K,
+                )
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error while building vector DB query: {e}", level=LogLevel.ERROR
+                )
+                raise VectorDBError(
+                    f"Failed to construct query for {vector_db}: {e}", actual_err=e
+                )
+            try:
+                n: VectorStoreQueryResult = vector_db.query(query=q)
+                if len(n.nodes) > 0:
+                    self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
+                    all_text = ""
+                    for node in n.nodes:
+                        all_text += node.get_content()
+                    return all_text
+                else:
+                    self.tool.stream_log(f"No nodes found for {doc_id}")
+                    return None
+            except Exception as e:
+                self.tool.stream_log(
+                    f"Error while executing vector DB query: {e}", level=LogLevel.ERROR
+                )
+                raise VectorDBError(
+                    f"Failed to execute query on {vector_db}: {e}", actual_err=e
+                )
         finally:
             vector_db.close()
 
@@ -180,6 +194,7 @@ class Index:
         return extracted_text
 
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
+    @capture_metrics
     def index(
         self,
         tool_id: str,
@@ -448,6 +463,12 @@ class Index:
         # case where the fields are reordered.
         hashed_index_key = ToolUtils.hash_str(json.dumps(index_key, sort_keys=True))
         return hashed_index_key
+
+    def get_metrics(self):
+        return self._metrics
+
+    def clear_metrics(self):
+        self._metrics = {}
 
     @deprecated(version="0.45.0", reason="Use generate_index_key() instead")
     def generate_file_id(

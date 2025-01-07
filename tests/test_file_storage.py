@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from unstract.sdk.constants import MimeType
 from unstract.sdk.exceptions import FileOperationError
-from unstract.sdk.file_storage.constants import StorageType
+from unstract.sdk.file_storage.constants import FileOperationParams, StorageType
 from unstract.sdk.file_storage.env_helper import EnvHelper
 from unstract.sdk.file_storage.impl import FileStorage
 from unstract.sdk.file_storage.provider import FileStorageProvider
@@ -488,29 +488,51 @@ def test_file(provider):
 
 
 @pytest.mark.parametrize(
-    "file_storage, lpath, rpath",
+    "file_storage, lpath, rpath, recursive, expected_result",
     [
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
         ),
         (
             file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH,
+            TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_FOLDER_PATH,
+            TEST_CONSTANTS.TEST_FOLDER,
+            False,
+            False,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER,
+            True,
+            True,
         ),
     ],
 )
-def test_cp(file_storage, lpath, rpath):
-    file_storage.cp(lpath, rpath, overwrite=True)
-    assert file_storage.exists(rpath) is True
-    file_storage.rm(rpath, recursive=True)
+def test_cp(file_storage, lpath, rpath, recursive, expected_result):
+    file_storage.cp(lpath, rpath, recursive=recursive, overwrite=True)
+    actual_result = file_storage.exists(rpath)
+    assert actual_result == expected_result
+    if actual_result:
+        file_storage.rm(rpath, recursive=True)
     assert file_storage.exists(rpath) is False
 
 
@@ -566,49 +588,59 @@ def test_file_size(file_storage, path, expected_size):
 
 
 @pytest.mark.parametrize(
-    "file_storage, path, expected_mime_type",
+    "file_storage, path, read_length, expected_mime_type",
     [
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_PDF_FILE,
+            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
             MimeType.PDF,
         ),
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_TEXT_FILE,
+            FileOperationParams.READ_ENTIRE_LENGTH,
             MimeType.TEXT,
         ),
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_PDF_FILE,
+            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
             MimeType.PDF,
         ),
         (
             file_storage(provider=FileStorageProvider.LOCAL),
             TEST_CONSTANTS.READ_TEXT_FILE,
+            50,
             MimeType.TEXT,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
+            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
             MimeType.PDF,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
+            FileOperationParams.READ_ENTIRE_LENGTH,
             MimeType.TEXT,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
+            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
             MimeType.PDF,
         ),
     ],
 )
-def test_file_mime_type(file_storage, path, expected_mime_type):
+def test_file_mime_type(file_storage, path, read_length, expected_mime_type):
     mime_type = file_storage.mime_type(path=path)
     file_storage.mkdir(path=TEST_CONSTANTS.READ_FOLDER_PATH)
     assert mime_type == expected_mime_type
+    mime_type_read_length = file_storage.mime_type(path=path, read_length=read_length)
+    file_storage.mkdir(path=TEST_CONSTANTS.READ_FOLDER_PATH)
+    assert mime_type_read_length == expected_mime_type
 
 
 @pytest.mark.parametrize(
@@ -724,12 +756,12 @@ def test_glob(file_storage, folder_path, expected_result):
     "storage_type, env_name, expected",
     [
         (
-            StorageType.PERMANENT.value,
+            StorageType.PERMANENT,
             "TEST_PERMANENT_STORAGE",
             FileStorageProvider.GCS,
         ),
         (
-            StorageType.TEMPORARY.value,
+            StorageType.TEMPORARY,
             "TEST_TEMPORARY_STORAGE",
             FileStorageProvider.MINIO,
         ),

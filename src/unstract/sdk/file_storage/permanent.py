@@ -28,12 +28,10 @@ class PermanentFileStorage(FileStorage):
                 f"supported in Permanent mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
-        if provider == FileStorageProvider.GCS:
+        if provider == FileStorageProvider.GCS or provider == FileStorageProvider.LOCAL:
             super().__init__(provider, **storage_config)
-        elif provider == FileStorageProvider.LOCAL:
-            super().__init__(provider)
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"Provider {provider.value} is not implemented")
 
     def _copy_on_read(self, path: str, legacy_storage_path: str):
         """Copies the file to the remote storage lazily if not present already.
@@ -76,6 +74,7 @@ class PermanentFileStorage(FileStorage):
             seek_position (int): Position to start reading from
             length (int): Number of bytes to be read. Default is full
             file content.
+            legacy_storage_path (str):  Legacy path to the same file
 
         Returns:
             Union[bytes, str] - File contents in bytes/string based on the opened mode
@@ -85,7 +84,7 @@ class PermanentFileStorage(FileStorage):
             if legacy_storage_path:
                 self._copy_on_read(path, legacy_storage_path)
             return super().read(path, mode, encoding, seek_position, length)
-        except FileNotFoundError:
-            logger.warning(f"File {path} not found. Ignoring.")
         except Exception as e:
+            if isinstance(e, FileNotFoundError) or isinstance(e, FileOperationError):
+                raise e
             raise FileOperationError(str(e)) from e
