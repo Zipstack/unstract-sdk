@@ -75,7 +75,7 @@ class MistralLLM(LLMAdapter):
             raise AdapterError(str(e))
 
     @staticmethod
-    def parse_llm_err(e: SDKError) -> LLMError:
+    def parse_llm_err(e: MistralError) -> LLMError:
         """Parse the error from MistralAI.
 
         Helps parse errors from MistralAI and wraps with custom exception.
