@@ -4,7 +4,7 @@ from typing import Any
 from llama_index.core.llms import LLM
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.mistralai.base import DEFAULT_MISTRALAI_MAX_TOKENS
-from mistralai.models import SDKError
+from mistralai.models import SDKError as MistralError
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
