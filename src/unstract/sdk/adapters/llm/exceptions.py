@@ -35,7 +35,7 @@ def parse_llm_err(e: Exception, llm_adapter: LLMAdapter) -> LLMError:
         err = OpenAILLM.parse_llm_err(e)
     elif isinstance(e, AnthropicAPIError):
         err = AnthropicLLM.parse_llm_err(e)
-    elif isinstance(e, SDKError):
+    elif isinstance(e, MistralError):
         err = MistralLLM.parse_llm_err(e)
     elif isinstance(e, GoogleAPICallError):
         err = PaLMLLM.parse_llm_err(e)
