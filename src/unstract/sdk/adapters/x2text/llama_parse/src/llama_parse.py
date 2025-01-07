@@ -7,7 +7,6 @@ from httpx import ConnectError
 from llama_parse import LlamaParse
 
 from unstract.sdk.adapters.exceptions import AdapterError
-from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llama_parse.src.constants import LlamaParseConfig
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
@@ -62,9 +61,7 @@ class LlamaParseAdapter(X2TextAdapter):
             file_extension = pathlib.Path(input_file_path).suffix
             if not file_extension:
                 try:
-                    input_file_extension = AdapterUtils.guess_extention(
-                        input_file_path, fs
-                    )
+                    input_file_extension = fs.guess_extension(input_file_path)
                     input_file_path_copy = input_file_path
                     input_file_path = ".".join(
                         (input_file_path_copy, input_file_extension)

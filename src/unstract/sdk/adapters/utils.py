@@ -1,14 +1,10 @@
 import logging
-from pathlib import Path
 
-import filetype
-import magic
 from requests import Response
 from requests.exceptions import RequestException
 
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.constants import MimeType
-from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -59,43 +55,3 @@ class AdapterUtils:
                 f"for {err_response}, returning {default_err}"
             )
         return default_err
-
-    # TODO: get_file_mime_type() to be removed once migrated to FileStorage
-    # FileStorage has mime_type() which could be used instead.
-    @staticmethod
-    def get_file_mime_type(
-        input_file: Path,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> str:
-        """Gets the file MIME type for an input file. Uses libmagic to perform
-        the same.
-
-        Args:
-            input_file (Path): Path object of the input file
-
-        Returns:
-            str: MIME type of the file
-        """
-        sample_contents = fs.read(path=input_file, mode="rb", length=100)
-        input_file_mime = magic.from_buffer(sample_contents, mime=True)
-        return input_file_mime
-
-    @staticmethod
-    def guess_extention(
-        input_file_path: str,
-        fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-    ) -> str:
-        """Returns the extention of the file passed.
-
-        Args:
-            input_file_path (str): String holding the path
-
-        Returns:
-            str: File extention
-        """
-        input_file_extention = ""
-        sample_contents = fs.read(path=input_file_path, mode="rb", length=100)
-        if sample_contents:
-            file_type = filetype.guess(sample_contents)
-            input_file_extention = file_type.EXTENSION
-        return input_file_extention
