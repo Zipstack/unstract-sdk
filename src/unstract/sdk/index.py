@@ -116,7 +116,6 @@ class Index:
                     f"Failed to execute query on {vector_db}: {e}", actual_err=e
                 )
         finally:
-            # Close connection only once at the end
             vector_db.close()
 
     @log_elapsed(operation="EXTRACTION")
