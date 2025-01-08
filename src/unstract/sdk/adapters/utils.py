@@ -77,6 +77,8 @@ class AdapterUtils:
         Returns:
             str: MIME type of the file
         """
+        # Adding the following DeprecationWarning manually as the package "deprecated"
+        # does not support deprecation on static methods.
         warnings.warn(
             "`get_file_mime_type` is deprecated. "
             "Use `FileStorage mime_type()` instead.",
