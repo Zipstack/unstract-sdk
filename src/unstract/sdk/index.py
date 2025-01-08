@@ -73,8 +73,8 @@ class Index:
 
         try:
             self.tool.stream_log(
-                    f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
-                )
+                f">>> Querying '{vector_db_instance_id}' for {doc_id}..."
+            )
             try:
                 doc_id_eq_filter = MetadataFilter.from_dict(
                     {
@@ -287,6 +287,20 @@ class Index:
 
             if doc_id_found and not reindex:
                 self.tool.stream_log(f"File was indexed already under {doc_id}")
+
+                if not fs.exists(output_file_path):
+                    # Added this as a workaround to handle extraction
+                    # for documents uploaded twice in different projects.
+                    # to be reconsidered after permanent fixes.
+                    extracted_text = self.extract_text(
+                        x2text_instance_id=x2text_instance_id,
+                        file_path=file_path,
+                        output_file_path=output_file_path,
+                        enable_highlight=enable_highlight,
+                        usage_kwargs=usage_kwargs,
+                        process_text=process_text,
+                        fs=fs,
+                    )
                 return doc_id
 
             extracted_text = self.extract_text(
@@ -298,7 +312,6 @@ class Index:
                 process_text=process_text,
                 fs=fs,
             )
-
             if not extracted_text:
                 raise IndexingError("No text available to index")
 
