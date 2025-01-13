@@ -55,6 +55,8 @@ class WhispererEnv:
 
     POLL_INTERVAL = "ADAPTER_LLMW_POLL_INTERVAL"
     MAX_POLLS = "ADAPTER_LLMW_MAX_POLLS"
+    POLL_INTERVAL_V2 = "ADAPTER_LLMW_POLL_INTERVAL_V2"
+    MAX_POLLS_V2 = "ADAPTER_LLMW_MAX_POLLS_V2"
     STATUS_RETRIES = "ADAPTER_LLMW_STATUS_RETRIES"
 
 
@@ -110,6 +112,8 @@ class WhispererDefaults:
     HORIZONTAL_STRETCH_FACTOR = 1.0
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
+    POLL_INTERVAL_V2 = int(os.getenv(WhispererEnv.POLL_INTERVAL_V2, 30))
+    MAX_POLLS_V2 = int(os.getenv(WhispererEnv.MAX_POLLS_V2, 30))
     PAGES_TO_EXTRACT = ""
     ADD_LINE_NOS = True
     OUTPUT_JSON = True

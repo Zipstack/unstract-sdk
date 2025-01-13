@@ -245,8 +245,8 @@ class LLMWhisperer(X2TextAdapter):
             WhisperStatus: Status of the extraction
         """
         version = self.config['version']
-        POLL_INTERVAL = WhispererDefaults.POLL_INTERVAL
-        MAX_POLLS = WhispererDefaults.MAX_POLLS
+        POLL_INTERVAL = WhispererDefaults.POLL_INTERVAL_V2 if version == "v2" else WhispererDefaults.POLL_INTERVAL
+        MAX_POLLS = WhispererDefaults.MAX_POLLS_V2 if version == "v2" else WhispererDefaults.MAX_POLLS
         STATUS_RETRY_THRESHOLD = WhispererDefaults.STATUS_RETRIES if version == "v2" else 0
         status_retry_count = 0
         request_count = 0
