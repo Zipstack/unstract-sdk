@@ -17,7 +17,7 @@ class SharedTemporaryFileStorage(FileStorage):
     ):
         if provider.value not in self.SUPPORTED_FILE_STORAGE_TYPES:
             raise FileStorageError(
-                f"File storage provider is not supported in Permanent mode. "
+                f"File storage provider is not supported in Shared Temporary mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
         if provider == FileStorageProvider.MINIO:

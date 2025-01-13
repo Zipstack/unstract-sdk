@@ -134,6 +134,13 @@ class ToolUtils:
         Returns:
             str: MIME type of the file
         """
+        # Adding the following DeprecationWarning manually as the package "deprecated"
+        # does not support deprecation on static methods.
+        warnings.warn(
+            "`get_file_mime_type` is deprecated. "
+            "Use `FileStorage mime_type()` instead.",
+            DeprecationWarning,
+        )
         input_file_mime = ""
         sample_contents = fs.read(path=input_file, mode="rb", length=100)
         input_file_mime = magic.from_buffer(sample_contents, mime=True)

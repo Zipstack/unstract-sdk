@@ -4,6 +4,7 @@ from enum import Enum
 class FileOperationParams:
     READ_ENTIRE_LENGTH = -1
     MIME_TYPE_DEFAULT_READ_LENGTH = 100
+    EXTENSION_DEFAULT_READ_LENGTH = 100
     DEFAULT_ENCODING = "utf-8"
 
 
@@ -15,7 +16,7 @@ class FileSeekPosition:
 
 class StorageType(Enum):
     PERMANENT = "permanent"
-    TEMPORARY = "temporary"
+    SHARED_TEMPORARY = "shared_temporary"
 
 
 class CredentialKeyword:

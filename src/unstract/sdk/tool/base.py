@@ -14,7 +14,8 @@ from unstract.sdk.constants import (
     ToolEnv,
     ToolExecKey,
 )
-from unstract.sdk.file_storage import SharedTemporaryFileStorage
+from unstract.sdk.exceptions import FileStorageError
+from unstract.sdk.file_storage import EnvHelper, StorageType
 from unstract.sdk.tool.mixin import ToolConfigHelper
 from unstract.sdk.tool.parser import ToolArgsParser
 from unstract.sdk.tool.stream import StreamMixin
@@ -43,27 +44,28 @@ class BaseTool(ABC, StreamMixin):
         self.filestorage_provider = None
         self.workflow_filestorage = None
         self.execution_dir = None
-        filestorage_provider_env = os.environ.get(
-            ToolEnv.WORKFLOW_EXECUTION_FS_PROVIDER
+        filestorage_env = os.environ.get(
+            ToolEnv.WORKFLOW_EXECUTION_FILE_STORAGE_CREDENTIALS
         )
-        if filestorage_provider_env:
+        if filestorage_env:
             self.execution_dir = Path(self.get_env_or_die(ToolEnv.EXECUTION_DATA_DIR))
-            self.filestorage_provider = ToolUtils.get_filestorage_provider(
-                var_name=ToolEnv.WORKFLOW_EXECUTION_FS_PROVIDER
-            )
+
             try:
-                self.filestorage_credentials = ToolUtils.get_filestorage_credentials(
-                    ToolEnv.WORKFLOW_EXECUTION_FS_CREDENTIAL
+                self.workflow_filestorage = EnvHelper.get_storage(
+                    StorageType.SHARED_TEMPORARY,
+                    ToolEnv.WORKFLOW_EXECUTION_FILE_STORAGE_CREDENTIALS,
                 )
-            except json.JSONDecodeError:
-                raise ValueError(
-                    "File storage credentials are not set properly. "
-                    "Please check your settings."
+            except KeyError as e:
+                self.stream_error_and_exit(
+                    f"Required credentials is missing in the env: {str(e)}"
                 )
-            self.workflow_filestorage = SharedTemporaryFileStorage(
-                provider=self.filestorage_provider,
-                **self.filestorage_credentials,
-            )
+            except FileStorageError as e:
+                self.stream_error_and_exit(
+                    "Error while initialising storage: %s",
+                    e,
+                    stack_info=True,
+                    exc_info=True,
+                )
 
     @classmethod
     def from_tool_args(cls, args: list[str]) -> "BaseTool":

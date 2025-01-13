@@ -4,6 +4,7 @@ from datetime import datetime
 from hashlib import sha256
 from typing import Any, Union
 
+import filetype
 import fsspec
 import magic
 import yaml
@@ -361,3 +362,24 @@ class FileStorage(FileStorageInterface):
         with self.fs.open(path=path) as f:
             data: dict[str, Any] = yaml.safe_load(f)
             return data
+
+    @skip_local_cache
+    def guess_extension(self, path: str) -> str:
+        """Returns the extension of the file passed.
+
+        Args:
+            path (str): String holding the path
+
+        Returns:
+            str: File extension
+        """
+        file_extension = ""
+        sample_contents = self.read(
+            path=path,
+            mode="rb",
+            length=FileOperationParams.EXTENSION_DEFAULT_READ_LENGTH,
+        )
+        if sample_contents:
+            file_type = filetype.guess(sample_contents)
+            file_extension = file_type.EXTENSION
+        return file_extension
