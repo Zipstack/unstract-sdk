@@ -42,36 +42,27 @@ class LLMWhisperer(X2TextAdapter):
         self.config["version"] = settings.get(WhispererConfig.VERSION, "v2")
         LLMWhisperer._version = settings.get(WhispererConfig.VERSION, "v2")
         
-    V1_NAME = "LLMWhisperer"
-    V1_DESCRIPTION = "LLMWhisperer X2Text"
-    V1_ICON = "/icons/adapter-icons/LLMWhisperer.png"
 
-    V2_ID = "llmwhisperer|a5e6b8af-3e1f-4a80-b006-d017e8e67f93"
-    V2_NAME = "LLMWhisperer V2"
-    V2_DESCRIPTION = "LLMWhisperer V2 X2Text"
-    V2_ICON = "/icons/adapter-icons/LLMWhispererV2.png"
+    ID = "llmwhisperer|a5e6b8af-3e1f-4a80-b006-d017e8e67f93"
+    NAME = "LLMWhisperer V2"
+    DESCRIPTION = "LLMWhisperer V2 X2Text"
+    ICON = "/icons/adapter-icons/LLMWhispererV2.png"
 
     @staticmethod
     def get_id() -> str:
-        return "llmwhisperer|a5e6b8af-3e1f-4a80-b006-d017e8e67f93"
+        return LLMWhisperer.ID
 
-    @classmethod
-    def get_name(cls) -> str:
-        if cls._version == "v2":
-            return cls.V2_NAME
-        return cls.V1_NAME
+    @staticmethod
+    def get_name() -> str:
+        return LLMWhisperer.NAME
 
-    @classmethod
-    def get_description(cls) -> str:
-        if cls._version == "v2":
-            return cls.V2_DESCRIPTION
-        return cls.V1_DESCRIPTION
+    @staticmethod
+    def get_description() -> str:
+        return LLMWhisperer.DESCRIPTION
 
-    @classmethod
-    def get_icon(cls) -> str:
-        if cls._version == "v2":
-            return cls.V2_ICON
-        return cls.V1_ICON
+    @staticmethod
+    def get_icon() -> str:
+        return LLMWhisperer.ICON
 
     @staticmethod
     def get_json_schema() -> str:
