@@ -127,6 +127,7 @@ class MetadataKey:
     SOURCE_HASH = "source_hash"
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
+    FILE_EXECUTION_ID = "file_execution_id"
     ORG_ID = "organization_id"
     TOOL_META = "tool_metadata"
     TOOL_NAME = "tool_name"
@@ -168,3 +169,10 @@ class MimeType:
     PDF = "application/pdf"
     TEXT = "text/plain"
     JSON = "application/json"
+
+
+class UsageKwargs:
+    RUN_ID = "run_id"
+    FILE_NAME = "file_name"
+    WORKFLOW_ID = "workflow_id"
+    EXECUTION_ID = "execution_id"
