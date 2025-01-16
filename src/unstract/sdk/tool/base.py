@@ -86,12 +86,11 @@ class BaseTool(ABC, StreamMixin):
         if parsed_args.command not in Command.static_commands():
             tool._exec_metadata = tool._get_exec_metadata()
             tool.workflow_id = tool._exec_metadata.get(MetadataKey.WORKFLOW_ID)
-            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID)
-            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID)
+            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID, "")
             tool.file_execution_id = tool._exec_metadata.get(
-                MetadataKey.FILE_EXECUTION_ID
+                MetadataKey.FILE_EXECUTION_ID, ""
             )
-            tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME)
+            tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME, "")
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
         return tool
 
