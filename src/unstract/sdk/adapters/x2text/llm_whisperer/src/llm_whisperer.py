@@ -44,8 +44,8 @@ class LLMWhisperer(X2TextAdapter):
         
 
     ID = "llmwhisperer|a5e6b8af-3e1f-4a80-b006-d017e8e67f93"
-    NAME = "LLMWhisperer V2"
-    DESCRIPTION = "LLMWhisperer V2 X2Text"
+    NAME = "LLMWhisperer"
+    DESCRIPTION = "LLMWhisperer X2Text"
     ICON = "/icons/adapter-icons/LLMWhispererV2.png"
 
     @staticmethod
