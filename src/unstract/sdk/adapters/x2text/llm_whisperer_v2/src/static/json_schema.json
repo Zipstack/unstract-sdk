@@ -83,13 +83,13 @@
       "type": "boolean",
       "title": "Mark vertical lines",
       "default": false,
-      "description": "States whether to reproduce vertical lines in the document. **Note**: This parameter is not applicable if `mode=native_text`."
+      "description": "States whether to reproduce vertical lines in the document. Note: This parameter is not applicable if `mode=native_text`."
     },
     "mark_horizontal_lines": {
       "type": "boolean",
       "title": "Mark horizontal lines",
       "default": false,
-      "description": "States whether to reproduce horizontal lines in the document. **Note**: This parameter is not applicable if `mode=native_text` and will not work if `mark_vertical_lines` is set to `false`."
+      "description": "States whether to reproduce horizontal lines in the document. Note: This parameter is not applicable if `mode=native_text` and will not work if `mark_vertical_lines` is set to `false`."
     },
     "tag": {
       "type": "string",
