@@ -1,6 +1,6 @@
 from anthropic import APIError as AnthropicAPIError
 from google.api_core.exceptions import GoogleAPICallError
-from mistralai.exceptions import MistralException
+from mistralai.models import SDKError as MistralError
 from openai import APIError as OpenAIAPIError
 from vertexai.generative_models import ResponseValidationError
 
@@ -35,7 +35,7 @@ def parse_llm_err(e: Exception, llm_adapter: LLMAdapter) -> LLMError:
         err = OpenAILLM.parse_llm_err(e)
     elif isinstance(e, AnthropicAPIError):
         err = AnthropicLLM.parse_llm_err(e)
-    elif isinstance(e, MistralException):
+    elif isinstance(e, MistralError):
         err = MistralLLM.parse_llm_err(e)
     elif isinstance(e, GoogleAPICallError):
         err = PaLMLLM.parse_llm_err(e)

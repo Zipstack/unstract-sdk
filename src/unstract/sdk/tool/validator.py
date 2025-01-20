@@ -209,9 +209,8 @@ class ToolValidator:
                 )
             allowed_mimes.append(EXT_MIME_MAP[ext])
         if self.tool.workflow_filestorage:
-            input_file_mime = ToolUtils.get_file_mime_type(
-                input_file=input_file, fs=self.tool.workflow_filestorage
-            )
+            tool_fs = self.tool.workflow_filestorage
+            input_file_mime = tool_fs.mime_type(input_file=input_file)
         else:
             input_file_mime = ToolUtils.get_file_mime_type(input_file=input_file)
         self.tool.stream_log(f"Input file MIME: {input_file_mime}")

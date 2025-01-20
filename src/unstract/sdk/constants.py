@@ -22,8 +22,9 @@ class ToolEnv:
     DATA_DIR = "TOOL_DATA_DIR"
     EXECUTION_BY_TOOL = "EXECUTION_BY_TOOL"
     EXECUTION_DATA_DIR = "EXECUTION_DATA_DIR"
-    WORKFLOW_EXECUTION_FS_PROVIDER = "WORKFLOW_EXECUTION_FS_PROVIDER"
-    WORKFLOW_EXECUTION_FS_CREDENTIAL = "WORKFLOW_EXECUTION_FS_CREDENTIAL"
+    WORKFLOW_EXECUTION_FILE_STORAGE_CREDENTIALS = (
+        "WORKFLOW_EXECUTION_FILE_STORAGE_CREDENTIALS"
+    )
 
 
 class ConnectorKeys:
@@ -126,6 +127,7 @@ class MetadataKey:
     SOURCE_HASH = "source_hash"
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
+    FILE_EXECUTION_ID = "file_execution_id"
     ORG_ID = "organization_id"
     TOOL_META = "tool_metadata"
     TOOL_NAME = "tool_name"
@@ -167,3 +169,10 @@ class MimeType:
     PDF = "application/pdf"
     TEXT = "text/plain"
     JSON = "application/json"
+
+
+class UsageKwargs:
+    RUN_ID = "run_id"
+    FILE_NAME = "file_name"
+    WORKFLOW_ID = "workflow_id"
+    EXECUTION_ID = "execution_id"

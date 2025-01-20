@@ -761,7 +761,7 @@ def test_glob(file_storage, folder_path, expected_result):
             FileStorageProvider.GCS,
         ),
         (
-            StorageType.TEMPORARY,
+            StorageType.SHARED_TEMPORARY,
             "TEST_TEMPORARY_STORAGE",
             FileStorageProvider.MINIO,
         ),
