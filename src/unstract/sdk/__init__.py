@@ -1,4 +1,5 @@
-__version__ = "0.55.0rc2"
+__version__ = "0.55.0rc3"
+
 
 def get_sdk_version():
     """Returns the SDK version."""
