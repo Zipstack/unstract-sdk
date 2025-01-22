@@ -14,6 +14,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     HTTPMethod,
     WhispererEndpoint,
 )
+from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import ExtraParams
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.helper import LLMWhispererHelper
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
@@ -76,8 +77,12 @@ class LLMWhispererV2(X2TextAdapter):
             str: Extracted text
         """
 
+        extra_params = ExtraParams(tag=kwargs.get(X2TextConstants.TAGS))
         response: requests.Response = LLMWhispererHelper.send_whisper_request(
-            input_file_path, self.config, fs=fs
+            input_file_path=input_file_path,
+            config=self.config,
+            fs=fs,
+            extra_params=extra_params,
         )
         response_text = response.text
         reponse_dict = json.loads(response_text)

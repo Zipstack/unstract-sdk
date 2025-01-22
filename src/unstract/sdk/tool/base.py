@@ -40,6 +40,7 @@ class BaseTool(ABC, StreamMixin):
         self.workflow_id = ""
         self.execution_id = ""
         self.file_execution_id = ""
+        self.tags = []
         self.source_file_name = ""
         self.org_id = ""
         self._exec_metadata = {}
@@ -90,6 +91,7 @@ class BaseTool(ABC, StreamMixin):
             tool.file_execution_id = tool._exec_metadata.get(
                 MetadataKey.FILE_EXECUTION_ID, ""
             )
+            tool.tags = tool._exec_metadata.get(MetadataKey.TAGS, [])
             tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME, "")
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
         return tool
