@@ -771,3 +771,72 @@ def test_get_storage(storage_type, env_name, expected):
     file_storage = EnvHelper.get_storage(storage_type, env_name)
     assert file_storage.provider == expected
     print(file_storage)
+
+
+@pytest.mark.parametrize(
+    "storage_type, env_name, path",
+    [
+        (
+            StorageType.PERMANENT,
+            "TEST_PERMANENT_STORAGE",
+            "fsspec-test",
+        ),
+        (
+            StorageType.SHARED_TEMPORARY,
+            "TEST_TEMPORARY_STORAGE",
+            "unstract/execution/mock_org/"
+            "13484b52-2127-48c2-b1a3-b517365346c3/"
+            "39fcdcba-90bb-44ce-9446-67253adcb4d7/COPY_TO_FOLDER",
+        ),
+    ],
+)
+def test_dir_walk(storage_type, env_name, path):
+    file_storage = EnvHelper.get_storage(storage_type, env_name)
+    try:
+        root, dirs, files = next(file_storage.walk(path))
+    except StopIteration:
+        return []
+    for dir_name in dirs:
+        print(dir_name)
+    for file_name in files:
+        print(file_name)
+    if storage_type == StorageType.PERMANENT:
+        assert len(files) > 0
+    elif storage_type == StorageType.SHARED_TEMPORARY:
+        assert len(files) == 0
+
+
+def list_print_dir(file_storage, path, iter_num):
+    print(f"PATH: {path}")
+    print(f"\nItertion: {iter_num}")
+    try:
+        root, dirs, files = next(file_storage.walk(path))
+    except StopIteration:
+        return []
+    for dir_name in dirs:
+        print(dir_name)
+    for file_name in files:
+        print(file_name)
+    print(f"Files: {files}")
+
+
+@pytest.mark.parametrize(
+    "storage_type, env_name, path",
+    [
+        (
+            StorageType.SHARED_TEMPORARY,
+            "TEST_TEMPORARY_STORAGE",
+            "unstract/execution/mock_org/"
+            "13484b52-2127-48c2-b1a3-b517365346c3/b"
+            "f7b3d81-d0aa-4e9e-883d-25dd0f3a6466/COPY_TO_FOLDER",
+        ),
+    ],
+)
+def test_dir_ls(storage_type, env_name, path):
+    new_file = os.path.join(path, "tmp.txt")
+    file_storage = EnvHelper.get_storage(storage_type, env_name)
+    if file_storage.exists(new_file):
+        file_storage.rm(new_file)
+    list_print_dir(file_storage, path, "1")
+    file_storage.write(new_file, "w", data="Hello")
+    list_print_dir(file_storage, path, "2")
