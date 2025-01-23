@@ -20,7 +20,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererHeader,
     WhisperStatus,
 )
-from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import ExtraParams
+from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
@@ -110,7 +110,7 @@ class LLMWhispererHelper:
 
     @staticmethod
     def get_whisperer_params(
-        config: dict[str, Any], extra_params: ExtraParams
+        config: dict[str, Any], extra_params: WhispererRequestParams
     ) -> dict[str, Any]:
         """Gets query params meant for /whisper endpoint.
 
@@ -296,7 +296,7 @@ class LLMWhispererHelper:
     def send_whisper_request(
         input_file_path: str,
         config: dict[str, Any],
-        extra_params: ExtraParams,
+        extra_params: WhispererRequestParams,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> requests.Response:
         headers = LLMWhispererHelper.get_request_headers(config)
