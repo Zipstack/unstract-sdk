@@ -399,5 +399,6 @@ class FileStorage(FileStorageInterface):
         Returns:
             Iterator containing the list of files and folders
         """
+        # Invalidating cache explicitly to avoid any stale listing
         self.fs.invalidate_cache(path=path)
         return self.fs.walk(path, maxdepth=max_depth, topdown=topdown)
