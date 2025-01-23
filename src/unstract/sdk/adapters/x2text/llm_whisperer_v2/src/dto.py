@@ -15,5 +15,6 @@ class WhispererRequestParams:
     tag: Optional[str] = None
 
     def __post_init__(self) -> None:
+        # TODO: Allow list of tags once its supported in LLMW v2
         if isinstance(self.tag, list):
             self.tag = self.tag[0] if self.tag else None
