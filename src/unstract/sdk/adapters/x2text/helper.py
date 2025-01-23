@@ -73,7 +73,7 @@ class UnstructuredHelper:
             if not local_storage.exists(input_file_path):
                 fs.download(from_path=input_file_path, to_path=input_file_path)
             with open(input_file_path, "rb") as input_f:
-                mime_type = local_storage.mime_type(input_file=input_file_path)
+                mime_type = local_storage.mime_type(path=input_file_path)
                 files = {"file": (input_file_path, input_f, mime_type)}
                 response = UnstructuredHelper.make_request(
                     unstructured_adapter_config=unstructured_adapter_config,
