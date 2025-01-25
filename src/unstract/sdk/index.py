@@ -128,6 +128,7 @@ class Index:
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
         fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
+        tags: Optional[list[str]] = None,
     ) -> str:
         """Extracts text from a document.
 
@@ -147,6 +148,7 @@ class Index:
                 Defaults to {}.
             process_text (Optional[Callable[[str], str]], optional): Optional function
                 to post-process the text. Defaults to None.
+            tags: (Optional[list[str]], optional): Tags
 
         Raises:
             IndexingError: Errors during text extraction
@@ -164,6 +166,7 @@ class Index:
                     input_file_path=file_path,
                     output_file_path=output_file_path,
                     enable_highlight=enable_highlight,
+                    tags=tags,
                     fs=fs,
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
@@ -171,7 +174,10 @@ class Index:
                 self.tool.update_exec_metadata(metadata)
             else:
                 process_response: TextExtractionResult = x2text.process(
-                    input_file_path=file_path, output_file_path=output_file_path, fs=fs
+                    input_file_path=file_path,
+                    output_file_path=output_file_path,
+                    tags=tags,
+                    fs=fs,
                 )
             extracted_text = process_response.extracted_text
         # TODO: Handle prepend of context where error is raised and remove this
@@ -193,6 +199,7 @@ class Index:
                 )
         return extracted_text
 
+    # TODO: Reduce the number of params by some dataclass
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
     @capture_metrics
     def index(
@@ -211,6 +218,7 @@ class Index:
         usage_kwargs: dict[Any, Any] = {},
         process_text: Optional[Callable[[str], str]] = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
+        tags: Optional[list[str]] = None,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -231,6 +239,8 @@ class Index:
             output_file_path (Optional[str], optional): File path to write
                 the extracted contents into. Defaults to None.
             fs (FileStorage): file storage object to perfrom file operations
+            tags (Optional[list[str]], optional): List of tags to be associated with
+                the indexed document.
 
         Returns:
             str: A unique ID for the file and indexing arguments combination
@@ -300,6 +310,7 @@ class Index:
                         usage_kwargs=usage_kwargs,
                         process_text=process_text,
                         fs=fs,
+                        tags=tags,
                     )
                 return doc_id
 
@@ -310,6 +321,7 @@ class Index:
                 enable_highlight=enable_highlight,
                 usage_kwargs=usage_kwargs,
                 process_text=process_text,
+                tags=tags,
                 fs=fs,
             )
             if not extracted_text:

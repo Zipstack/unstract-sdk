@@ -39,6 +39,9 @@ class BaseTool(ABC, StreamMixin):
         self.variables = ToolConfigHelper.variables()
         self.workflow_id = ""
         self.execution_id = ""
+        self.file_execution_id = ""
+        self.tags = []
+        self.source_file_name = ""
         self.org_id = ""
         self._exec_metadata = {}
         self.filestorage_provider = None
@@ -84,7 +87,12 @@ class BaseTool(ABC, StreamMixin):
         if parsed_args.command not in Command.static_commands():
             tool._exec_metadata = tool._get_exec_metadata()
             tool.workflow_id = tool._exec_metadata.get(MetadataKey.WORKFLOW_ID)
-            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID)
+            tool.execution_id = tool._exec_metadata.get(MetadataKey.EXECUTION_ID, "")
+            tool.file_execution_id = tool._exec_metadata.get(
+                MetadataKey.FILE_EXECUTION_ID, ""
+            )
+            tool.tags = tool._exec_metadata.get(MetadataKey.TAGS, [])
+            tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME, "")
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
         return tool
 

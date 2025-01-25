@@ -125,3 +125,7 @@ class FileStorageInterface(ABC):
     @abstractmethod
     def guess_extension(self, path: str) -> str:
         pass
+
+    @abstractmethod
+    def walk(self, path: str):
+        pass

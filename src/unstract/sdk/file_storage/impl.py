@@ -383,3 +383,22 @@ class FileStorage(FileStorageInterface):
             file_type = filetype.guess(sample_contents)
             file_extension = file_type.EXTENSION
         return file_extension
+
+    def walk(self, path: str, max_depth=None, topdown=True):
+        """Walks the dir in the path and returns the list of files/dirs.
+
+        Args:
+            path (str): Root to recurse into
+            maxdepth (int): Maximum recursion depth. None means limitless,
+            but not recommended
+                on link-based file-systems.
+            topdown (bool): Whether to walk the directory tree from the top
+            downwards or from
+                the bottom upwards.
+
+        Returns:
+            Iterator containing the list of files and folders
+        """
+        # Invalidating cache explicitly to avoid any stale listing
+        self.fs.invalidate_cache(path=path)
+        return self.fs.walk(path, maxdepth=max_depth, topdown=topdown)

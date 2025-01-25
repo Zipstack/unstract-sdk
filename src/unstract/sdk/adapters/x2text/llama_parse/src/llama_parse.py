@@ -72,7 +72,7 @@ class LlamaParseAdapter(X2TextAdapter):
                     fs.write(
                         path=input_file_path,
                         data=text_content,
-                        mode="w",
+                        mode="wb",
                         encoding="utf-8",
                     )
                 except OSError as os_err:
