@@ -18,7 +18,7 @@ class Constants:
     DEFAULT_TIMEOUT = 240
     DEFAULT_MAX_RETRIES = 3
 
-class Bedrock(BaseEmbedding):
+class Bedrock(EmbeddingAdapter):
     def __init__(self, settings: dict[str, Any]):
         super().__init__("Bedrock")
         self.config = settings
