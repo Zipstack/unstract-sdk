@@ -128,6 +128,7 @@ class MetadataKey:
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
     FILE_EXECUTION_ID = "file_execution_id"
+    TAGS = "tags"
     ORG_ID = "organization_id"
     TOOL_META = "tool_metadata"
     TOOL_NAME = "tool_name"
