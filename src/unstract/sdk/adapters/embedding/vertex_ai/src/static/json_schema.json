@@ -44,13 +44,13 @@
         "title": "Embed Mode",
         "description": "Embedding mode for Vertex AI's embedding model",
         "enum": [
-            "DEFAULT",
-            "CLASSIFICATION",
-            "CLUSTERING",
-            "SEMANTIC_SIMILARITY",
-            "RETRIEVAL_DOCUMENT"
+            "default",
+            "classification",
+            "clustering",
+            "similarity",
+            "retrieval"
           ],
-          "default": "DEFAULT"
+          "default": "default"
       }
     }
   }
