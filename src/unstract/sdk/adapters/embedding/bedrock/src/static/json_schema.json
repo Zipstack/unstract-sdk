@@ -19,7 +19,7 @@
         "type": "string",
         "title": "Model",
         "default": "amazon.titan-embed-text-v2:0",
-        "description": "Model name. Refer to Bedrock's documentation for the list of available models."
+        "description": "Model name. Refer to [Bedrock's documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) for the list of available models."
       },
       "aws_access_key_id": {
         "type": "string",
