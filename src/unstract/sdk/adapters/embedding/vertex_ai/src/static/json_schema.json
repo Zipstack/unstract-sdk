@@ -24,7 +24,7 @@
         "type": "string",
         "title": "Model",
         "default": "",
-        "description": "Provide the name of the model you defined for Vertex AI"
+        "description": "Provide the name of the model you defined for Vertex AI."
       },
       "project": {
         "type": "string",
@@ -42,7 +42,7 @@
       "embed_mode": {
         "type": "string",
         "title": "Embed Mode",
-        "description": "Embedding mode for Vertex AI's embedding model",
+        "description": "Embedding mode for Vertex AI's embedding model. Refer to [Vertext AI's documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/task-types) for more details.",
         "enum": [
             "default",
             "classification",
