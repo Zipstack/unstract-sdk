@@ -243,11 +243,13 @@ class BaseTool(ABC, StreamMixin):
             metadata (dict[str, Any]): Metadata to write
         """
         base_path = self.execution_dir
+        if fs and fs.provider.value == "gcs": 
+            base_path = self._get_data_dir()
         metadata_path = base_path / ToolExecKey.METADATA_FILE
         ToolUtils.dump_json(
             file_to_dump=metadata_path,
             json_to_dump=metadata,
-            fs=self.workflow_filestorage,
+            fs=fs,
         )
 
     def _update_exec_metadata(self) -> None:
