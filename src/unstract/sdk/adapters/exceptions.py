@@ -12,6 +12,3 @@ class LLMError(AdapterError):
 
 class ExtractorError(AdapterError):
     pass
-
-class EmbeddingError(AdapterError):
-    pass
