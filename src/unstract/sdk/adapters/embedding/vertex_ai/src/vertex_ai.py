@@ -11,7 +11,8 @@ from llama_index.embeddings.vertex import VertexTextEmbedding
 
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
-from unstract.sdk.adapters.exceptions import AdapterError, EmbeddingError
+from unstract.sdk.adapters.exceptions import AdapterError
+from unstract.sdk.exceptions import EmbeddingError
 
 class Constants:
     MODEL = "model"
