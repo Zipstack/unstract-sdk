@@ -171,7 +171,7 @@ class Index:
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
                 metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
-                self.tool.update_exec_metadata(metadata)
+                self.tool.update_exec_metadata(metadata, fs)
             else:
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path,

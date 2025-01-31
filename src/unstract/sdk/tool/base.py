@@ -15,7 +15,12 @@ from unstract.sdk.constants import (
     ToolExecKey,
 )
 from unstract.sdk.exceptions import FileStorageError
-from unstract.sdk.file_storage import EnvHelper, StorageType
+from unstract.sdk.file_storage import (
+    EnvHelper,
+    FileStorage,
+    FileStorageProvider,
+    StorageType,
+)
 from unstract.sdk.tool.mixin import ToolConfigHelper
 from unstract.sdk.tool.parser import ToolArgsParser
 from unstract.sdk.tool.stream import StreamMixin
@@ -227,25 +232,23 @@ class BaseTool(ABC, StreamMixin):
             self.stream_error_and_exit(f"OS Error while opening {metadata_path}: {e}")
         return metadata_json
 
-    def _write_exec_metadata(self, metadata: dict[str, Any]) -> None:
+    def _write_exec_metadata(
+        self,
+        metadata: dict[str, Any],
+        fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
+    ) -> None:
         """Helps write the `METADATA.JSON` file.
 
         Args:
             metadata (dict[str, Any]): Metadata to write
         """
-        if self.workflow_filestorage:
-            base_path = self.execution_dir
-            metadata_path = base_path / ToolExecKey.METADATA_FILE
-            ToolUtils.dump_json(
-                file_to_dump=metadata_path,
-                json_to_dump=metadata,
-                fs=self.workflow_filestorage,
-            )
-        else:
-            base_path: Path = self._get_data_dir()
-            metadata_path = base_path / ToolExecKey.METADATA_FILE
-            with metadata_path.open("w", encoding="utf-8") as f:
-                f.write(ToolUtils.json_to_str(metadata))
+        base_path = self.execution_dir
+        metadata_path = base_path / ToolExecKey.METADATA_FILE
+        ToolUtils.dump_json(
+            file_to_dump=metadata_path,
+            json_to_dump=metadata,
+            fs=self.workflow_filestorage,
+        )
 
     def _update_exec_metadata(self) -> None:
         """Updates the execution metadata after a tool executes.
@@ -268,9 +271,15 @@ class BaseTool(ABC, StreamMixin):
         else:
             self._exec_metadata[MetadataKey.TOOL_META].append(tool_metadata)
 
-        self._write_exec_metadata(metadata=self._exec_metadata)
+        self._write_exec_metadata(
+            metadata=self._exec_metadata, fs=self.workflow_filestorage
+        )
 
-    def update_exec_metadata(self, metadata: dict[str, Any]) -> None:
+    def update_exec_metadata(
+        self,
+        metadata: dict[str, Any],
+        fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
+    ) -> None:
         """Helps update the execution metadata with the provided metadata
         dictionary.
 
@@ -289,7 +298,7 @@ class BaseTool(ABC, StreamMixin):
         for key, value in metadata.items():
             self._exec_metadata[key] = value
 
-        self._write_exec_metadata(metadata=self._exec_metadata)
+        self._write_exec_metadata(metadata=self._exec_metadata, fs=fs)
 
     def write_tool_result(self, data: Union[str, dict[str, Any]]) -> None:
         """Helps write contents of the tool result into TOOL_DATA_DIR.
