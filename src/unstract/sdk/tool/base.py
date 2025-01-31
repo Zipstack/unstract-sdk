@@ -1,8 +1,7 @@
 import datetime
-import json
 import os
 from abc import ABC, abstractmethod
-from json import JSONDecodeError, loads
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Union
 
@@ -143,18 +142,13 @@ class BaseTool(ABC, StreamMixin):
         return base_path.absolute()
 
     def _get_file_from_data_dir(self, file_to_get: str, raise_err: bool = False) -> str:
-        if self.workflow_filestorage:
-            base_path = self.execution_dir
-            file_path = base_path / file_to_get
-            if raise_err and not self.workflow_filestorage.exists(path=file_path):
-                self.stream_error_and_exit(
-                    f"{file_to_get} is missing in EXECUTION_DATA_DIR"
-                )
-        else:
-            base_path: Path = self._get_data_dir()
-            file_path = base_path / file_to_get
-            if raise_err and not file_path.exists():
-                self.stream_error_and_exit(f"{file_to_get} is missing in TOOL_DATA_DIR")
+        base_path = self.execution_dir
+        file_path = base_path / file_to_get
+        if raise_err and not self.workflow_filestorage.exists(path=file_path):
+            self.stream_error_and_exit(
+                f"{file_to_get} is missing in EXECUTION_DATA_DIR"
+            )
+
         return str(file_path)
 
     def get_source_file(self) -> str:
@@ -183,10 +177,7 @@ class BaseTool(ABC, StreamMixin):
         Returns:
             str: Absolute path to the output directory.
         """
-        if self.workflow_filestorage:
-            base_path = self.execution_dir
-        else:
-            base_path: Path = self._get_data_dir()
+        base_path = self.execution_dir
         return str(base_path / ToolExecKey.OUTPUT_DIR)
 
     @property
@@ -205,20 +196,13 @@ class BaseTool(ABC, StreamMixin):
         Returns:
             dict[str, Any]: Contents of METADATA.json
         """
-        if self.workflow_filestorage:
-            base_path = self.execution_dir
-        else:
-            base_path: Path = self._get_data_dir()
+        base_path = self.execution_dir
         metadata_path = base_path / ToolExecKey.METADATA_FILE
         metadata_json = {}
         try:
-            if self.workflow_filestorage:
-                metadata_json = ToolUtils.load_json(
-                    file_to_load=metadata_path, fs=self.workflow_filestorage
-                )
-            else:
-                with open(metadata_path, encoding="utf-8") as f:
-                    metadata_json = loads(f.read())
+            metadata_json = ToolUtils.load_json(
+                file_to_load=metadata_path, fs=self.workflow_filestorage
+            )
         except JSONDecodeError as e:
             self.stream_error_and_exit(f"JSON decode error for {metadata_path}: {e}")
         except FileNotFoundError:
@@ -233,19 +217,13 @@ class BaseTool(ABC, StreamMixin):
         Args:
             metadata (dict[str, Any]): Metadata to write
         """
-        if self.workflow_filestorage:
-            base_path = self.execution_dir
-            metadata_path = base_path / ToolExecKey.METADATA_FILE
-            ToolUtils.dump_json(
-                file_to_dump=metadata_path,
-                json_to_dump=metadata,
-                fs=self.workflow_filestorage,
-            )
-        else:
-            base_path: Path = self._get_data_dir()
-            metadata_path = base_path / ToolExecKey.METADATA_FILE
-            with metadata_path.open("w", encoding="utf-8") as f:
-                f.write(ToolUtils.json_to_str(metadata))
+        base_path = self.execution_dir
+        metadata_path = base_path / ToolExecKey.METADATA_FILE
+        ToolUtils.dump_json(
+            file_to_dump=metadata_path,
+            json_to_dump=metadata,
+            fs=self.workflow_filestorage,
+        )
 
     def _update_exec_metadata(self) -> None:
         """Updates the execution metadata after a tool executes.
@@ -314,18 +292,13 @@ class BaseTool(ABC, StreamMixin):
         self.stream_result(result)
 
         self._update_exec_metadata()
-        json_data = json.dumps(data)
         # INFILE is overwritten for next tool to run
         input_file_path: Path = Path(self.get_input_file())
-        if self.workflow_filestorage:
-            ToolUtils.dump_json(
-                file_to_dump=input_file_path,
-                json_to_dump=data,
-                fs=self.workflow_filestorage,
-            )
-        else:
-            with input_file_path.open("w", encoding="utf-8") as f:
-                f.write(json_data)
+        ToolUtils.dump_json(
+            file_to_dump=input_file_path,
+            json_to_dump=data,
+            fs=self.workflow_filestorage,
+        )
 
     def validate(self, input_file: str, settings: dict[str, Any]) -> None:
         """Override to implement custom validation for the tool.
