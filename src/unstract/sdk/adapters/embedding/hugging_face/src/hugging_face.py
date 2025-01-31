@@ -67,7 +67,4 @@ class HuggingFace(EmbeddingAdapter):
         except Exception as e:
             raise AdapterError(str(e))
 
-    def test_connection(self) -> bool:
-        embedding = self.get_embedding_instance()
-        test_result: bool = EmbeddingHelper.test_embedding_instance(embedding)
-        return test_result
+     
