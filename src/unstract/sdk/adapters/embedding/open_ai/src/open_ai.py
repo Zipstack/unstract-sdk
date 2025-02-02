@@ -27,6 +27,8 @@ class OpenAI(EmbeddingAdapter):
         super().__init__("OpenAI")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "openai|717a0b0e-3bbc-41dc-9f0c-5689437a1151"
@@ -46,13 +48,6 @@ class OpenAI(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/OpenAI.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

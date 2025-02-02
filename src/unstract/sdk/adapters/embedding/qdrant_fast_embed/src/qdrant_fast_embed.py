@@ -19,6 +19,8 @@ class QdrantFastEmbedM(EmbeddingAdapter):
         super().__init__("QdrantFastEmbedM")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "qdrantfastembed|31e83eee-a416-4c07-9c9c-02392d5bcf7f"
@@ -34,13 +36,6 @@ class QdrantFastEmbedM(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/qdrant.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

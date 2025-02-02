@@ -30,10 +30,13 @@ class Adapter(ABC):
     def get_icon() -> str:
         return ""
 
-    @staticmethod
-    @abstractmethod
-    def get_json_schema() -> str:
-        return ""
+    @classmethod
+    def get_json_schema(cls) -> str:
+        schema_path = getattr(cls, 'SCHEMA_PATH', None)
+        if schema_path is None:
+            raise ValueError(f"SCHEMA_PATH not defined for {cls.__name__}")
+        with open(schema_path) as f:
+            return f.read()
 
     @staticmethod
     @abstractmethod

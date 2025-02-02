@@ -27,6 +27,8 @@ class AzureOpenAI(EmbeddingAdapter):
         super().__init__("AzureOpenAIEmbedding")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "azureopenai|9770f3f6-f8ba-4fa0-bb3a-bef48a00e66f"
@@ -46,13 +48,6 @@ class AzureOpenAI(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/AzureopenAI.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

@@ -23,6 +23,8 @@ class Bedrock(EmbeddingAdapter):
         super().__init__("Bedrock")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "bedrock|88199741-8d7e-4e8c-9d92-d76b0dc20c91"
@@ -42,14 +44,6 @@ class Bedrock(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Bedrock.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
-    
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

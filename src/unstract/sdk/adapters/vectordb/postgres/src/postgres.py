@@ -32,6 +32,8 @@ class Postgres(VectorDBAdapter):
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Postgres", self._vector_db_instance)
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "postgres|70ab6cc2-e86a-4e5a-896f-498a95022d34"
@@ -48,12 +50,7 @@ class Postgres(VectorDBAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/postgres.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance

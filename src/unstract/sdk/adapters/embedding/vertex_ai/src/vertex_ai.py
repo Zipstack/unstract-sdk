@@ -25,6 +25,8 @@ class VertexAIEmbedding(EmbeddingAdapter):
         super().__init__("Bedrock")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "vertexai|457a256b-e74f-4251-98a0-8864aafb42a5"
@@ -44,13 +46,6 @@ class VertexAIEmbedding(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/VertexAI.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
     
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
