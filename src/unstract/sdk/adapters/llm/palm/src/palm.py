@@ -22,6 +22,8 @@ class PaLMLLM(LLMAdapter):
         super().__init__("PaLM")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "palm|af7c8ee7-3d01-47c5-9b81-5ffd7546014b"
@@ -42,12 +44,7 @@ class PaLMLLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/PaLM.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_llm_instance(self) -> LLM:
         try:

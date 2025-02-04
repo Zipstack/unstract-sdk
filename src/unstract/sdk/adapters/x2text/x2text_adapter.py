@@ -29,10 +29,6 @@ class X2TextAdapter(Adapter, ABC):
         return ""
 
     @staticmethod
-    def get_json_schema() -> str:
-        return ""
-
-    @staticmethod
     def get_adapter_type() -> AdapterTypes:
         return AdapterTypes.X2TEXT
 

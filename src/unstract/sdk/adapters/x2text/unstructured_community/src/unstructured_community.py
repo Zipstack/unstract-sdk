@@ -15,6 +15,8 @@ class UnstructuredCommunity(X2TextAdapter):
         super().__init__("UnstructuredIOCommunity")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "unstructuredcommunity|eeed506f-1875-457f-9101-846fc7115676"
@@ -31,12 +33,7 @@ class UnstructuredCommunity(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/UnstructuredIO.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def process(
         self,

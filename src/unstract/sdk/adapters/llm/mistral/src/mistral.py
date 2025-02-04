@@ -25,6 +25,8 @@ class MistralLLM(LLMAdapter):
         super().__init__("Mistral")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "mistral|00f766a5-6d6d-47ea-9f6c-ddb1e8a94e82"
@@ -44,13 +46,6 @@ class MistralLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Mistral%20AI.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_llm_instance(self) -> LLM:
         max_retries = int(

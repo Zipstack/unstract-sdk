@@ -15,6 +15,8 @@ class NoOpEmbedding(EmbeddingAdapter):
         super().__init__("NoOpCustomEmbedding")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "noOpEmbedding|ff223003-fee8-4079-b288-e86215e6b39a"
@@ -34,13 +36,6 @@ class NoOpEmbedding(EmbeddingAdapter):
     @staticmethod
     def get_provider() -> str:
         return "NoOp"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_embedding_instance(self) -> BaseEmbedding:
         embedding: BaseEmbedding = NoOpCustomEmbedding(

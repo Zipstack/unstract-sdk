@@ -18,6 +18,8 @@ class ReplicateLLM(LLMAdapter):
         super().__init__("Replicate")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "replicate|2715ce84-05af-4ab4-b8e9-67ac3211b81e"
@@ -38,12 +40,7 @@ class ReplicateLLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/Replicate.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     @staticmethod
     def can_write() -> bool:

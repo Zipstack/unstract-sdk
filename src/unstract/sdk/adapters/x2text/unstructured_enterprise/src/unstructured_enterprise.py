@@ -15,6 +15,8 @@ class UnstructuredEnterprise(X2TextAdapter):
         super().__init__("UnstructuredIOEnterprise")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "unstructuredenterprise|eb1b6c58-221f-4db0-a4a5-e5f9cdca44e1"
@@ -31,12 +33,7 @@ class UnstructuredEnterprise(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/UnstructuredIO.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def process(
         self,

@@ -38,6 +38,8 @@ class LLMWhisperer(X2TextAdapter):
         super().__init__("LLMWhisperer")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "llmwhisperer|0a1647f0-f65f-410d-843b-3d979c78350e"
@@ -54,12 +56,7 @@ class LLMWhisperer(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhisperer.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def _get_request_headers(self) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLMWhisperer.
