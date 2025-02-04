@@ -54,6 +54,8 @@ class VertexAILLM(LLMAdapter):
         super().__init__("VertexAILLM")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "vertexai|78fa17a5-a619-47d4-ac6e-3fc1698fdb55"
@@ -74,12 +76,7 @@ class VertexAILLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/VertexAI.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_llm_instance(self) -> LLM:
         input_credentials = self.config.get(Constants.JSON_CREDENTIALS, "{}")

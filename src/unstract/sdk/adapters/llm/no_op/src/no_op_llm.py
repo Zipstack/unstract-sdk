@@ -16,6 +16,8 @@ class NoOpLLM(LLMAdapter):
         super().__init__("NoOpLlm")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "noOpLlm|f673a5a2-90f9-40f5-94c0-9fbc663b7553"
@@ -35,13 +37,6 @@ class NoOpLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/noOpLlm.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_llm_instance(self) -> LLM:
         llm: LLM = NoOpCustomLLM(wait_time=self.config.get("wait_time"))

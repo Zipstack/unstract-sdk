@@ -20,6 +20,8 @@ class LlamaParseAdapter(X2TextAdapter):
         super().__init__("LlamaParse")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "llamaparse|78860239-b3cc-4cc5-b3de-f84315f75d14"
@@ -36,12 +38,7 @@ class LlamaParseAdapter(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def _call_parser(
         self,
