@@ -369,7 +369,7 @@ class LLMWhispererHelper:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=output_file_path, mode="w", data=text_output, encoding="utf-8"
+                path=str(output_file_path), mode="w", data=text_output, encoding="utf-8"
             )
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
@@ -381,7 +381,7 @@ class LLMWhispererHelper:
             metadata_file_name = output_file_path.with_suffix(".json").name
             metadata_file_path = metadata_dir / metadata_file_name
             # Ensure the metadata directory exists
-            fs.mkdir(create_parents=True, path=metadata_dir)
+            fs.mkdir(create_parents=True, path=str(metadata_dir))
             # Remove the "result_text" key from the metadata
             metadata = {
                 key: value for key, value in output_json.items() if key != "result_text"
@@ -389,7 +389,7 @@ class LLMWhispererHelper:
             metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
             logger.info(f"Writing metadata to {metadata_file_path}")
             fs.write(
-                path=metadata_file_path, mode="w", data=metadata_json, encoding="utf-8"
+                path=str(metadata_file_path), mode="w", data=metadata_json, encoding="utf-8"
             )
         except Exception as e:
             logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")
