@@ -64,6 +64,13 @@ class LLMWhispererHelper:
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
             ),
+            WhispererConfig.WAIT_TIMEOUT: config.get(
+                WhispererConfig.WAIT_TIMEOUT,
+                WhispererDefaults.WAIT_TIMEOUT,
+            ),
+            WhispererConfig.WAIT_FOR_COMPLETION: config.get(
+                WhispererDefaults.WAIT_FOR_COMPLETION
+            ),
         }
         if params[WhispererConfig.MODE] == Modes.LOW_COST.value:
             params.update(

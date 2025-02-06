@@ -87,6 +87,8 @@ class WhispererConfig:
     WEBHOOK_METADATA = "webhook_metadata"
     TEXT_ONLY = "text_only"
     VERSION = "version"
+    WAIT_TIMEOUT = "wait_timeout"
+    WAIT_FOR_COMPLETION ="wait_for_completion"
 
 class WhisperStatus:
     """Values returned / used by /whisper-status endpoint."""
@@ -124,3 +126,5 @@ class WhispererDefaults:
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False
+    WAIT_TIMEOUT = 300
+    WAIT_FOR_COMPLETION = True

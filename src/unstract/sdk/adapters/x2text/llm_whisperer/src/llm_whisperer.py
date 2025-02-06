@@ -1,3 +1,4 @@
+from io import BytesIO
 import json
 import logging
 import os
@@ -9,6 +10,11 @@ import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
 
+from unstract.llmwhisperer.client_v2 import (
+    LLMWhispererClientV2,
+    LLMWhispererClientException,
+)
+from unstract.llmwhisperer.client import LLMWhispererClient
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
@@ -36,12 +42,12 @@ logger = logging.getLogger(__name__)
 
 class LLMWhisperer(X2TextAdapter):
     _version = "v2"
+
     def __init__(self, settings: dict[str, Any]):
         super().__init__("LLMWhisperer")
         self.config = settings
         self.config["version"] = settings.get(WhispererConfig.VERSION, "v2")
         LLMWhisperer._version = settings.get(WhispererConfig.VERSION, "v2")
-        
 
     ID = "llmwhisperer|a5e6b8af-3e1f-4a80-b006-d017e8e67f93"
     NAME = "LLMWhisperer"
@@ -71,24 +77,12 @@ class LLMWhisperer(X2TextAdapter):
         f.close()
         return schema
 
-    def _get_request_headers(self) -> dict[str, Any]:
-        """Obtains the request headers to authenticate with LLMWhisperer.
-
-        Returns:
-            str: Request headers
-        """
-        return {
-            "accept": MimeType.JSON,
-            WhispererHeader.UNSTRACT_KEY: self.config.get(WhispererConfig.UNSTRACT_KEY),
-        }
-
     def _make_request(
         self,
-        request_method: HTTPMethod,
         request_endpoint: str,
-        headers: Optional[dict[str, Any]] = None,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
+        is_test_connect: bool = False,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -107,41 +101,65 @@ class LLMWhisperer(X2TextAdapter):
         """
         # Determine version and set appropriate URL
         version = self.config.get("version", "v1")
-        base_url = (f"{self.config.get(WhispererConfig.URL)}/api/v2/{request_endpoint}"
-                    if version == "v2"
-                    else f"{self.config.get(WhispererConfig.URL)}" f"/v1/{request_endpoint}"
-                    )
-
-        if not headers:
-            headers = self._get_request_headers()
-
-        try:
-            response: Response
-            if request_method == HTTPMethod.GET:
+        base_url = (
+            f"{self.config.get(WhispererConfig.URL)}/api/v2/{request_endpoint}"
+            if version == "v2"
+            else f"{self.config.get(WhispererConfig.URL)}" f"/v1/{request_endpoint}"
+        )
+        if is_test_connect:
+            headers = {
+                "accept": MimeType.JSON,
+                WhispererHeader.UNSTRACT_KEY: self.config.get(
+                    WhispererConfig.UNSTRACT_KEY
+                ),
+            }
+            try:
                 response = requests.get(url=base_url, headers=headers, params=params)
-            elif request_method == HTTPMethod.POST:
-                response = requests.post(
-                    url=base_url, headers=headers, params=params, data=data
+            except ConnectionError as e:
+                logger.error(f"Adapter error: {e}")
+                raise ExtractorError(
+                    "Unable to connect to LLMWhisperer service, please check the URL"
                 )
-            else:
-                raise ExtractorError(f"Unsupported request method: {request_method}")
-            response.raise_for_status()
-        except ConnectionError as e:
-            logger.error(f"Adapter error: {e}")
-            raise ExtractorError(
-                "Unable to connect to LLMWhisperer service, please check the URL",
+            except HTTPError as e:
+                logger.error(f"Adapter error: {e}")
+                default_err = "Error while calling the LLMWhisperer service"
+                msg = AdapterUtils.get_msg_from_request_exc(
+                    err=e, message_key="message", default_err=default_err
+                )
+                raise ExtractorError(msg)
+
+        else:
+            client = (
+                LLMWhispererClientV2(
+                    base_url=base_url,
+                    api_key=self.config.get(WhispererConfig.UNSTRACT_KEY),
+                )
+                if version == "v2"
+                else LLMWhispererClient(
+                    base_url=base_url,
+                    api_key=self.config.get(WhispererConfig.UNSTRACT_KEY),
+                )
             )
-        except Timeout as e:
-            msg = "Request to LLMWhisperer has timed out"
-            logger.error(f"{msg}: {e}")
-            raise ExtractorError(msg)
-        except HTTPError as e:
-            logger.error(f"Adapter error: {e}")
-            default_err = "Error while calling the LLMWhisperer service"
-            msg = AdapterUtils.get_msg_from_request_exc(
-                err=e, message_key="message", default_err=default_err
-            )
-            raise ExtractorError(msg)
+            try:
+                response: Any
+                whisper_result = client.whisper(params, stream=data)
+                if whisper_result["status_code"] == 200:
+                    response = whisper_result["extraction"]
+                else:
+                    default_err = "Error while calling the LLMWhisperer service"
+                    raise ExtractorError(
+                        default_err,
+                        whisper_result["status_code"],
+                        whisper_result["message"],
+                    )
+            except LLMWhispererClientException as e:
+                logger.error(f"Adapter error: {e}")
+                raise ExtractorError(message=LLMWhispererClientException.error_message)
+
+            except Exception as e:
+                logger.error(f"Adapter error: {e}")
+                default_err = "Error while calling the LLMWhisperer service"
+                raise ExtractorError(message=default_err, actual_err=e)
         return response
 
     def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
@@ -193,6 +211,13 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.MARK_HORIZONTAL_LINES,
                 WhispererDefaults.MARK_HORIZONTAL_LINES,
             ),
+            WhispererConfig.WAIT_FOR_COMPLETION: self.config.get(
+                WhispererDefaults.WAIT_FOR_COMPLETION,
+            ),
+            WhispererConfig.WAIT_TIMEOUT: self.config.get(
+                WhispererConfig.WAIT_TIMEOUT,
+                WhispererDefaults.WAIT_TIMEOUT,
+            ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
             params.update(
@@ -216,134 +241,9 @@ class LLMWhisperer(X2TextAdapter):
 
     def test_connection(self) -> bool:
         self._make_request(
-            request_method=HTTPMethod.GET,
-            request_endpoint=WhispererEndpoint.TEST_CONNECTION,
+            request_endpoint=WhispererEndpoint.TEST_CONNECTION, is_test_connection=True
         )
         return True
-
-    def _check_status_until_ready(
-
-        self,
-        whisper_hash: str = "",
-        headers: dict[str, Any] = None,
-        params: dict[str, Any] = None,
-    ) -> WhisperStatus:
-        """Checks the extraction status by polling for both v1 and v2.
-
-        Polls the /whisper-status endpoint in fixed intervals of
-        env: ADAPTER_LLMW_POLL_INTERVAL for a certain number of times
-        controlled by env: ADAPTER_LLMW_MAX_POLLS.
-
-        Args:
-            version (str): Version of the LLMWhisperer API (either 'v1' or 'v2')
-            config (Optional[dict[str, Any]]): Configuration for v2 (None for v1)
-            whisper_hash (str): Identifier for the extraction, returned by LLMWhisperer
-            headers (dict[str, Any]): Headers to pass for the status check
-            params (dict[str, Any]): Params to pass for the status check
-
-        Returns:
-            WhisperStatus: Status of the extraction
-        """
-        version = self.config['version']
-        POLL_INTERVAL = WhispererDefaults.POLL_INTERVAL_V2 if version == "v2" else WhispererDefaults.POLL_INTERVAL
-        MAX_POLLS = WhispererDefaults.MAX_POLLS_V2 if version == "v2" else WhispererDefaults.MAX_POLLS
-        STATUS_RETRY_THRESHOLD = WhispererDefaults.STATUS_RETRIES if version == "v2" else 0
-        status_retry_count = 0
-        request_count = 0
-
-        while True:
-            request_count += 1
-            logger.info(
-                f"Checking status{' for whisper-hash ' if version == 'v2' else ''}"
-                f"'{whisper_hash}' with interval: {POLL_INTERVAL}s, request count: "
-                f"{request_count} [max: {MAX_POLLS}]"
-            )
-
-            # Make request based on version
-            status_response = self._make_request(
-                request_method=HTTPMethod.GET,
-                request_endpoint=WhispererEndpoint.STATUS,
-                headers=headers,
-                params=params,
-            )
-
-            if status_response.status_code == 200:
-                status_data = status_response.json()
-                status = status_data.get(WhisperStatus.STATUS, WhisperStatus.UNKNOWN)
-                logger.info(f"Whisper status for '{whisper_hash}': {status}")
-                if status in [WhisperStatus.PROCESSED, WhisperStatus.DELIVERED]:
-                    break
-            else:
-                if version == "v2" and status_retry_count >= STATUS_RETRY_THRESHOLD:
-                    raise ExtractorError(
-                        f"Error checking LLMWhisperer status for whisper-hash "
-                        f"'{whisper_hash}': {status_response.text}"
-                    )
-                elif version == "v2":
-                    status_retry_count += 1
-                    logger.warning(
-                        f"Whisper status for '{whisper_hash}' failed "
-                        f"{status_retry_count} time(s), retrying... "
-                        f"[threshold: {STATUS_RETRY_THRESHOLD}]: {status_response.text}"
-                    )
-                else:  # v1 error handling
-                    raise ExtractorError(
-                        "Error checking LLMWhisperer status: "
-                        f"{status_response.status_code} - {status_response.text}"
-                    )
-
-            if request_count >= MAX_POLLS:
-                raise ExtractorError(
-                    f"Unable to extract text for whisper-hash '{whisper_hash}' "
-                    f"after attempting {request_count} times"
-                )
-
-            time.sleep(POLL_INTERVAL)
-
-        return status
-
-
-    def _extract_async(self, whisper_hash: str) -> str:
-        """Makes an async extraction with LLMWhisperer.
-
-        Polls and checks the status first before proceeding to retrieve once.
-
-        Args:
-            whisper_hash (str): Identifier of the extraction
-
-        Returns:
-            str: Extracted contents from the file
-        """
-        logger.info(f"Extracting async for whisper hash: {whisper_hash}")
-        version = self.config['version']
-        headers: dict[str, Any] = self._get_request_headers()
-        params =({
-            WhisperStatus.WHISPER_HASH: whisper_hash,
-            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
-        } if version == 'v1'
-        else {
-            WhisperStatus.WHISPER_HASH_V2: whisper_hash,
-            WhispererConfig.TEXT_ONLY: WhispererDefaults.TEXT_ONLY,
-        })
-
-        # Polls in fixed intervals and checks status
-        self._check_status_until_ready(
-            whisper_hash=whisper_hash, headers=headers, params=params
-        )
-
-        retrieve_response = self._make_request(
-            request_method=HTTPMethod.GET,
-            request_endpoint=WhispererEndpoint.RETRIEVE,
-            headers=headers,
-            params=params,
-        )
-        if retrieve_response.status_code == 200:
-            return retrieve_response.json()
-        else:
-            raise ExtractorError(
-                "Error retrieving from LLMWhisperer: "
-                f"{retrieve_response.status_code} - {retrieve_response.text}"
-            )
 
     def _send_whisper_request(
         self,
@@ -362,10 +262,9 @@ class LLMWhisperer(X2TextAdapter):
         Returns:
             requests.Response: Response from the whisper request
         """
-        version = self.config['version']
+        version = self.config["version"]
         config = self.config
         params = {}
-        headers = self._get_request_headers()
         if version == "v1":
             params = self._get_whisper_params(enable_highlight)
         elif version == "v2":
@@ -373,16 +272,13 @@ class LLMWhisperer(X2TextAdapter):
         else:
             raise ValueError("Unsupported version. Only 'v1' and 'v2' are allowed.")
 
-        headers["Content-Type"] = "application/octet-stream"
-
         try:
             input_file_data = fs.read(input_file_path, "rb")
+            file_buffer = BytesIO(input_file_data.read())
             response = self._make_request(
-                request_method=HTTPMethod.POST,
                 request_endpoint=WhispererEndpoint.WHISPER,
-                headers=headers,
                 params=params,
-                data=input_file_data,
+                data=file_buffer,
             )
         except OSError as e:
             logger.error(f"OS error while reading {input_file_path}: {e}")
@@ -397,15 +293,8 @@ class LLMWhisperer(X2TextAdapter):
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         output_json = {}
-        version = self.config['version']
-        if response.status_code == 200:
-            output_json = response.json()
-        elif response.status_code == 202:
-            whisper_hash_key = WhisperStatus.WHISPER_HASH_V2 if version == "v2" else WhisperStatus.WHISPER_HASH
-            whisper_hash = response.json().get(whisper_hash_key)
-            output_json = self._extract_async(whisper_hash=whisper_hash)
-        else:
-            raise ExtractorError("Couldn't extract text from file")
+        version = self.config["version"]
+        output_json = response
         if output_file_path:
             self._write_output_to_file(
                 output_json=output_json, output_file_path=Path(output_file_path), fs=fs
@@ -432,7 +321,7 @@ class LLMWhisperer(X2TextAdapter):
             ExtractorError: If there is an error while writing the output file.
         """
         try:
-            version = self.config['version']
+            version = self.config["version"]
             output_key = "text" if version == "v1" else "result_text"
             text_output = output_json.get(output_key, "")
             logger.info(f"Writing output to {output_file_path}")
@@ -490,7 +379,7 @@ class LLMWhisperer(X2TextAdapter):
         Returns:
             TextExtractionResult: Extracted text along with metadata.
         """
-        if self.config['version'] == "v2":
+        if self.config["version"] == "v2":
             # V2 logic
             response: requests.Response = self._send_whisper_request(
                 input_file_path, fs=fs
