@@ -6,6 +6,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhispererConfig,
     WhispererDefaults,
 )
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +50,6 @@ class LLMWhispererHelper:
                 WhispererConfig.MARK_HORIZONTAL_LINES,
                 WhispererDefaults.MARK_HORIZONTAL_LINES,
             ),
-            WhispererConfig.URL_IN_POST: WhispererDefaults.URL_IN_POST,
             WhispererConfig.PAGE_SEPARATOR: config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
@@ -68,9 +68,7 @@ class LLMWhispererHelper:
                 WhispererConfig.WAIT_TIMEOUT,
                 WhispererDefaults.WAIT_TIMEOUT,
             ),
-            WhispererConfig.WAIT_FOR_COMPLETION: config.get(
-                WhispererDefaults.WAIT_FOR_COMPLETION
-            ),
+            WhispererConfig.WAIT_FOR_COMPLETION: WhispererDefaults.WAIT_FOR_COMPLETION,
         }
         if params[WhispererConfig.MODE] == Modes.LOW_COST.value:
             params.update(

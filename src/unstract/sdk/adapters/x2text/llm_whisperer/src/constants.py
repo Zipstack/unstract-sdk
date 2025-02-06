@@ -72,7 +72,7 @@ class WhispererConfig:
     GAUSSIAN_BLUR_RADIUS = "gaussian_blur_radius"
     FORCE_TEXT_PROCESSING = "force_text_processing"
     LINE_SPLITTER_TOLERANCE = "line_splitter_tolerance"
-    LINE_SPLITTER_STRATEGY = "line_splitter_strategy"
+    LINE_SPLITTER_STRATEGY = "line_spitter_strategy"
     HORIZONTAL_STRETCH_FACTOR = "horizontal_stretch_factor"
     PAGES_TO_EXTRACT = "pages_to_extract"
     STORE_METADATA_FOR_HIGHLIGHTING = "store_metadata_for_highlighting"
@@ -81,14 +81,14 @@ class WhispererConfig:
     PAGE_SEPARATOR = "page_seperator"
     MARK_VERTICAL_LINES = "mark_vertical_lines"
     MARK_HORIZONTAL_LINES = "mark_horizontal_lines"
-    URL_IN_POST = "url_in_post"
     TAG = "tag"
     USE_WEBHOOK = "use_webhook"
     WEBHOOK_METADATA = "webhook_metadata"
     TEXT_ONLY = "text_only"
     VERSION = "version"
     WAIT_TIMEOUT = "wait_timeout"
-    WAIT_FOR_COMPLETION ="wait_for_completion"
+    WAIT_FOR_COMPLETION = "wait_for_completion"
+
 
 class WhisperStatus:
     """Values returned / used by /whisper-status endpoint."""
@@ -112,17 +112,12 @@ class WhispererDefaults:
     LINE_SPLITTER_TOLERANCE = 0.75
     LINE_SPLITTER_STRATEGY = "left-priority"
     HORIZONTAL_STRETCH_FACTOR = 1.0
-    POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
-    MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
-    POLL_INTERVAL_V2 = int(os.getenv(WhispererEnv.POLL_INTERVAL_V2, 30))
-    MAX_POLLS_V2 = int(os.getenv(WhispererEnv.MAX_POLLS_V2, 30))
     PAGES_TO_EXTRACT = ""
     ADD_LINE_NOS = True
     OUTPUT_JSON = True
     PAGE_SEPARATOR = "<<< >>>"
     MARK_VERTICAL_LINES = False
     MARK_HORIZONTAL_LINES = False
-    STATUS_RETRIES = int(os.getenv(WhispererEnv.STATUS_RETRIES, 5))
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False

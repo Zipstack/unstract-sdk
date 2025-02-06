@@ -2,7 +2,6 @@ from io import BytesIO
 import json
 import logging
 import os
-import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -82,7 +81,7 @@ class LLMWhisperer(X2TextAdapter):
         request_endpoint: str,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
-        is_test_connect: bool = False,
+        is_test_connection: bool = False,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -102,19 +101,20 @@ class LLMWhisperer(X2TextAdapter):
         # Determine version and set appropriate URL
         version = self.config.get("version", "v1")
         base_url = (
-            f"{self.config.get(WhispererConfig.URL)}/api/v2/{request_endpoint}"
+            f"{self.config.get(WhispererConfig.URL)}/api/v2"
             if version == "v2"
-            else f"{self.config.get(WhispererConfig.URL)}" f"/v1/{request_endpoint}"
+            else f"{self.config.get(WhispererConfig.URL)}" f"/v1"
         )
-        if is_test_connect:
+        if is_test_connection:
             headers = {
                 "accept": MimeType.JSON,
                 WhispererHeader.UNSTRACT_KEY: self.config.get(
                     WhispererConfig.UNSTRACT_KEY
                 ),
             }
+            url = f"{base_url}/{request_endpoint}"
             try:
-                response = requests.get(url=base_url, headers=headers, params=params)
+                response = requests.get(url=url, headers=headers, params=params)
             except ConnectionError as e:
                 logger.error(f"Adapter error: {e}")
                 raise ExtractorError(
@@ -142,24 +142,25 @@ class LLMWhisperer(X2TextAdapter):
             )
             try:
                 response: Any
-                whisper_result = client.whisper(params, stream=data)
+                whisper_result = client.whisper(**params, stream=data)
                 if whisper_result["status_code"] == 200:
-                    response = whisper_result["extraction"]
+                    if version == "v2":
+                        response = whisper_result["extraction"]
+                    else:
+                        response = whisper_result
                 else:
                     default_err = "Error while calling the LLMWhisperer service"
                     raise ExtractorError(
-                        default_err,
-                        whisper_result["status_code"],
                         whisper_result["message"],
+                        whisper_result["status_code"],
                     )
             except LLMWhispererClientException as e:
-                logger.error(f"Adapter error: {e}")
-                raise ExtractorError(message=LLMWhispererClientException.error_message)
+                logger.error(f"LLM Whisperer error: {e}")
+                raise ExtractorError(f"LLM Whisperer error: {e}")
 
             except Exception as e:
                 logger.error(f"Adapter error: {e}")
-                default_err = "Error while calling the LLMWhisperer service"
-                raise ExtractorError(message=default_err, actual_err=e)
+                raise ExtractorError(f"Adapter error: {e}")
         return response
 
     def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
@@ -177,7 +178,6 @@ class LLMWhisperer(X2TextAdapter):
             # Not providing default value to maintain legacy compatablity
             # Providing default value will overide the params
             # processing_mode, force_text_processing
-            WhispererConfig.MODE: self.config.get(WhispererConfig.MODE),
             WhispererConfig.OUTPUT_MODE: self.config.get(
                 WhispererConfig.OUTPUT_MODE, OutputModes.LINE_PRINTER.value
             ),
@@ -197,26 +197,9 @@ class LLMWhisperer(X2TextAdapter):
                 WhispererConfig.PAGES_TO_EXTRACT,
                 WhispererDefaults.PAGES_TO_EXTRACT,
             ),
-            WhispererConfig.ADD_LINE_NOS: WhispererDefaults.ADD_LINE_NOS,
-            WhispererConfig.OUTPUT_JSON: WhispererDefaults.OUTPUT_JSON,
             WhispererConfig.PAGE_SEPARATOR: self.config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
-            ),
-            WhispererConfig.MARK_VERTICAL_LINES: self.config.get(
-                WhispererConfig.MARK_VERTICAL_LINES,
-                WhispererDefaults.MARK_VERTICAL_LINES,
-            ),
-            WhispererConfig.MARK_HORIZONTAL_LINES: self.config.get(
-                WhispererConfig.MARK_HORIZONTAL_LINES,
-                WhispererDefaults.MARK_HORIZONTAL_LINES,
-            ),
-            WhispererConfig.WAIT_FOR_COMPLETION: self.config.get(
-                WhispererDefaults.WAIT_FOR_COMPLETION,
-            ),
-            WhispererConfig.WAIT_TIMEOUT: self.config.get(
-                WhispererConfig.WAIT_TIMEOUT,
-                WhispererDefaults.WAIT_TIMEOUT,
             ),
         }
         if not params[WhispererConfig.FORCE_TEXT_PROCESSING]:
@@ -273,12 +256,11 @@ class LLMWhisperer(X2TextAdapter):
             raise ValueError("Unsupported version. Only 'v1' and 'v2' are allowed.")
 
         try:
-            input_file_data = fs.read(input_file_path, "rb")
-            file_buffer = BytesIO(input_file_data.read())
+            input_file_data = BytesIO(fs.read(input_file_path, "rb"))
             response = self._make_request(
                 request_endpoint=WhispererEndpoint.WHISPER,
                 params=params,
-                data=file_buffer,
+                data=input_file_data,
             )
         except OSError as e:
             logger.error(f"OS error while reading {input_file_path}: {e}")
@@ -299,7 +281,7 @@ class LLMWhisperer(X2TextAdapter):
             self._write_output_to_file(
                 output_json=output_json, output_file_path=Path(output_file_path), fs=fs
             )
-        output_key = "text" if version == "v1" else "result_text"
+        output_key = "extracted_text" if version == "v1" else "result_text"
         return output_json.get(output_key, "")
 
     def _write_output_to_file(
@@ -322,7 +304,7 @@ class LLMWhisperer(X2TextAdapter):
         """
         try:
             version = self.config["version"]
-            output_key = "text" if version == "v1" else "result_text"
+            output_key = "extracted_text" if version == "v1" else "result_text"
             text_output = output_json.get(output_key, "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
@@ -341,7 +323,9 @@ class LLMWhisperer(X2TextAdapter):
                 fs.mkdir(str(metadata_dir), create_parents=True)
                 # Remove the "text" key from the metadata
                 metadata = {
-                    key: value for key, value in output_json.items() if key != "text"
+                    key: value
+                    for key, value in output_json.items()
+                    if key != output_key
                 }
                 metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
                 logger.info(f"Writing metadata to {metadata_file_path}")
@@ -384,10 +368,8 @@ class LLMWhisperer(X2TextAdapter):
             response: requests.Response = self._send_whisper_request(
                 input_file_path, fs=fs
             )
-            response_text = response.text
-            response_dict = json.loads(response_text)
             metadata = TextExtractionMetadata(
-                whisper_hash=response_dict.get(WhisperStatus.WHISPER_HASH_V2, "")
+                whisper_hash=response.get(WhisperStatus.WHISPER_HASH_V2, "")
             )
         else:
             # V1 logic
@@ -398,7 +380,7 @@ class LLMWhisperer(X2TextAdapter):
             )
 
             metadata = TextExtractionMetadata(
-                whisper_hash=response.headers.get(X2TextConstants.WHISPER_HASH, "")
+                whisper_hash=response.get(X2TextConstants.WHISPER_HASH, "")
             )
 
         extracted_text = self._extract_text_from_response(
