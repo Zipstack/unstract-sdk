@@ -3,13 +3,13 @@ from typing import Any
 
 from llama_index.core.llms import LLM
 from llama_index.llms.openai import OpenAI
+from llama_index.llms.openai.utils import O1_MODELS
 from openai import APIError as OpenAIAPIError
 
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.exceptions import LLMError
-
 
 class Constants:
     MODEL = "model"
@@ -53,21 +53,23 @@ class OpenAILLM(LLMAdapter):
         try:
             max_tokens = self.config.get(Constants.MAX_TOKENS)
             max_tokens = int(max_tokens) if max_tokens else None
-            llm: LLM = OpenAI(
-                model=str(self.config.get(Constants.MODEL)),
-                api_key=str(self.config.get(Constants.API_KEY)),
-                api_base=str(self.config.get(Constants.API_BASE)),
-                api_version=str(self.config.get(Constants.API_VERSION)),
-                max_retries=int(
-                    self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
-                ),
-                api_type="openai",
-                temperature=0,
-                timeout=float(
-                    self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
-                ),
-                max_tokens=max_tokens,
-            )
+            model = str(self.config.get(Constants.MODEL))
+
+            llm_kwargs = {
+                "model": model,
+                "api_key": str(self.config.get(Constants.API_KEY)),
+                "api_base": str(self.config.get(Constants.API_BASE)),
+                "api_version": str(self.config.get(Constants.API_VERSION)),
+                "max_retries": int(self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)),
+                "api_type": "openai",
+                "timeout": float(self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)),
+                "max_tokens": max_tokens,
+            }
+
+            if model not in O1_MODELS:
+                llm_kwargs["temperature"] = 0
+
+            llm = OpenAI(**llm_kwargs)
             return llm
         except Exception as e:
             raise AdapterError(str(e))
