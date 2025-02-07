@@ -121,6 +121,7 @@ class FileStorage(FileStorageInterface):
         except Exception as e:
             raise FileOperationError(str(e)) from e
 
+    @skip_local_cache
     def exists(self, path: str) -> bool:
         """Checks if a file/directory path exists.
 
