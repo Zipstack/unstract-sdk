@@ -40,6 +40,8 @@ class Pinecone(VectorDBAdapter):
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Pinecone", self._vector_db_instance)
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "pinecone|83881133-485d-4ecc-b1f7-0009f96dc74a"
@@ -56,12 +58,7 @@ class Pinecone(VectorDBAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/pinecone.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance

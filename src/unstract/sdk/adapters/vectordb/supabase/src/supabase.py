@@ -29,6 +29,8 @@ class Supabase(VectorDBAdapter):
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Supabase", self._vector_db_instance)
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "supabase|e6998e3c-3595-48c0-a190-188dbd803858"
@@ -45,12 +47,7 @@ class Supabase(VectorDBAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/supabase.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_vector_db_instance(self) -> VectorStore:
         return self._vector_db_instance

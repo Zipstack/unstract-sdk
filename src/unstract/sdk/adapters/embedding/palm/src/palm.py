@@ -20,6 +20,8 @@ class PaLM(EmbeddingAdapter):
         super().__init__("Palm")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "palm|a3fc9fda-f02f-405f-bb26-8bd2ace4317e"
@@ -40,13 +42,6 @@ class PaLM(EmbeddingAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/PaLM.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
-
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
             embedding_batch_size = EmbeddingHelper.get_embedding_batch_size(
@@ -61,7 +56,4 @@ class PaLM(EmbeddingAdapter):
         except Exception as e:
             raise AdapterError(str(e))
 
-    def test_connection(self) -> bool:
-        embedding = self.get_embedding_instance()
-        test_result: bool = EmbeddingHelper.test_embedding_instance(embedding)
-        return test_result
+     

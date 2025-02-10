@@ -29,6 +29,8 @@ class OllamaLLM(LLMAdapter):
         super().__init__("Ollama")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "ollama|4b8bd31a-ce42-48d4-9d69-f29c12e0f276"
@@ -48,13 +50,6 @@ class OllamaLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/ollama.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_llm_instance(self) -> LLM:
         try:

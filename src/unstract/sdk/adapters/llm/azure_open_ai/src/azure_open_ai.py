@@ -27,6 +27,8 @@ class AzureOpenAILLM(LLMAdapter):
         super().__init__("AzureOpenAI")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "azureopenai|592d84b9-fe03-4102-a17e-6b391f32850b"
@@ -46,13 +48,6 @@ class AzureOpenAILLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/AzureopenAI.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_llm_instance(self) -> LLM:
         max_retries = int(
