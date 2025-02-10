@@ -23,7 +23,17 @@ class Constants:
 
 
 class OpenAILLM(LLMAdapter):
+    
     def __init__(self, settings: dict[str, Any]):
+        """
+        Initializes the OpenAI configuration.
+
+        Args:
+            settings (dict[str, Any]): A dictionary containing configuration settings.
+
+        Note:
+            O-series models (e.g., O1, O1-mini) do not support the 'temperature' parameter, so it defaults to 1.
+        """
         super().__init__("OpenAI")
         self.config = settings
 
