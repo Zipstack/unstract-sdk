@@ -77,6 +77,11 @@ classifiers = [
 ]
 scripts = { unstract-tool-gen = "unstract.sdk.scripts.tool_gen:main" }
 
+[project.optional-dependencies]
+# Pinning boto3 to 1.34.x for remote storage compatibility.
+aws = ["s3fs[boto3]~=2024.10.0", "boto3~=1.34.131"]
+gcs = ["gcsfs~=2024.10.0"]
+
 [tool.pdm.dev-dependencies]
 docs = [ "lazydocs~=0.4.8" ]
 test = [
