@@ -16,7 +16,7 @@
       "type": "string",
       "title": "URL",
       "format": "uri",
-      "default": "http://unstract-unstructured-io:8000/general/v0/general",
+      "default": "http://unstract-unstructured-io/general/v0/general",
       "description": "Provide the URL of Unstructured IO server."
     }
   }
