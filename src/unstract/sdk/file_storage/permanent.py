@@ -13,7 +13,6 @@ class PermanentFileStorage(FileStorage):
     SUPPORTED_FILE_STORAGE_TYPES = [
         FileStorageProvider.GCS.value,
         FileStorageProvider.S3.value,
-        FileStorageProvider.AZURE.value,
         FileStorageProvider.LOCAL.value,
     ]
 

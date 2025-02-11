@@ -765,6 +765,11 @@ def test_glob(file_storage, folder_path, expected_result):
             "TEST_TEMPORARY_STORAGE",
             FileStorageProvider.MINIO,
         ),
+        (
+            StorageType.PERMANENT,
+            "TEST_LOCAL_STORAGE",
+            FileStorageProvider.LOCAL,
+        ),
     ],
 )
 def test_get_storage(storage_type, env_name, expected):
