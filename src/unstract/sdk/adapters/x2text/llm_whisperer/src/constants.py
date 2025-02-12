@@ -122,7 +122,7 @@ class WhispererDefaults:
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False
-    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 200))
+    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
     WAIT_FOR_COMPLETION = True
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
