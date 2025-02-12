@@ -1,4 +1,3 @@
-from io import BytesIO
 import json
 import logging
 import os
@@ -32,6 +31,12 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhisperStatus,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer.src.helper import LLMWhispererHelper
+from unstract.sdk.adapters.x2text.llm_whisperer.src.llm_whispererv1 import (
+    LLMWhispererV1,
+)
+from unstract.sdk.adapters.x2text.llm_whisperer.src.llm_whispererv2 import (
+    LLMWhispererV2,
+)
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
@@ -53,6 +58,8 @@ class LLMWhisperer(X2TextAdapter):
     DESCRIPTION = "LLMWhisperer X2Text"
     ICON = "/icons/adapter-icons/LLMWhispererV2.png"
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return LLMWhisperer.ID
@@ -68,13 +75,6 @@ class LLMWhisperer(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return LLMWhisperer.ICON
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def _make_request(
         self,
@@ -129,38 +129,14 @@ class LLMWhisperer(X2TextAdapter):
                 raise ExtractorError(msg)
 
         else:
-            client = (
-                LLMWhispererClientV2(
-                    base_url=base_url,
-                    api_key=self.config.get(WhispererConfig.UNSTRACT_KEY),
+            if version == "v2":
+                response = LLMWhispererV2._get_result(
+                    base_url=base_url, params=params, data=data
                 )
-                if version == "v2"
-                else LLMWhispererClient(
-                    base_url=base_url,
-                    api_key=self.config.get(WhispererConfig.UNSTRACT_KEY),
+            else:
+                response = LLMWhispererV1._get_result(
+                    base_url=base_url, params=params, data=data
                 )
-            )
-            try:
-                response: Any
-                whisper_result = client.whisper(**params, stream=data)
-                if whisper_result["status_code"] == 200:
-                    if version == "v2":
-                        response = whisper_result["extraction"]
-                    else:
-                        response = whisper_result
-                else:
-                    default_err = "Error while calling the LLMWhisperer service"
-                    raise ExtractorError(
-                        whisper_result["message"],
-                        whisper_result["status_code"],
-                    )
-            except LLMWhispererClientException as e:
-                logger.error(f"LLM Whisperer error: {e}")
-                raise ExtractorError(f"LLM Whisperer error: {e}")
-
-            except Exception as e:
-                logger.error(f"Adapter error: {e}")
-                raise ExtractorError(f"Adapter error: {e}")
         return response
 
     def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
@@ -256,7 +232,7 @@ class LLMWhisperer(X2TextAdapter):
             raise ValueError("Unsupported version. Only 'v1' and 'v2' are allowed.")
 
         try:
-            input_file_data = BytesIO(fs.read(input_file_path, "rb"))
+            input_file_data = fs.read(input_file_path, "rb")
             response = self._make_request(
                 request_endpoint=WhispererEndpoint.WHISPER,
                 params=params,
@@ -268,6 +244,17 @@ class LLMWhisperer(X2TextAdapter):
 
         return response
 
+    def _get_request_headers(self) -> dict[str, Any]:
+        """Obtains the request headers to authenticate with LLMWhisperer.
+
+        Returns:
+            str: Request headers
+        """
+        return {
+            "accept": MimeType.JSON,
+            WhispererHeader.UNSTRACT_KEY: self.config.get(WhispererConfig.UNSTRACT_KEY),
+        }
+
     def _extract_text_from_response(
         self,
         output_file_path: Optional[str],
@@ -277,6 +264,16 @@ class LLMWhisperer(X2TextAdapter):
         output_json = {}
         version = self.config["version"]
         output_json = response
+        if version == "v1":
+            if response.status_code == 200:
+                output_json = response.json()
+            elif response.status_code == 202:
+                whisper_hash_key = WhisperStatus.WHISPER_HASH
+                whisper_hash = response.json().get(whisper_hash_key)
+                output_json = LLMWhispererV1._extract_async(whisper_hash=whisper_hash)
+            else:
+                raise ExtractorError("Couldn't extract text from file")
+
         if output_file_path:
             self._write_output_to_file(
                 output_json=output_json, output_file_path=Path(output_file_path), fs=fs
@@ -308,10 +305,7 @@ class LLMWhisperer(X2TextAdapter):
             text_output = output_json.get(output_key, "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=output_file_path,
-                mode="w",
-                encoding="utf-8",
-                data=text_output,
+                path=str(output_file_path), mode="w", data=text_output, encoding="utf-8"
             )
             try:
                 # Define the directory of the output file and metadata paths
@@ -320,7 +314,7 @@ class LLMWhisperer(X2TextAdapter):
                 metadata_file_name = output_file_path.with_suffix(".json").name
                 metadata_file_path = metadata_dir / metadata_file_name
                 # Ensure the metadata directory exists
-                fs.mkdir(str(metadata_dir), create_parents=True)
+                fs.mkdir(create_parents=True, path=str(metadata_dir))
                 # Remove the "text" key from the metadata
                 metadata = {
                     key: value
@@ -331,10 +325,10 @@ class LLMWhisperer(X2TextAdapter):
                 logger.info(f"Writing metadata to {metadata_file_path}")
 
                 fs.write(
-                    path=metadata_file_path,
+                    path=str(metadata_file_path),
                     mode="w",
-                    encoding="utf-8",
                     data=metadata_json,
+                    encoding="utf-8",
                 )
             except Exception as e:
                 logger.error(
