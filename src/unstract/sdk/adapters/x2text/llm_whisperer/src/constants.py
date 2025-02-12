@@ -58,6 +58,7 @@ class WhispererEnv:
     POLL_INTERVAL_V2 = "ADAPTER_LLMW_POLL_INTERVAL_V2"
     MAX_POLLS_V2 = "ADAPTER_LLMW_MAX_POLLS_V2"
     STATUS_RETRIES = "ADAPTER_LLMW_STATUS_RETRIES"
+    WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
 
 
 class WhispererConfig:
@@ -121,7 +122,7 @@ class WhispererDefaults:
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False
-    WAIT_TIMEOUT = 300
+    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 200))
     WAIT_FOR_COMPLETION = True
     POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
     MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
