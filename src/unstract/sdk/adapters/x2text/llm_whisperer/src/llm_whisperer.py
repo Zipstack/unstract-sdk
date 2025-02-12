@@ -6,13 +6,7 @@ from typing import Any, Optional
 
 import requests
 from requests import Response
-from requests.exceptions import ConnectionError, HTTPError, Timeout
-
-from unstract.llmwhisperer.client_v2 import (
-    LLMWhispererClientV2,
-    LLMWhispererClientException,
-)
-from unstract.llmwhisperer.client import LLMWhispererClient
+from requests.exceptions import ConnectionError, HTTPError
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
@@ -21,7 +15,6 @@ from unstract.sdk.adapters.x2text.dto import (
     TextExtractionResult,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
-    HTTPMethod,
     OutputModes,
     ProcessingModes,
     WhispererConfig,
@@ -40,6 +33,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.llm_whispererv2 import (
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.sdk.adapters.x2text.llm_whisperer.src.dto import WhispererRequestParams
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +54,6 @@ class LLMWhisperer(X2TextAdapter):
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
-    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
-
     @staticmethod
     def get_id() -> str:
         return LLMWhisperer.ID
@@ -77,6 +69,13 @@ class LLMWhisperer(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhisperer.png"
+
+    @staticmethod
+    def get_json_schema() -> str:
+        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
+        schema = f.read()
+        f.close()
+        return schema
 
     def _make_request(
         self,
@@ -131,14 +130,26 @@ class LLMWhisperer(X2TextAdapter):
                 raise ExtractorError(msg)
 
         else:
+            headers = self._get_request_headers()
+            response: Any
             if version == "v2":
-                response = LLMWhispererV2._get_result(
-                    base_url=base_url, params=params, data=data
-                )
+                try:
+                    response = LLMWhispererV2._get_result(
+                        base_url=base_url, params=params, data=data, config=self.config
+                    )
+                except Exception as e:
+                    logger.error(f"{e}")
+                    raise ExtractorError(f"{e}")
             else:
-                response = LLMWhispererV1._get_result(
-                    base_url=base_url, params=params, data=data
-                )
+                try:
+
+                    url = f"{base_url}/{request_endpoint}"
+                    response = LLMWhispererV1._get_result(
+                        base_url=url, params=params, data=data, headers=headers
+                    )
+                except Exception as e:
+                    logger.error(f"{e}")
+                    raise ExtractorError(f"{e}")
         return response
 
     def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
@@ -209,6 +220,7 @@ class LLMWhisperer(X2TextAdapter):
     def _send_whisper_request(
         self,
         input_file_path: str,
+        extra_params: Optional[WhispererRequestParams] = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         enable_highlight: bool = False,
     ) -> requests.Response:
@@ -229,12 +241,14 @@ class LLMWhisperer(X2TextAdapter):
         if version == "v1":
             params = self._get_whisper_params(enable_highlight)
         elif version == "v2":
-            params = LLMWhispererHelper.get_whisperer_params(config)
+            params = LLMWhispererHelper.get_whisperer_params(
+                config=config, extra_params=extra_params
+            )
         else:
             raise ValueError("Unsupported version. Only 'v1' and 'v2' are allowed.")
 
         try:
-            input_file_data = fs.read(input_file_path, "rb")
+            input_file_data = fs.read(path=input_file_path, mode="rb")
             response = self._make_request(
                 request_endpoint=WhispererEndpoint.WHISPER,
                 params=params,
@@ -361,8 +375,9 @@ class LLMWhisperer(X2TextAdapter):
         """
         if self.config["version"] == "v2":
             # V2 logic
+            extra_params = WhispererRequestParams(tag=kwargs.get(X2TextConstants.TAGS))
             response: requests.Response = self._send_whisper_request(
-                input_file_path, fs=fs
+                input_file_path=input_file_path, fs=fs, extra_params=extra_params
             )
             metadata = TextExtractionMetadata(
                 whisper_hash=response.get(WhisperStatus.WHISPER_HASH_V2, "")
@@ -370,13 +385,15 @@ class LLMWhisperer(X2TextAdapter):
         else:
             # V1 logic
             response: requests.Response = self._send_whisper_request(
-                input_file_path,
-                fs,
-                bool(kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)),
+                input_file_path=input_file_path,
+                fs=fs,
+                enable_highlight=bool(
+                    kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)
+                ),
             )
 
             metadata = TextExtractionMetadata(
-                whisper_hash=response.get(X2TextConstants.WHISPER_HASH, "")
+                whisper_hash=response.headers.get(X2TextConstants.WHISPER_HASH, "")
             )
 
         extracted_text = self._extract_text_from_response(

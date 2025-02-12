@@ -12,17 +12,18 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhispererDefaults,
     WhispererEndpoint,
 )
-from unstract.sdk.adapters.x2text.llm_whisperer.src.llm_whisperer import LLMWhisperer
 
 logger = logging.getLogger(__name__)
 
 
-class LLMWhispererV1(LLMWhisperer):
+class LLMWhispererV1:
     def _get_result(
-        self, base_url: str, params: Optional[dict[str, Any]], data: Optional[Any]
+        base_url: str,
+        params: Optional[dict[str, Any]],
+        data: Optional[Any],
+        headers: Optional[Any],
     ) -> Response:
         """Handles v1 API requests."""
-        headers = LLMWhisperer._get_request_headers()
         headers["Content-Type"] = "application/octet-stream"
         try:
             response = requests.post(

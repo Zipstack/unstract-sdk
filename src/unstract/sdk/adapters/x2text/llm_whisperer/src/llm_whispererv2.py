@@ -5,7 +5,6 @@ from io import BytesIO
 from requests import Response
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import WhispererConfig
-from unstract.sdk.adapters.x2text.llm_whisperer.src.llm_whisperer import LLMWhisperer
 from unstract.llmwhisperer.client_v2 import (
     LLMWhispererClientV2,
     LLMWhispererClientException,
@@ -14,14 +13,14 @@ from unstract.llmwhisperer.client_v2 import (
 logger = logging.getLogger(__name__)
 
 
-class LLMWhispererV2(LLMWhisperer):
+class LLMWhispererV2:
     def _get_result(
-        self, base_url: str, params: Optional[dict[str, Any]], data: Optional[Any]
+        config, base_url: str, params: Optional[dict[str, Any]], data: Optional[Any]
     ) -> Response:
         """Handles v2 API requests."""
         client = LLMWhispererClientV2(
             base_url=base_url,
-            api_key=self.config.get(WhispererConfig.UNSTRACT_KEY),
+            api_key=config.get(WhispererConfig.UNSTRACT_KEY),
         )
         try:
             byte_file = BytesIO(data)

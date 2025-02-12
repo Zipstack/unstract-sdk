@@ -123,3 +123,6 @@ class WhispererDefaults:
     TEXT_ONLY = False
     WAIT_TIMEOUT = 300
     WAIT_FOR_COMPLETION = True
+    POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
+    MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
+    STATUS_RETRIES = int(os.getenv(WhispererEnv.STATUS_RETRIES, 5))

@@ -6,6 +6,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer.src.constants import (
     WhispererConfig,
     WhispererDefaults,
 )
+from unstract.sdk.adapters.x2text.llm_whisperer.src.dto import WhispererRequestParams
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,9 @@ logger = logging.getLogger(__name__)
 class LLMWhispererHelper:
 
     @staticmethod
-    def get_whisperer_params(config: dict[str, Any]) -> dict[str, Any]:
+    def get_whisperer_params(
+        config: dict[str, Any], extra_params: WhispererRequestParams
+    ) -> dict[str, Any]:
         """Gets query params meant for /whisper endpoint.
 
         The params is filled based on the configuration passed.
@@ -56,7 +59,8 @@ class LLMWhispererHelper:
             ),
             # Not providing default value to maintain legacy compatablity
             # these are optional params and identifiers for audit
-            WhispererConfig.TAG: config.get(
+            WhispererConfig.TAG: extra_params.tag
+            or config.get(
                 WhispererConfig.TAG,
                 WhispererDefaults.TAG,
             ),
