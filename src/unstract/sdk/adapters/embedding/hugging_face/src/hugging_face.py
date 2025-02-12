@@ -22,6 +22,8 @@ class HuggingFace(EmbeddingAdapter):
         super().__init__("HuggingFace")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "huggingface|90ec9ec2-1768-4d69-8fb1-c88b95de5e5a"
@@ -37,13 +39,6 @@ class HuggingFace(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/huggingface.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
@@ -67,7 +62,4 @@ class HuggingFace(EmbeddingAdapter):
         except Exception as e:
             raise AdapterError(str(e))
 
-    def test_connection(self) -> bool:
-        embedding = self.get_embedding_instance()
-        test_result: bool = EmbeddingHelper.test_embedding_instance(embedding)
-        return test_result
+     

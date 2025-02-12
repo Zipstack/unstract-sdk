@@ -25,6 +25,8 @@ class Milvus(VectorDBAdapter):
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Milvus", self._vector_db_instance)
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "milvus|3f42f6f9-4b8e-4546-95f3-22ecc9aca442"
@@ -41,12 +43,7 @@ class Milvus(VectorDBAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/Milvus.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def get_vector_db_instance(self) -> VectorStore:
         return self._vector_db_instance

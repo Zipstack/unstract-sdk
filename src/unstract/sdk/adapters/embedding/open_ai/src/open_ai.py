@@ -27,6 +27,8 @@ class OpenAI(EmbeddingAdapter):
         super().__init__("OpenAI")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "openai|717a0b0e-3bbc-41dc-9f0c-5689437a1151"
@@ -47,13 +49,6 @@ class OpenAI(EmbeddingAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/OpenAI.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
-
     def get_embedding_instance(self) -> BaseEmbedding:
         try:
             timeout = int(self.config.get(Constants.TIMEOUT, Constants.DEFAULT_TIMEOUT))
@@ -73,7 +68,4 @@ class OpenAI(EmbeddingAdapter):
         except Exception as e:
             raise AdapterError(str(e))
 
-    def test_connection(self) -> bool:
-        embedding = self.get_embedding_instance()
-        test_result: bool = EmbeddingHelper.test_embedding_instance(embedding)
-        return test_result
+     

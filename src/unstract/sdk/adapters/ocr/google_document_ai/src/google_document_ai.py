@@ -41,6 +41,8 @@ class GoogleDocumentAI(OCRAdapter):
         else:
             self.google_service_account = json.loads(google_service_account)
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "googledocumentai|1013f64b-ecc9-4e35-b986-aebd60fb55d7"
@@ -57,12 +59,7 @@ class GoogleDocumentAI(OCRAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/GoogleDocumentAI.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     """ Construct the request body to be sent to Google AI Document server """
 

@@ -15,6 +15,8 @@ class NoOpX2Text(X2TextAdapter):
         super().__init__("NoOpX2Text")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "noOpX2text|mp66d1op-7100-d340-9101-846fc7115676"
@@ -31,12 +33,7 @@ class NoOpX2Text(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/noOpx2Text.png"
 
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
+     
 
     def process(
         self,

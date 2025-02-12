@@ -27,6 +27,8 @@ class AnthropicLLM(LLMAdapter):
         super().__init__("Anthropic")
         self.config = settings
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return "anthropic|90ebd4cd-2f19-4cef-a884-9eeb6ac0f203"
@@ -46,13 +48,6 @@ class AnthropicLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Anthropic.png"
-
-    @staticmethod
-    def get_json_schema() -> str:
-        f = open(f"{os.path.dirname(__file__)}/static/json_schema.json")
-        schema = f.read()
-        f.close()
-        return schema
 
     def get_llm_instance(self) -> LLM:
         max_tokens = int(

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from llama_index.core.llms import LLM, MockLLM
+from llama_index.llms.openai.utils import O1_MODELS
 
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
@@ -36,10 +37,6 @@ class LLMAdapter(Adapter, ABC):
 
     @staticmethod
     def get_icon() -> str:
-        return ""
-
-    @staticmethod
-    def get_json_schema() -> str:
         return ""
 
     @staticmethod
@@ -76,9 +73,14 @@ class LLMAdapter(Adapter, ABC):
                 message="Unable to connect to LLM, please recheck the configuration",
                 status_code=400,
             )
+        # Get completion kwargs based on model capabilities
+        completion_kwargs = {}
+        if hasattr(llm, 'model') and getattr(llm, 'model') not in O1_MODELS:
+            completion_kwargs['temperature'] = 0.003
+            
         response = llm.complete(
             "The capital of Tamilnadu is ",
-            temperature=0.003,
+            **completion_kwargs
         )
         response_lower_case: str = response.text.lower()
         find_match = re.search("chennai", response_lower_case)

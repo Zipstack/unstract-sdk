@@ -60,6 +60,8 @@ class LLMWhisperer(X2TextAdapter):
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
+    SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
+
     @staticmethod
     def get_id() -> str:
         return LLMWhisperer.ID
@@ -74,7 +76,7 @@ class LLMWhisperer(X2TextAdapter):
 
     @staticmethod
     def get_icon() -> str:
-        return LLMWhisperer.ICON
+        return "/icons/adapter-icons/LLMWhisperer.png"
 
     def _make_request(
         self,

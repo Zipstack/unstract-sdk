@@ -36,7 +36,7 @@ class EnvHelper:
             provider = FileStorageProvider(
                 file_storage_creds[CredentialKeyword.PROVIDER]
             )
-            credentials = file_storage_creds.get(CredentialKeyword.CREDENTIALS, "{}")
+            credentials = file_storage_creds.get(CredentialKeyword.CREDENTIALS, {})
             if storage_type == StorageType.PERMANENT:
                 file_storage = PermanentFileStorage(provider=provider, **credentials)
             elif storage_type == StorageType.SHARED_TEMPORARY:
