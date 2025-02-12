@@ -41,6 +41,7 @@ class LLMWhispererV1:
         except HTTPError as e:
             logger.error(f"Adapter error: {e}")
             default_err = "Error while calling the LLMWhisperer service"
+            # TODO: to make use of this X2TextError where ever possible
             msg = AdapterUtils.get_msg_from_request_exc(
                 err=e, message_key="message", default_err=default_err
             )
