@@ -1,3 +1,4 @@
+from io import BytesIO
 import json
 import logging
 import time
@@ -18,11 +19,14 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererDefaults,
     WhispererEndpoint,
     WhispererHeader,
-    WhisperStatus,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
+from unstract.llmwhisperer.client_v2 import (
+    LLMWhispererClientV2,
+    LLMWhispererClientException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +47,11 @@ class LLMWhispererHelper:
     @staticmethod
     def make_request(
         config: dict[str, Any],
-        request_method: HTTPMethod,
         request_endpoint: str,
         headers: Optional[dict[str, Any]] = None,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
+        is_test_connection: bool = False,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -64,30 +68,27 @@ class LLMWhispererHelper:
         Returns:
             Response: Response from the request
         """
-        llm_whisperer_svc_url = (
-            f"{config.get(WhispererConfig.URL)}" f"/api/v2/{request_endpoint}"
-        )
+        llm_whisperer_svc_url = f"{config.get(WhispererConfig.URL)}" f"/api/v2"
         if not headers:
             headers = LLMWhispererHelper.get_request_headers(config=config)
 
         try:
             response: Response
-            if request_method == HTTPMethod.GET:
-                response = requests.get(
-                    url=llm_whisperer_svc_url, headers=headers, params=params
-                )
-            elif request_method == HTTPMethod.POST:
-                response = requests.post(
-                    url=llm_whisperer_svc_url,
-                    headers=headers,
-                    params=params,
-                    data=data,
-                )
+            if is_test_connection:
+                url = f"{llm_whisperer_svc_url}/{request_endpoint}"
+                response = requests.get(url=url, headers=headers, params=params)
+                response.raise_for_status()
             else:
-                raise ExtractorError(
-                    f"Unsupported request method: {request_method}", status_code=500
+                client = LLMWhispererClientV2(
+                    base_url=llm_whisperer_svc_url,
+                    api_key=config.get(WhispererConfig.UNSTRACT_KEY),
                 )
-            response.raise_for_status()
+                response = client.whisper(**params, stream=data)
+                if response["status_code"] == 200:
+                    return response["extraction"]
+                else:
+                    raise ExtractorError(response["message"], response["status_code"])
+
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
             raise ExtractorError(
@@ -106,6 +107,13 @@ class LLMWhispererHelper:
                 err=e, message_key="message", default_err=default_err
             )
             raise ExtractorError(msg)
+        except LLMWhispererClientException as e:
+            logger.error(f"LLM Whisperer error: {e}")
+            raise ExtractorError(f"LLM Whisperer error: {e}")
+        except Exception as e:
+            logger.error(f"Adapter error: {e}")
+            raise ExtractorError(f"Adapter error: {e}")
+
         return response
 
     @staticmethod
@@ -148,7 +156,6 @@ class LLMWhispererHelper:
                 WhispererConfig.MARK_HORIZONTAL_LINES,
                 WhispererDefaults.MARK_HORIZONTAL_LINES,
             ),
-            WhispererConfig.URL_IN_POST: WhispererDefaults.URL_IN_POST,
             WhispererConfig.PAGE_SEPARATOR: config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
@@ -164,6 +171,11 @@ class LLMWhispererHelper:
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
             ),
+            WhispererConfig.WAIT_TIMEOUT: config.get(
+                WhispererConfig.WAIT_TIMEOUT,
+                WhispererDefaults.WAIT_TIMEOUT,
+            ),
+            WhispererConfig.WAIT_FOR_COMPLETION: WhispererDefaults.WAIT_FOR_COMPLETION,
         }
         if params[WhispererConfig.MODE] == Modes.LOW_COST.value:
             params.update(
@@ -181,138 +193,22 @@ class LLMWhispererHelper:
         return params
 
     @staticmethod
-    def check_status_until_ready(
-        config: dict[str, Any],
-        whisper_hash: str,
-        headers: dict[str, Any],
-        params: dict[str, Any],
-    ) -> WhisperStatus:
-        """Checks the extraction status by polling.
-
-        Polls the /whisper-status endpoint in fixed intervals of
-        env: ADAPTER_LLMW_POLL_INTERVAL for a certain number of times
-        controlled by env: ADAPTER_LLMW_MAX_POLLS.
-
-        Args:
-            whisper_hash (str): Identifier for the extraction,
-                returned by LLMWhisperer
-            headers (dict[str, Any]): Headers to pass for the status check
-            params (dict[str, Any]): Params to pass for the status check
-
-        Returns:
-            WhisperStatus: Status of the extraction
-        """
-        POLL_INTERVAL = WhispererDefaults.POLL_INTERVAL
-        MAX_POLLS = WhispererDefaults.MAX_POLLS
-        STATUS_RETRY_THRESHOLD = WhispererDefaults.STATUS_RETRIES
-        status_retry_count = 0
-        request_count = 0
-
-        # Check status in fixed intervals upto max poll count.
-        while True:
-            request_count += 1
-            logger.info(
-                f"Checking status for whisper-hash '{whisper_hash}' with interval: "
-                f"{POLL_INTERVAL}s, request count: {request_count} [max: {MAX_POLLS}]"
-            )
-            status_response = LLMWhispererHelper.make_request(
-                config=config,
-                request_method=HTTPMethod.GET,
-                request_endpoint=WhispererEndpoint.STATUS,
-                headers=headers,
-                params=params,
-            )
-            if status_response.status_code == 200:
-                status_data = status_response.json()
-                status = status_data.get(WhisperStatus.STATUS, WhisperStatus.UNKNOWN)
-                logger.info(f"Whisper status for '{whisper_hash}': {status}")
-                if status in [WhisperStatus.PROCESSED, WhisperStatus.DELIVERED]:
-                    break
-            else:
-                if status_retry_count >= STATUS_RETRY_THRESHOLD:
-                    raise ExtractorError(
-                        f"Error checking LLMWhisperer status for whisper-hash "
-                        f"'{whisper_hash}': {status_response.text}"
-                    )
-                else:
-                    status_retry_count += 1
-                    logger.warning(
-                        f"Whisper status for '{whisper_hash}' failed "
-                        f"{status_retry_count} time(s), retrying... "
-                        f"[threshold: {STATUS_RETRY_THRESHOLD}]: {status_response.text}"
-                    )
-
-            # Exit with error if max poll count is reached
-            if request_count >= MAX_POLLS:
-                raise ExtractorError(
-                    f"Unable to extract text for whisper-hash '{whisper_hash}' "
-                    f"after attempting {request_count} times"
-                )
-            time.sleep(POLL_INTERVAL)
-
-        return status
-
-    @staticmethod
-    def extract_async(config: dict[str, Any], whisper_hash: str) -> dict[Any, Any]:
-        """Makes an async extraction with LLMWhisperer.
-
-        Polls and checks the status first before proceeding to retrieve once.
-
-        Args:
-            whisper_hash (str): Identifier of the extraction
-
-        Returns:
-            str: Extracted contents from the file
-        """
-        logger.info(f"Extracting async for whisper hash: {whisper_hash}")
-
-        headers: dict[str, Any] = LLMWhispererHelper.get_request_headers(config)
-        params = {
-            WhisperStatus.WHISPER_HASH: whisper_hash,
-            WhispererConfig.TEXT_ONLY: WhispererDefaults.TEXT_ONLY,
-        }
-
-        # Polls in fixed intervals and checks status
-        LLMWhispererHelper.check_status_until_ready(
-            config=config, whisper_hash=whisper_hash, headers=headers, params=params
-        )
-
-        retrieve_response = LLMWhispererHelper.make_request(
-            config=config,
-            request_method=HTTPMethod.GET,
-            request_endpoint=WhispererEndpoint.RETRIEVE,
-            headers=headers,
-            params=params,
-        )
-        if retrieve_response.status_code == 200:
-            return retrieve_response.json()
-        else:
-            raise ExtractorError(
-                "Error retrieving from LLMWhisperer: "
-                f"{retrieve_response.status_code} - {retrieve_response.text}"
-            )
-
-    @staticmethod
     def send_whisper_request(
         input_file_path: str,
         config: dict[str, Any],
         extra_params: WhispererRequestParams,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> requests.Response:
-        headers = LLMWhispererHelper.get_request_headers(config)
-        headers["Content-Type"] = "application/octet-stream"
         params = LLMWhispererHelper.get_whisperer_params(
             config=config, extra_params=extra_params
         )
 
         response: requests.Response
         try:
-            input_file_data = fs.read(input_file_path, "rb")
+            input_file_data = BytesIO(fs.read(input_file_path, "rb"))
             response = LLMWhispererHelper.make_request(
                 config=config,
-                request_method=HTTPMethod.POST,
                 request_endpoint=WhispererEndpoint.WHISPER,
-                headers=headers,
                 params=params,
                 data=input_file_data,
             )
@@ -323,22 +219,14 @@ class LLMWhispererHelper:
 
     @staticmethod
     def extract_text_from_response(
-        config: dict[str, Any],
         output_file_path: Optional[str],
-        response_dict: dict[str, Any],
-        response: Response,
+        response: dict[str, Any],
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
-        output_json = {}
-        if response.status_code == 200:
-            output_json = response.json()
-        elif response.status_code == 202:
-            whisper_hash = response_dict.get(WhisperStatus.WHISPER_HASH)
-            output_json = LLMWhispererHelper.extract_async(
-                config=config, whisper_hash=whisper_hash
-            )
-        else:
+        if not response:
             raise ExtractorError("Couldn't extract text from file")
+        output_json = {}
+        output_json = response
         if output_file_path:
             LLMWhispererHelper.write_output_to_file(
                 output_json=output_json,
@@ -389,7 +277,10 @@ class LLMWhispererHelper:
             metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
             logger.info(f"Writing metadata to {metadata_file_path}")
             fs.write(
-                path=str(metadata_file_path), mode="w", data=metadata_json, encoding="utf-8"
+                path=str(metadata_file_path),
+                mode="w",
+                data=metadata_json,
+                encoding="utf-8",
             )
         except Exception as e:
             logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")
