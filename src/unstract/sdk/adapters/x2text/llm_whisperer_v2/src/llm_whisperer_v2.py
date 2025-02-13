@@ -45,12 +45,9 @@ class LLMWhispererV2(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhispererV2.png"
 
-     
-
     def test_connection(self) -> bool:
-        LLMWhispererHelper.make_request(
+        LLMWhispererHelper.test_connection_request(
             config=self.config,
-            request_method=HTTPMethod.GET,
             request_endpoint=WhispererEndpoint.TEST_CONNECTION,
         )
         return True
@@ -81,15 +78,13 @@ class LLMWhispererV2(X2TextAdapter):
             fs=fs,
             extra_params=extra_params,
         )
-        response_text = response.text
-        reponse_dict = json.loads(response_text)
         metadata = TextExtractionMetadata(
-            whisper_hash=reponse_dict.get(X2TextConstants.WHISPER_HASH_V2, "")
+            whisper_hash=response.get(X2TextConstants.WHISPER_HASH_V2, "")
         )
 
         return TextExtractionResult(
             extracted_text=LLMWhispererHelper.extract_text_from_response(
-                self.config, output_file_path, reponse_dict, response, fs=fs
+                output_file_path, response, fs=fs
             ),
             extraction_metadata=metadata,
         )

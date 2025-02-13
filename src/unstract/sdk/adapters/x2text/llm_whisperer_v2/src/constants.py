@@ -46,9 +46,8 @@ class WhispererEnv:
             on failure during polling. Defaults to 5.
     """
 
-    POLL_INTERVAL = "ADAPTER_LLMW_POLL_INTERVAL"
-    MAX_POLLS = "ADAPTER_LLMW_MAX_POLLS"
-    STATUS_RETRIES = "ADAPTER_LLMW_STATUS_RETRIES"
+    WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
+    LOG_LEVEL = "LOG_LEVEL"
 
 
 class WhispererConfig:
@@ -61,7 +60,7 @@ class WhispererConfig:
     MEDIAN_FILTER_SIZE = "median_filter_size"
     GAUSSIAN_BLUR_RADIUS = "gaussian_blur_radius"
     LINE_SPLITTER_TOLERANCE = "line_splitter_tolerance"
-    LINE_SPLITTER_STRATEGY = "line_splitter_strategy"
+    LINE_SPLITTER_STRATEGY = "line_spitter_strategy"
     HORIZONTAL_STRETCH_FACTOR = "horizontal_stretch_factor"
     PAGES_TO_EXTRACT = "pages_to_extract"
     MARK_VERTICAL_LINES = "mark_vertical_lines"
@@ -72,6 +71,9 @@ class WhispererConfig:
     USE_WEBHOOK = "use_webhook"
     WEBHOOK_METADATA = "webhook_metadata"
     TEXT_ONLY = "text_only"
+    WAIT_TIMEOUT = "wait_timeout"
+    WAIT_FOR_COMPLETION = "wait_for_completion"
+    LOGGING_LEVEL = "logging_level"
 
 
 class WhisperStatus:
@@ -95,9 +97,6 @@ class WhispererDefaults:
     LINE_SPLITTER_TOLERANCE = 0.75
     LINE_SPLITTER_STRATEGY = "left-priority"
     HORIZONTAL_STRETCH_FACTOR = 1.0
-    POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
-    MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
-    STATUS_RETRIES = int(os.getenv(WhispererEnv.STATUS_RETRIES, 5))
     PAGES_TO_EXTRACT = ""
     PAGE_SEPARATOR = "<<<"
     MARK_VERTICAL_LINES = False
@@ -105,3 +104,6 @@ class WhispererDefaults:
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False
+    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
+    WAIT_FOR_COMPLETION = True
+    LOGGING_LEVEL = os.getenv(WhispererEnv.LOG_LEVEL, "INFO")
