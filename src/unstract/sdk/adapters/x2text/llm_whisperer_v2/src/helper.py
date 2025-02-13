@@ -44,13 +44,42 @@ class LLMWhispererHelper:
         }
 
     @staticmethod
+    def test_connection_request(
+        config: dict[str, Any], request_endpoint: str
+    ) -> Response:
+        llm_whisperer_svc_url = f"{config.get(WhispererConfig.URL)}" f"/api/v2"
+        headers = LLMWhispererHelper.get_request_headers(config=config)
+
+        try:
+            response: Response
+            url = f"{llm_whisperer_svc_url}/{request_endpoint}"
+            response = requests.get(url=url, headers=headers)
+            response.raise_for_status()
+        except ConnectionError as e:
+            logger.error(f"Adapter error: {e}")
+            raise ExtractorError(
+                "Unable to connect to LLMWhisperer service, please check the URL",
+                actual_err=e,
+                status_code=503,
+            )
+        except Timeout as e:
+            msg = "Request to LLMWhisperer has timed out"
+            logger.error(f"{msg}: {e}")
+            raise ExtractorError(msg, actual_err=e, status_code=504)
+        except HTTPError as e:
+            logger.error(f"Adapter error: {e}")
+            default_err = "Error while calling the LLMWhisperer service"
+            msg = AdapterUtils.get_msg_from_request_exc(
+                err=e, message_key="message", default_err=default_err
+            )
+            raise ExtractorError(msg, status_code=e.response.status_code, actual_err=e)
+
+    @staticmethod
     def make_request(
         config: dict[str, Any],
-        request_endpoint: str,
         headers: Optional[dict[str, Any]] = None,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
-        is_test_connection: Optional[bool] = False,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -72,26 +101,21 @@ class LLMWhispererHelper:
             headers = LLMWhispererHelper.get_request_headers(config=config)
 
         try:
-            response: Response
-            if is_test_connection:
-                url = f"{llm_whisperer_svc_url}/{request_endpoint}"
-                response = requests.get(url=url, headers=headers, params=params)
-                response.raise_for_status()
+            response: dict[str, Any]
+            client = LLMWhispererClientV2(
+                base_url=llm_whisperer_svc_url,
+                api_key=config.get(WhispererConfig.UNSTRACT_KEY),
+                logging_level=WhispererDefaults.LOGGING_LEVEL,
+            )
+            response = client.whisper(**params, stream=data)
+            if response["status_code"] == 200:
+                return response["extraction"]
             else:
-                client = LLMWhispererClientV2(
-                    base_url=llm_whisperer_svc_url,
-                    api_key=config.get(WhispererConfig.UNSTRACT_KEY),
-                    logging_level=WhispererDefaults.LOGGING_LEVEL,
+                raise ExtractorError(
+                    response["message"],
+                    response["status_code"],
+                    actual_err=response,
                 )
-                response = client.whisper(**params, stream=data)
-                if response["status_code"] == 200:
-                    return response["extraction"]
-                else:
-                    raise ExtractorError(
-                        response["message"],
-                        response["status_code"],
-                        actual_err=response,
-                    )
 
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
@@ -104,13 +128,6 @@ class LLMWhispererHelper:
             msg = "Request to LLMWhisperer has timed out"
             logger.error(f"{msg}: {e}")
             raise ExtractorError(msg, actual_err=e, status_code=504)
-        except HTTPError as e:
-            logger.error(f"Adapter error: {e}")
-            default_err = "Error while calling the LLMWhisperer service"
-            msg = AdapterUtils.get_msg_from_request_exc(
-                err=e, message_key="message", default_err=default_err
-            )
-            raise ExtractorError(msg, status_code=e.response.status_code, actual_err=e)
         except LLMWhispererClientException as e:
             logger.error(f"LLM Whisperer error: {e}")
             raise ExtractorError(
@@ -213,7 +230,6 @@ class LLMWhispererHelper:
             input_file_data = BytesIO(fs.read(input_file_path, "rb"))
             response = LLMWhispererHelper.make_request(
                 config=config,
-                request_endpoint=WhispererEndpoint.WHISPER,
                 params=params,
                 data=input_file_data,
             )

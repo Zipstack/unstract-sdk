@@ -47,7 +47,7 @@ class WhispererEnv:
     """
 
     WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
-    LOG_LEVEL = "DEFAULT_LOG_LEVEL"
+    LOG_LEVEL = "LOG_LEVEL"
 
 
 class WhispererConfig:

@@ -46,9 +46,8 @@ class LLMWhispererV2(X2TextAdapter):
         return "/icons/adapter-icons/LLMWhispererV2.png"
 
     def test_connection(self) -> bool:
-        LLMWhispererHelper.make_request(
+        LLMWhispererHelper.test_connection_request(
             config=self.config,
-            is_test_connection=True,
             request_endpoint=WhispererEndpoint.TEST_CONNECTION,
         )
         return True
