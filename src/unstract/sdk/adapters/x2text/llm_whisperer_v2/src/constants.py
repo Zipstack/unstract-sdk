@@ -106,4 +106,4 @@ class WhispererDefaults:
     TEXT_ONLY = False
     WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
     WAIT_FOR_COMPLETION = True
-    LOGGING_LEVEL = str(os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO"))
+    LOGGING_LEVEL = os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO")
