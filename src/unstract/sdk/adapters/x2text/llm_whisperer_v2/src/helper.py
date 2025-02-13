@@ -51,7 +51,7 @@ class LLMWhispererHelper:
         headers: Optional[dict[str, Any]] = None,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
-        is_test_connection: bool = False,
+        is_test_connection: Optional[bool] = False,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -82,12 +82,17 @@ class LLMWhispererHelper:
                 client = LLMWhispererClientV2(
                     base_url=llm_whisperer_svc_url,
                     api_key=config.get(WhispererConfig.UNSTRACT_KEY),
+                    logging_level=config.get(WhispererConfig.LOGGING_LEVEL),
                 )
                 response = client.whisper(**params, stream=data)
                 if response["status_code"] == 200:
                     return response["extraction"]
                 else:
-                    raise ExtractorError(response["message"], response["status_code"])
+                    raise ExtractorError(
+                        response["message"],
+                        response["status_code"],
+                        actual_err=response,
+                    )
 
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
@@ -106,13 +111,14 @@ class LLMWhispererHelper:
             msg = AdapterUtils.get_msg_from_request_exc(
                 err=e, message_key="message", default_err=default_err
             )
-            raise ExtractorError(msg)
+            raise ExtractorError(msg, status_code=e.response.status_code, actual_err=e)
         except LLMWhispererClientException as e:
             logger.error(f"LLM Whisperer error: {e}")
-            raise ExtractorError(f"LLM Whisperer error: {e}")
-        except Exception as e:
-            logger.error(f"Adapter error: {e}")
-            raise ExtractorError(f"Adapter error: {e}")
+            raise ExtractorError(
+                message=f"LLM Whisperer error: {e}",
+                actual_err=e,
+                status_code=500,
+            )
 
         return response
 
@@ -224,7 +230,7 @@ class LLMWhispererHelper:
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         if not response:
-            raise ExtractorError("Couldn't extract text from file")
+            raise ExtractorError("Couldn't extract text from file", status_code=500)
         output_json = {}
         output_json = response
         if output_file_path:

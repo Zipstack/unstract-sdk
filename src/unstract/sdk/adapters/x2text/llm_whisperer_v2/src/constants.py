@@ -46,10 +46,8 @@ class WhispererEnv:
             on failure during polling. Defaults to 5.
     """
 
-    POLL_INTERVAL = "ADAPTER_LLMW_POLL_INTERVAL"
-    MAX_POLLS = "ADAPTER_LLMW_MAX_POLLS"
-    STATUS_RETRIES = "ADAPTER_LLMW_STATUS_RETRIES"
     WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
+    LOGGING_LEVEL = "DEFAULT_LOG_LEVEL"
 
 
 class WhispererConfig:
@@ -75,6 +73,7 @@ class WhispererConfig:
     TEXT_ONLY = "text_only"
     WAIT_TIMEOUT = "wait_timeout"
     WAIT_FOR_COMPLETION = "wait_for_completion"
+    LOGGING_LEVEL = "logging_level"
 
 
 class WhisperStatus:
@@ -110,3 +109,4 @@ class WhispererDefaults:
     TEXT_ONLY = False
     WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
     WAIT_FOR_COMPLETION = True
+    LOGGING_LEVEL = os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO")
