@@ -97,9 +97,6 @@ class WhispererDefaults:
     LINE_SPLITTER_TOLERANCE = 0.75
     LINE_SPLITTER_STRATEGY = "left-priority"
     HORIZONTAL_STRETCH_FACTOR = 1.0
-    POLL_INTERVAL = int(os.getenv(WhispererEnv.POLL_INTERVAL, 30))
-    MAX_POLLS = int(os.getenv(WhispererEnv.MAX_POLLS, 30))
-    STATUS_RETRIES = int(os.getenv(WhispererEnv.STATUS_RETRIES, 5))
     PAGES_TO_EXTRACT = ""
     PAGE_SEPARATOR = "<<<"
     MARK_VERTICAL_LINES = False
@@ -109,4 +106,4 @@ class WhispererDefaults:
     TEXT_ONLY = False
     WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
     WAIT_FOR_COMPLETION = True
-    LOGGING_LEVEL = os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO")
+    LOGGING_LEVEL = str(os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO"))

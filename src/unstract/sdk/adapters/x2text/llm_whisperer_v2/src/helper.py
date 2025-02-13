@@ -12,7 +12,6 @@ from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
-    HTTPMethod,
     Modes,
     OutputModes,
     WhispererConfig,
@@ -82,7 +81,7 @@ class LLMWhispererHelper:
                 client = LLMWhispererClientV2(
                     base_url=llm_whisperer_svc_url,
                     api_key=config.get(WhispererConfig.UNSTRACT_KEY),
-                    logging_level=config.get(WhispererConfig.LOGGING_LEVEL),
+                    logging_level=WhispererDefaults.LOGGING_LEVEL,
                 )
                 response = client.whisper(**params, stream=data)
                 if response["status_code"] == 200:
