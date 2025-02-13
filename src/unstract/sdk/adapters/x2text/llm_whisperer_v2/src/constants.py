@@ -47,7 +47,7 @@ class WhispererEnv:
     """
 
     WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
-    LOGGING_LEVEL = "DEFAULT_LOG_LEVEL"
+    LOG_LEVEL = "DEFAULT_LOG_LEVEL"
 
 
 class WhispererConfig:
@@ -106,4 +106,4 @@ class WhispererDefaults:
     TEXT_ONLY = False
     WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
     WAIT_FOR_COMPLETION = True
-    LOGGING_LEVEL = os.getenv(WhispererEnv.LOGGING_LEVEL, "INFO")
+    LOGGING_LEVEL = os.getenv(WhispererEnv.LOG_LEVEL, "INFO")
