@@ -57,8 +57,6 @@ class ToolExecutor:
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}"
         )
-        if not self.tool.workflow_filestorage:
-            self._setup_for_run()
         validator = ToolValidator(self.tool)
         settings = validator.validate_pre_execution(settings=settings)
 

@@ -11,7 +11,6 @@ class ToolEnv:
         PLATFORM_API_KEY (str): Platform service API key.
         PLATFORM_HOST (str): Platform service host.
         PLATFORM_PORT (str): Platform service port.
-        DATA_DIR (str): The environment variable for the tool data directory.
         EXECUTION_BY_TOOL (str): Implicitly set to 1 by the SDK if its executed
             by a tool.
     """
@@ -19,7 +18,6 @@ class ToolEnv:
     PLATFORM_API_KEY = "PLATFORM_SERVICE_API_KEY"
     PLATFORM_HOST = "PLATFORM_SERVICE_HOST"
     PLATFORM_PORT = "PLATFORM_SERVICE_PORT"
-    DATA_DIR = "TOOL_DATA_DIR"
     EXECUTION_BY_TOOL = "EXECUTION_BY_TOOL"
     EXECUTION_DATA_DIR = "EXECUTION_DATA_DIR"
     WORKFLOW_EXECUTION_FILE_STORAGE_CREDENTIALS = (

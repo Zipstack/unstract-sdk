@@ -13,6 +13,7 @@ class PermanentFileStorage(FileStorage):
     SUPPORTED_FILE_STORAGE_TYPES = [
         FileStorageProvider.GCS.value,
         FileStorageProvider.S3.value,
+        FileStorageProvider.MINIO.value,
         FileStorageProvider.LOCAL.value,
     ]
 
@@ -27,7 +28,11 @@ class PermanentFileStorage(FileStorage):
                 f"supported in Permanent mode. "
                 f"Supported providers: {self.SUPPORTED_FILE_STORAGE_TYPES}"
             )
-        if provider == FileStorageProvider.GCS or provider == FileStorageProvider.LOCAL:
+        if (
+            provider == FileStorageProvider.GCS
+            or provider == FileStorageProvider.LOCAL
+            or provider == FileStorageProvider.MINIO
+        ):
             super().__init__(provider, **storage_config)
         else:
             raise NotImplementedError(f"Provider {provider.value} is not implemented")
