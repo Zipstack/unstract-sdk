@@ -85,7 +85,8 @@ class LLMWhispererHelper:
                 )
             else:
                 raise ExtractorError(
-                    f"Unsupported request method: {request_method}", status_code=500
+                    f"Unsupported request method: {request_method}",
+                    status_code=500,
                 )
             response.raise_for_status()
         except ConnectionError as e:
@@ -274,7 +275,10 @@ class LLMWhispererHelper:
 
         # Polls in fixed intervals and checks status
         LLMWhispererHelper.check_status_until_ready(
-            config=config, whisper_hash=whisper_hash, headers=headers, params=params
+            config=config,
+            whisper_hash=whisper_hash,
+            headers=headers,
+            params=params,
         )
 
         retrieve_response = LLMWhispererHelper.make_request(
@@ -307,7 +311,7 @@ class LLMWhispererHelper:
 
         response: requests.Response
         try:
-            input_file_data = fs.read(input_file_path, "rb")
+            input_file_data = fs.read(path=input_file_path, mode="rb")
             response = LLMWhispererHelper.make_request(
                 config=config,
                 request_method=HTTPMethod.POST,
@@ -369,7 +373,10 @@ class LLMWhispererHelper:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=str(output_file_path), mode="w", data=text_output, encoding="utf-8"
+                path=str(output_file_path),
+                mode="w",
+                data=text_output,
+                encoding="utf-8",
             )
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
@@ -389,7 +396,10 @@ class LLMWhispererHelper:
             metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
             logger.info(f"Writing metadata to {metadata_file_path}")
             fs.write(
-                path=str(metadata_file_path), mode="w", data=metadata_json, encoding="utf-8"
+                path=str(metadata_file_path),
+                mode="w",
+                data=metadata_json,
+                encoding="utf-8",
             )
         except Exception as e:
             logger.warn(f"Error while writing metadata to {metadata_file_path}: {e}")

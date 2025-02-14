@@ -126,21 +126,6 @@ class BaseTool(ABC, StreamMixin):
         else:
             raise ValueError(f"Unknown command {command}")
 
-    def _get_data_dir(self) -> Path:
-        """Gets the TOOL_DATA_DIR that houses the input and output files of
-        tool execution.
-
-        Returns:
-            Path: Path object of the TOOL_DATA_DIR that's configured.
-        """
-        data_dir = self.get_env_or_die(ToolEnv.DATA_DIR)
-        base_path = Path(data_dir)
-        if not base_path.exists():
-            self.stream_error_and_exit(f"{data_dir} does not exist")
-        if not base_path.is_dir():
-            self.stream_error_and_exit(f"{data_dir} is not a directory")
-        return base_path.absolute()
-
     def _get_file_from_data_dir(self, file_to_get: str, raise_err: bool = False) -> str:
         base_path = self.execution_dir
         file_path = base_path / file_to_get
