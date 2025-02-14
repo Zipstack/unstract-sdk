@@ -629,7 +629,7 @@ def test_file_size(file_storage, path, expected_size):
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
-            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+            100,
             MimeType.PDF,
         ),
     ],
