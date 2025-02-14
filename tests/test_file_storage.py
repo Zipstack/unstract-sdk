@@ -593,7 +593,7 @@ def test_file_size(file_storage, path, expected_size):
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_PDF_FILE,
-            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+            FileOperationParams.READ_ENTIRE_LENGTH,
             MimeType.PDF,
         ),
         (
@@ -605,7 +605,7 @@ def test_file_size(file_storage, path, expected_size):
         (
             file_storage(provider=FileStorageProvider.GCS),
             TEST_CONSTANTS.READ_PDF_FILE,
-            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+            FileOperationParams.READ_ENTIRE_LENGTH,
             MimeType.PDF,
         ),
         (
@@ -617,13 +617,13 @@ def test_file_size(file_storage, path, expected_size):
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_PDF_FILE,
-            FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+            100,
             MimeType.PDF,
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
-            FileOperationParams.READ_ENTIRE_LENGTH,
+            100,
             MimeType.TEXT,
         ),
         (

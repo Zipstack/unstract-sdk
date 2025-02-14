@@ -216,7 +216,7 @@ class FileStorage(FileStorageInterface):
     def mime_type(
         self,
         path: str,
-        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+        read_length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -224,7 +224,7 @@ class FileStorage(FileStorageInterface):
         Args:
             path (str): Path of the input file
             read_length (int): Length(bytes) to be read from the file for in
-            order to identify the mime type
+            order to identify the mime type. Defaults to read the entire length.
 
         Returns:
             str: MIME type of the file
