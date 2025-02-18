@@ -1,6 +1,9 @@
 import logging
 from typing import Any, Optional, Union
 
+import filetype
+import magic
+
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import FileOperationParams
 from unstract.sdk.file_storage.impl import FileStorage
@@ -58,6 +61,11 @@ class PermanentFileStorage(FileStorage):
             # to remote storage
             if local_file_storage.exists(local_file_path):
                 self.upload(local_file_path, path)
+                logger.info(
+                    f"Uploading {local_file_path} from "
+                    f"{local_file_storage.provider} to remote "
+                    f"storage {self.provider} in the path {path}"
+                )
 
     def read(
         self,
@@ -92,3 +100,54 @@ class PermanentFileStorage(FileStorage):
             if isinstance(e, FileNotFoundError) or isinstance(e, FileOperationError):
                 raise e
             raise FileOperationError(str(e)) from e
+
+    def mime_type(
+        self,
+        path: str,
+        read_length: int = FileOperationParams.READ_ENTIRE_LENGTH,
+        legacy_storage_path: Optional[str] = None,
+    ) -> str:
+        """Gets the file MIME type for an input file. Uses libmagic to perform
+        the same.
+
+        Args:
+            path (str): Path of the input file
+            read_length (int): Length(bytes) to be read from the file for in
+            order to identify the mime type. Defaults to read the entire length.
+            legacy_storage_path (str):  Legacy path to the same file
+
+        Returns:
+            str: MIME type of the file
+        """
+        sample_contents = self.read(
+            path=path,
+            mode="rb",
+            length=read_length,
+            legacy_storage_path=legacy_storage_path,
+        )
+        mime_type = magic.from_buffer(sample_contents, mime=True)
+        return mime_type
+
+    def guess_extension(
+        self, path: str, legacy_storage_path: Optional[str] = None
+    ) -> str:
+        """Returns the extension of the file passed.
+
+        Args:
+            path (str): String holding the path
+            legacy_storage_path (str):  Legacy path to the same file
+
+        Returns:
+            str: File extension
+        """
+        file_extension = ""
+        sample_contents = self.read(
+            path=path,
+            mode="rb",
+            length=FileOperationParams.EXTENSION_DEFAULT_READ_LENGTH,
+            legacy_storage_path=legacy_storage_path,
+        )
+        if sample_contents:
+            file_type = filetype.guess(sample_contents)
+            file_extension = file_type.EXTENSION
+        return file_extension
