@@ -187,7 +187,7 @@ class LLMWhispererHelper:
                 WhispererConfig.TAG,
                 WhispererDefaults.TAG,
             ),
-            WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK),
+            WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK, ""),
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
             ),
