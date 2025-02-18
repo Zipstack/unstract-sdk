@@ -55,7 +55,7 @@ dependencies = [
     "httpx>=0.25.2",
     "pdfplumber>=0.11.2",
     "redis>=5.2.1",
-    "llmwhisperer-client>=2.1.0",
+    "llmwhisperer-client>=2.2.1",
 ]
 readme = "README.md"
 urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }
