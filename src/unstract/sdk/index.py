@@ -298,8 +298,7 @@ class Index:
 
             if doc_id_found and not reindex:
                 self.tool.stream_log(f"File was indexed already under {doc_id}")
-
-                if not fs.exists(output_file_path):
+                if output_file_path and not fs.exists(output_file_path):
                     # Added this as a workaround to handle extraction
                     # for documents uploaded twice in different projects.
                     # to be reconsidered after permanent fixes.

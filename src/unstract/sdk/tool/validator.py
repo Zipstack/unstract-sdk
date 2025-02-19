@@ -8,7 +8,6 @@ from jsonschema import Draft202012Validator, ValidationError, validators
 from unstract.sdk.constants import MetadataKey, PropKey
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.mime_types import EXT_MIME_MAP
-from unstract.sdk.utils import ToolUtils
 
 
 def extend_with_default(validator_class: Any) -> Any:
@@ -68,11 +67,7 @@ class ToolValidator:
             dict[str, Any]: Settings JSON for a tool (filled with defaults)
         """
         input_file = Path(self.tool.get_input_file())
-        file_exists = (
-            self.tool.workflow_filestorage.exists(path=input_file)
-            if self.tool.workflow_filestorage
-            else input_file.is_file()
-        )
+        file_exists = self.tool.workflow_filestorage.exists(path=input_file)
 
         if not file_exists:
             self.tool.stream_error_and_exit(f"Input file not found: {input_file}")
@@ -123,10 +118,7 @@ class ToolValidator:
         self.tool.stream_log(
             f"Checking input file size... (max file size: {max_file_size})"
         )
-        if self.tool.workflow_filestorage:
-            file_size = self.tool.workflow_filestorage.size(path=input_file)
-        else:
-            file_size = input_file.stat().st_size
+        file_size = self.tool.workflow_filestorage.size(path=input_file)
         self.tool.stream_log(f"Input file size: {self._human_readable_size(file_size)}")
 
         if file_size > max_size_in_bytes:
@@ -208,11 +200,8 @@ class ToolValidator:
                     f"{ext} mentioned in tool PROPERTIES is not supported"
                 )
             allowed_mimes.append(EXT_MIME_MAP[ext])
-        if self.tool.workflow_filestorage:
-            tool_fs = self.tool.workflow_filestorage
-            input_file_mime = tool_fs.mime_type(input_file)
-        else:
-            input_file_mime = ToolUtils.get_file_mime_type(input_file=input_file)
+        tool_fs = self.tool.workflow_filestorage
+        input_file_mime = tool_fs.mime_type(input_file)
         self.tool.stream_log(f"Input file MIME: {input_file_mime}")
         if input_file_mime not in allowed_mimes:
             self.tool.stream_error_and_exit(

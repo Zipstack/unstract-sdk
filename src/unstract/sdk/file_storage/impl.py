@@ -41,7 +41,7 @@ class FileStorage(FileStorageInterface):
 
         Args:
             path (str): Path to the file to be opened
-            mode (str): Mode in whicg the file is to be opened. Usual options
+            mode (str): Mode in which the file is to be opened. Usual options
                         include r, rb, w and wb
             encoding (str): Encoding type like utf-8 or utf-16
             seek_position (int): Position to start reading from
@@ -212,11 +212,10 @@ class FileStorage(FileStorageInterface):
             file_mtime = datetime.fromtimestamp(file_mtime)
         return file_mtime
 
-    @skip_local_cache
     def mime_type(
         self,
         path: str,
-        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+        read_length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -224,7 +223,7 @@ class FileStorage(FileStorageInterface):
         Args:
             path (str): Path of the input file
             read_length (int): Length(bytes) to be read from the file for in
-            order to identify the mime type
+            order to identify the mime type. Defaults to read the entire length.
 
         Returns:
             str: MIME type of the file
@@ -364,7 +363,6 @@ class FileStorage(FileStorageInterface):
             data: dict[str, Any] = yaml.safe_load(f)
             return data
 
-    @skip_local_cache
     def guess_extension(self, path: str) -> str:
         """Returns the extension of the file passed.
 

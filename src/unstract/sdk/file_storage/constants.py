@@ -3,7 +3,6 @@ from enum import Enum
 
 class FileOperationParams:
     READ_ENTIRE_LENGTH = -1
-    MIME_TYPE_DEFAULT_READ_LENGTH = 100
     EXTENSION_DEFAULT_READ_LENGTH = 100
     DEFAULT_ENCODING = "utf-8"
 
