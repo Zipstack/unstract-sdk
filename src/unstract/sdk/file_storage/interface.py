@@ -77,7 +77,7 @@ class FileStorageInterface(ABC):
     def mime_type(
         self,
         path: str,
-        read_length: int = FileOperationParams.MIME_TYPE_DEFAULT_READ_LENGTH,
+        read_length: int = FileOperationParams.READ_ENTIRE_LENGTH,
     ) -> str:
         pass
 

@@ -225,7 +225,7 @@ class LLMWhispererHelper:
 
         response: requests.Response
         try:
-            input_file_data = BytesIO(fs.read(input_file_path, "rb"))
+            input_file_data = BytesIO(fs.read(path=input_file_path, mode="rb"))
             response = LLMWhispererHelper.make_request(
                 config=config,
                 params=params,
@@ -276,7 +276,10 @@ class LLMWhispererHelper:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=str(output_file_path), mode="w", data=text_output, encoding="utf-8"
+                path=str(output_file_path),
+                mode="w",
+                data=text_output,
+                encoding="utf-8",
             )
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
