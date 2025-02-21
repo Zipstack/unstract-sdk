@@ -237,6 +237,7 @@ class LLMWhispererHelper:
         try:
             input_file_data = BytesIO(fs.read(path=input_file_path, mode="rb"))
             enable_highlight = extra_params.enable_highlight
+            print(f"enable_highlight:::::::::::{enable_highlight}")
             response = LLMWhispererHelper.make_request(
                 config=config,
                 params=params,
