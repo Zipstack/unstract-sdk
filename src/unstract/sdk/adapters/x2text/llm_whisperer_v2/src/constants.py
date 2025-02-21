@@ -30,6 +30,7 @@ class WhispererEndpoint:
     WHISPER = "whisper"
     STATUS = "whisper-status"
     RETRIEVE = "whisper-retrieve"
+    HIGHLIGHTS = "highlights"
 
 
 class WhispererEnv:
@@ -42,8 +43,8 @@ class WhispererEnv:
             LLMWhisperer's status API. Defaults to 30s
         MAX_POLLS: Total number of times to poll the status API.
             Set to -1 to poll indefinitely. Defaults to -1
-        STATUS_RETRIES: Number of times to retry calling LLLMWhisperer's status API
-            on failure during polling. Defaults to 5.
+        STATUS_RETRIES: Number of times to retry calling LLLMWhisperer's
+        status API on failure during polling. Defaults to 5.
     """
 
     WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
@@ -74,6 +75,9 @@ class WhispererConfig:
     WAIT_TIMEOUT = "wait_timeout"
     WAIT_FOR_COMPLETION = "wait_for_completion"
     LOGGING_LEVEL = "logging_level"
+    ADD_LINE_NOS = "add_line_nos"
+    EXTRACT_ALL_LINES = "extract_all_lines"
+    LINES = "lines"
 
 
 class WhisperStatus:

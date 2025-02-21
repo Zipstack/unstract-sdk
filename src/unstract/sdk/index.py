@@ -21,6 +21,7 @@ from unstract.sdk.adapters.vectordb.no_op.src.no_op_custom_vectordb import (
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llm_whisperer.src import LLMWhisperer
+from unstract.sdk.adapters.x2text.llm_whisperer_v2.src import LLMWhispererV2
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.embedding import Embedding
 from unstract.sdk.exceptions import IndexingError, SdkError, VectorDBError, X2TextError
@@ -161,7 +162,7 @@ class Index:
             usage_kwargs=usage_kwargs,
         )
         try:
-            if enable_highlight and isinstance(x2text.x2text_instance, LLMWhisperer):
+            if enable_highlight and (isinstance(x2text.x2text_instance, LLMWhisperer) or isinstance(x2text.x2text_instance, LLMWhispererV2)):
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path,
                     output_file_path=output_file_path,
@@ -171,7 +172,8 @@ class Index:
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
                 metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
-                self.tool.update_exec_metadata(metadata)
+                if hasattr(self.tool, 'update_exec_metadata'):
+                    self.tool.update_exec_metadata(metadata)
             else:
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path,
@@ -256,7 +258,6 @@ class Index:
             fs=fs,
         )
         self.tool.stream_log(f"Checking if doc_id {doc_id} exists")
-
         embedding = Embedding(
             tool=self.tool,
             adapter_instance_id=embedding_instance_id,
