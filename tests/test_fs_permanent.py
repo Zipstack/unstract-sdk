@@ -22,6 +22,7 @@ class TEST_CONSTANTS:
     GCS_BUCKET = os.environ.get("GCS_BUCKET")
     TEXT_CONTENT = os.environ.get("TEXT_CONTENT")
     FILE_STORAGE_GCS = "FILE_STORAGE_GCS"
+    FILE_STORAGE_MINIO = "FILE_STORAGE_MINIO"
     FILE_STORAGE_LOCAL = "FILE_STORAGE_LOCAL"
 
 
@@ -31,6 +32,8 @@ def permanent_file_storage(provider: FileStorageProvider):
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_GCS, "{}"))
         elif provider == FileStorageProvider.LOCAL:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
+        elif provider == FileStorageProvider.MINIO:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_MINIO, "{}"))
     except JSONDecodeError:
         creds = {}
     file_storage = PermanentFileStorage(provider=provider, **creds)
@@ -45,7 +48,12 @@ def permanent_file_storage(provider: FileStorageProvider):
             permanent_file_storage(provider=FileStorageProvider.GCS),
             "fsspec-test/input/3.txt",
             "r",
-        )
+        ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.MINIO),
+            "fsspec-test/input/3.txt",
+            "r",
+        ),
     ],
 )
 def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
@@ -69,7 +77,15 @@ def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
             "fsspec-test/legacy_storage/3.txt",
             "fsspec-test/output/copy_on_read_legacy_storage.txt",
             "w",
-        )
+        ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.MINIO),
+            "fsspec-test/input/3.txt",
+            "r",
+            "fsspec-test/legacy_storage/3.txt",
+            "fsspec-test/output/copy_on_read_legacy_storage.txt",
+            "w",
+        ),
     ],
 )
 def test_permanent_fs_copy_on_read_with_legacy_storage(
@@ -123,6 +139,13 @@ def test_permanent_fs_copy(
     [
         (
             permanent_file_storage(provider=FileStorageProvider.GCS),
+            "fsspec-test/input/3.txt",
+            "r",
+            "fsspec-test/output/test_write.txt",
+            "w",
+        ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.MINIO),
             "fsspec-test/input/3.txt",
             "r",
             "fsspec-test/output/test_write.txt",

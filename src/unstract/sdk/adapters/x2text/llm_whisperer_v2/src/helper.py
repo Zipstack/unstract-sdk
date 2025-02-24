@@ -1,13 +1,16 @@
-from io import BytesIO
 import json
 import logging
-import time
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Optional
 
 import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
+from unstract.llmwhisperer.client_v2 import (
+    LLMWhispererClientException,
+    LLMWhispererClientV2,
+)
 
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
@@ -16,16 +19,11 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     OutputModes,
     WhispererConfig,
     WhispererDefaults,
-    WhispererEndpoint,
     WhispererHeader,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
-from unstract.llmwhisperer.client_v2 import (
-    LLMWhispererClientV2,
-    LLMWhispererClientException,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -189,7 +187,7 @@ class LLMWhispererHelper:
                 WhispererConfig.TAG,
                 WhispererDefaults.TAG,
             ),
-            WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK),
+            WhispererConfig.USE_WEBHOOK: config.get(WhispererConfig.USE_WEBHOOK, ""),
             WhispererConfig.WEBHOOK_METADATA: config.get(
                 WhispererConfig.WEBHOOK_METADATA
             ),
@@ -227,7 +225,7 @@ class LLMWhispererHelper:
 
         response: requests.Response
         try:
-            input_file_data = BytesIO(fs.read(input_file_path, "rb"))
+            input_file_data = BytesIO(fs.read(path=input_file_path, mode="rb"))
             response = LLMWhispererHelper.make_request(
                 config=config,
                 params=params,
@@ -278,7 +276,10 @@ class LLMWhispererHelper:
             text_output = output_json.get("result_text", "")
             logger.info(f"Writing output to {output_file_path}")
             fs.write(
-                path=str(output_file_path), mode="w", data=text_output, encoding="utf-8"
+                path=str(output_file_path),
+                mode="w",
+                data=text_output,
+                encoding="utf-8",
             )
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
