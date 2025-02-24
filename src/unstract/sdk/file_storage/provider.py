@@ -8,3 +8,4 @@ class FileStorageProvider(enum.Enum):
     MINIO = "minio"
     REDIS = "redis"
     LOCAL = "local"
+    AZURE = "azure"

@@ -54,6 +54,11 @@ def permanent_file_storage(provider: FileStorageProvider):
             "fsspec-test/input/3.txt",
             "r",
         ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.AZURE),
+            "fsspec-test/input/3.txt",
+            "r",
+        ),
     ],
 )
 def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
@@ -80,6 +85,14 @@ def test_permanent_fs_copy_on_read(file_storage, file_read_path, read_mode):
         ),
         (
             permanent_file_storage(provider=FileStorageProvider.MINIO),
+            "fsspec-test/input/3.txt",
+            "r",
+            "fsspec-test/legacy_storage/3.txt",
+            "fsspec-test/output/copy_on_read_legacy_storage.txt",
+            "w",
+        ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.AZURE),
             "fsspec-test/input/3.txt",
             "r",
             "fsspec-test/legacy_storage/3.txt",
@@ -146,6 +159,13 @@ def test_permanent_fs_copy(
         ),
         (
             permanent_file_storage(provider=FileStorageProvider.MINIO),
+            "fsspec-test/input/3.txt",
+            "r",
+            "fsspec-test/output/test_write.txt",
+            "w",
+        ),
+        (
+            permanent_file_storage(provider=FileStorageProvider.AZURE),
             "fsspec-test/input/3.txt",
             "r",
             "fsspec-test/output/test_write.txt",
