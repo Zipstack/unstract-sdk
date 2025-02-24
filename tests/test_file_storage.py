@@ -32,7 +32,7 @@ class TEST_CONSTANTS:
     FILE_STORAGE_MINIO = "FILE_STORAGE_MINIO"
     FILE_STORAGE_LOCAL = "FILE_STORAGE_LOCAL"
     FILE_STORAGE_S3 = "FILE_STORAGE_S3"
-    FILE_STORAGE_AZURE = "FILE_STORAGE_AZURE" 
+    FILE_STORAGE_AZURE = "FILE_STORAGE_AZURE"
 
 
 def file_storage(provider: FileStorageProvider):
@@ -45,7 +45,7 @@ def file_storage(provider: FileStorageProvider):
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
         elif provider == FileStorageProvider.S3:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_S3, "{}"))
-        elif provider == FileStorageProvider.AZURE :
+        elif provider == FileStorageProvider.AZURE:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_AZURE, "{}"))
     except JSONDecodeError:
         creds = {}
