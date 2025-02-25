@@ -2,10 +2,9 @@ import enum
 
 
 class FileStorageProvider(enum.Enum):
-    AZURE = "azure"
+    AZURE = "abfs"
     GCS = "gcs"
     S3 = "s3"
     MINIO = "minio"
     REDIS = "redis"
     LOCAL = "local"
-    AZURE = "azure"
