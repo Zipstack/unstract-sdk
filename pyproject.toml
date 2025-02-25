@@ -92,7 +92,7 @@ test = [
     "pytest-mock==3.14.0",
     "gcsfs==2024.10.0",
     "s3fs==2024.10.0",
-    "adlfs==2024.7.0"
+    "adlfs~=2024.7.0"
 ]
 lint = [
     "autopep8~=2.0.2",
