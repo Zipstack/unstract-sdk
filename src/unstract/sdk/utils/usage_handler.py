@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 from llama_index.core.callbacks.base_handler import BaseCallbackHandler
+from llama_index.core.callbacks.schema import EventPayload
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
 
@@ -87,7 +88,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
             event_type == CBEventType.LLM
             and event_type not in self.event_ends_to_ignore
             and payload is not None
-            and "completion" in payload
+            and EventPayload.COMPLETION in payload
         ):
             model_name = self.llm_model.metadata.model_name
             # Need to push the data to via platform service
