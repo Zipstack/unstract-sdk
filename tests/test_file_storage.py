@@ -31,6 +31,8 @@ class TEST_CONSTANTS:
     FILE_STORAGE_GCS = "FILE_STORAGE_GCS"
     FILE_STORAGE_MINIO = "FILE_STORAGE_MINIO"
     FILE_STORAGE_LOCAL = "FILE_STORAGE_LOCAL"
+    FILE_STORAGE_S3 = "FILE_STORAGE_S3"
+    FILE_STORAGE_AZURE = "FILE_STORAGE_AZURE"
 
 
 def file_storage(provider: FileStorageProvider):
@@ -41,6 +43,10 @@ def file_storage(provider: FileStorageProvider):
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_MINIO, "{}"))
         elif provider == FileStorageProvider.LOCAL:
             creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_LOCAL, "{}"))
+        elif provider == FileStorageProvider.S3:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_S3, "{}"))
+        elif provider == FileStorageProvider.AZURE:
+            creds = json.loads(os.environ.get(TEST_CONSTANTS.FILE_STORAGE_AZURE, "{}"))
     except JSONDecodeError:
         creds = {}
     file_storage = FileStorage(provider, **creds)
@@ -84,6 +90,20 @@ def file_storage(provider: FileStorageProvider):
             TEST_CONSTANTS.READ_TEXT_FILE,
             "r",
             -1,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.S3),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            0,
+            os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            0,
             os.path.getsize(TEST_CONSTANTS.READ_TEXT_FILE),
         ),
     ],
@@ -233,6 +253,46 @@ def test_file_read_exception(file_storage, path, mode, read_length):
             0,
             len(TEST_CONSTANTS.TEXT_CONTENT),
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_PDF_FILE,
+            "rb",
+            None,
+            TEST_CONSTANTS.WRITE_PDF_FILE,
+            "wb",
+            -1,
+            os.path.getsize(TEST_CONSTANTS.READ_PDF_FILE),
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            None,
+            TEST_CONSTANTS.WRITE_TEXT_FILE,
+            "wb",
+            0,
+            0,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "rb",
+            None,
+            TEST_CONSTANTS.WRITE_TEXT_FILE,
+            "wb",
+            0,
+            0,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            None,
+            "rb",
+            TEST_CONSTANTS.TEXT_CONTENT,
+            TEST_CONSTANTS.WRITE_TEXT_FILE,
+            "w",
+            0,
+            len(TEST_CONSTANTS.TEXT_CONTENT),
+        ),
     ],
 )
 def test_file_write(
@@ -284,6 +344,11 @@ def test_file_write(
             # as they only support creating buckets. For
             # further details pls check implementation of mkdir in S3
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.TEST_FOLDER,
+            False,
+        ),
     ],
 )
 def test_make_dir(file_storage, folder_path, expected_result):
@@ -316,6 +381,11 @@ def test_make_dir(file_storage, folder_path, expected_result):
             TEST_CONSTANTS.GCS_BUCKET,
             True,
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.GCS_BUCKET,
+            True,
+        ),
     ],
 )
 def test_path_exists(file_storage, folder_path, expected_result):
@@ -345,6 +415,11 @@ def test_path_exists(file_storage, folder_path, expected_result):
             TEST_CONSTANTS.READ_FOLDER_PATH,
             2,
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_FOLDER_PATH,
+            2,
+        ),
     ],
 )
 def test_ls(file_storage, folder_path, expected_file_count):
@@ -364,6 +439,10 @@ def test_ls(file_storage, folder_path, expected_file_count):
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.WRITE_FOLDER_PATH,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
             TEST_CONSTANTS.WRITE_FOLDER_PATH,
         ),
     ],
@@ -661,6 +740,11 @@ def test_file_mime_type(file_storage, path, read_length, expected_mime_type):
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
+        ),
     ],
 )
 def test_download(file_storage, from_path, to_path):
@@ -687,6 +771,11 @@ def test_download(file_storage, from_path, to_path):
         ),
         (
             file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
             TEST_CONSTANTS.READ_TEXT_FILE,
             TEST_CONSTANTS.TEST_FOLDER + "/3.txt",
         ),
@@ -719,6 +808,11 @@ def test_upload(file_storage, from_path, to_path):
             TEST_CONSTANTS.READ_TEXT_FILE,
             "4a08b5721f75657eb883202cae16c74ca62df2c605e4126e50f4bf341d4fd693",
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+            "4a08b5721f75657eb883202cae16c74ca62df2c605e4126e50f4bf341d4fd693",
+        ),
     ],
 )
 def test_get_hash_from_file(file_storage, file_path, expected_result):
@@ -744,6 +838,11 @@ def test_get_hash_from_file(file_storage, file_path, expected_result):
             TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
             1,
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_FOLDER_PATH + "/*.pdf",
+            1,
+        ),
     ],
 )
 def test_glob(file_storage, folder_path, expected_result):
@@ -757,7 +856,7 @@ def test_glob(file_storage, folder_path, expected_result):
     [
         (
             StorageType.PERMANENT,
-            "TEST_PERMANENT_STORAGE",
+            "TEST_PERMANENT_STORAGE_GCS",
             FileStorageProvider.GCS,
         ),
         (
@@ -769,6 +868,11 @@ def test_glob(file_storage, folder_path, expected_result):
             StorageType.PERMANENT,
             "TEST_LOCAL_STORAGE",
             FileStorageProvider.LOCAL,
+        ),
+        (
+            StorageType.PERMANENT,
+            "TEST_PERMANENT_STORAGE_AZURE",
+            FileStorageProvider.AZURE,
         ),
     ],
 )
@@ -783,7 +887,7 @@ def test_get_storage(storage_type, env_name, expected):
     [
         (
             StorageType.PERMANENT,
-            "TEST_PERMANENT_STORAGE",
+            "TEST_PERMANENT_STORAGE_GCS",
             "fsspec-test",
         ),
         (
