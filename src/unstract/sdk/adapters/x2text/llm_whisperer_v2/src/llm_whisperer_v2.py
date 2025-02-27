@@ -71,7 +71,11 @@ class LLMWhispererV2(X2TextAdapter):
             str: Extracted text
         """
 
-        extra_params = WhispererRequestParams(tag=kwargs.get(X2TextConstants.TAGS))
+        enable_highlight = kwargs.get(X2TextConstants.ENABLE_HIGHLIGHT, False)
+        extra_params = WhispererRequestParams(
+            tag=kwargs.get(X2TextConstants.TAGS),
+            enable_highlight=enable_highlight,
+        )
         response: requests.Response = LLMWhispererHelper.send_whisper_request(
             input_file_path=input_file_path,
             config=self.config,
@@ -84,7 +88,7 @@ class LLMWhispererV2(X2TextAdapter):
 
         return TextExtractionResult(
             extracted_text=LLMWhispererHelper.extract_text_from_response(
-                output_file_path, response, fs=fs
+                output_file_path, response, fs=fs,
             ),
             extraction_metadata=metadata,
         )

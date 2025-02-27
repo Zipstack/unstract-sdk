@@ -20,7 +20,9 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererConfig,
     WhispererDefaults,
     WhispererHeader,
+    WhisperStatus,
 )
+from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
@@ -78,6 +80,7 @@ class LLMWhispererHelper:
         headers: Optional[dict[str, Any]] = None,
         params: Optional[dict[str, Any]] = None,
         data: Optional[Any] = None,
+        type: str = "whisper"
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -105,15 +108,22 @@ class LLMWhispererHelper:
                 api_key=config.get(WhispererConfig.UNSTRACT_KEY),
                 logging_level=WhispererDefaults.LOGGING_LEVEL,
             )
-            response = client.whisper(**params, stream=data)
-            if response["status_code"] == 200:
-                return response["extraction"]
-            else:
-                raise ExtractorError(
-                    response["message"],
-                    response["status_code"],
-                    actual_err=response,
-                )
+            if type == "whisper":
+                response = client.whisper(**params, stream=data)
+                if response["status_code"] == 200:
+                    response["extraction"][X2TextConstants.WHISPER_HASH_V2] = response.get(
+                        X2TextConstants.WHISPER_HASH_V2, ""
+                    )
+                    return response["extraction"]
+                else:
+                    raise ExtractorError(
+                        response["message"],
+                        response["status_code"],
+                        actual_err=response,
+                    )
+            elif type == "highlight":
+                response = client.get_highlight_data(**params)
+                return response
 
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
@@ -180,6 +190,7 @@ class LLMWhispererHelper:
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
+            WhispererConfig.ADD_LINE_NOS: extra_params.enable_highlight,
             # Not providing default value to maintain legacy compatablity
             # these are optional params and identifiers for audit
             WhispererConfig.TAG: extra_params.tag
@@ -222,20 +233,59 @@ class LLMWhispererHelper:
         params = LLMWhispererHelper.get_whisperer_params(
             config=config, extra_params=extra_params
         )
-
         response: requests.Response
         try:
             input_file_data = BytesIO(fs.read(path=input_file_path, mode="rb"))
+            enable_highlight = extra_params.enable_highlight
             response = LLMWhispererHelper.make_request(
                 config=config,
                 params=params,
                 data=input_file_data,
             )
+            if enable_highlight:
+                whisper_hash = response.get(X2TextConstants.WHISPER_HASH_V2, "")
+                highlight_data = LLMWhispererHelper.make_highlight_data_request(
+                    config,
+                    whisper_hash,
+                    enable_highlight,
+                )
+                response["line_metadata"] = highlight_data
         except OSError as e:
             logger.error(f"OS error while reading {input_file_path}: {e}")
             raise ExtractorError(str(e))
         return response
 
+    @staticmethod
+    def make_highlight_data_request(
+        config: dict[str, Any],
+        whisper_hash: str,
+        enable_highlight: bool
+    ) -> dict[Any, Any]:
+        """Makes a call to get highlight data from LLMWhisperer.
+
+        Args:
+            whisper_hash (str): Identifier of the extraction
+
+        Returns:
+            str: Extracted contents from the file
+        """
+        logger.info(f"Extracting async for whisper hash: {whisper_hash}")
+
+        headers: dict[str, Any] = LLMWhispererHelper.get_request_headers(config)
+        params = {
+            WhisperStatus.WHISPER_HASH: whisper_hash,
+            WhispererConfig.EXTRACT_ALL_LINES: enable_highlight,
+            WhispererConfig.LINES: "",
+        }
+
+        retrieve_response = LLMWhispererHelper.make_request(
+            config=config,
+            headers=headers,
+            params=params,
+            type="highlight",
+        )
+        return retrieve_response
+        
     @staticmethod
     def extract_text_from_response(
         output_file_path: Optional[str],
