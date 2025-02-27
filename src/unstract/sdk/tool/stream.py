@@ -7,7 +7,7 @@ from typing import Any
 from deprecated import deprecated
 
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
-from unstract.sdk.utils import ToolUtils
+from unstract.sdk.utils import Utils
 from unstract.sdk.utils.common_utils import UNSTRACT_TO_PY_LOG_LEVEL
 
 
@@ -29,7 +29,7 @@ class StreamMixin:
 
         """
         self.log_level = log_level
-        self._exec_by_tool = ToolUtils.str_to_bool(
+        self._exec_by_tool = Utils.str_to_bool(
             os.environ.get(ToolEnv.EXECUTION_BY_TOOL, "False")
         )
         if self.is_exec_by_tool:

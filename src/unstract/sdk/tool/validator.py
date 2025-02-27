@@ -8,6 +8,7 @@ from jsonschema import Draft202012Validator, ValidationError, validators
 from unstract.sdk.constants import MetadataKey, PropKey
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.mime_types import EXT_MIME_MAP
+from unstract.sdk.utils import Utils
 
 
 def extend_with_default(validator_class: Any) -> Any:
@@ -119,7 +120,7 @@ class ToolValidator:
             f"Checking input file size... (max file size: {max_file_size})"
         )
         file_size = self.tool.workflow_filestorage.size(path=input_file)
-        self.tool.stream_log(f"Input file size: {self._human_readable_size(file_size)}")
+        self.tool.stream_log(f"Input file size: {Utils.pretty_file_size(file_size)}")
 
         if file_size > max_size_in_bytes:
             source_name = self.tool.get_exec_metadata.get(MetadataKey.SOURCE_NAME)
@@ -127,22 +128,6 @@ class ToolValidator:
                 f"File {source_name} exceeds the maximum "
                 f"allowed size of {max_file_size}"
             )
-
-    def _human_readable_size(self, num: float, suffix: str = "B") -> str:
-        """Gets the human readable size for a file,
-
-        Args:
-            num (int): Size in bytes to parse
-            suffix (str, optional): _description_. Defaults to "B".
-
-        Returns:
-            str: Human readable size
-        """
-        for unit in ("", "K", "M", "G", "T"):
-            if abs(num) < 1024.0:
-                return f"{num:3.1f}{unit}{suffix}"
-            num /= 1024.0
-        return f"{num:.1f}{suffix}"
 
     def _parse_size_string(self, size_string: str) -> int:
         """Parses the size string for validation.
