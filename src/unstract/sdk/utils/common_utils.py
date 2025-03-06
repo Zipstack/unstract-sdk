@@ -9,11 +9,47 @@ from unstract.sdk.metrics_mixin import MetricsMixin
 logger = logging.getLogger(__name__)
 
 
-class CommonUtils:
+class Utils:
     @staticmethod
     def generate_uuid() -> str:
         """Class method to get uuid."""
         return str(uuid.uuid4())
+
+    @staticmethod
+    def str_to_bool(string: str) -> bool:
+        """String value of boolean to boolean.
+
+        Useful while parsing envs to bool.
+
+        Args:
+            string (str): value like "true", "True" etc..
+
+        Returns:
+            bool
+        """
+        return string.lower() == "true"
+
+    @staticmethod
+    def pretty_file_size(num: float, suffix: str = "B") -> str:
+        """Gets the human readable size for a file,
+
+        Args:
+            num (int): Size in bytes to parse
+            suffix (str, optional): _description_. Defaults to "B".
+
+        Returns:
+            str: Human readable size
+        """
+        for unit in ("", "K", "M", "G", "T"):
+            if abs(num) < 1024.0:
+                return f"{num:.2f} {unit}{suffix}"
+            num /= 1024.0
+        return f"{num:.2f} {suffix}"
+
+
+# TODO: Kept for backward compatibility, make use of Utils instead
+class CommonUtils(Utils):
+    pass
 
 
 # Mapping from python log level to Unstract counterpart

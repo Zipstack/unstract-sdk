@@ -161,20 +161,6 @@ class ToolUtils:
         file_length = fs.size(path=input_file)
         return file_length
 
-    @staticmethod
-    def str_to_bool(string: str) -> bool:
-        """String value of boolean to boolean.
-
-        Useful while parsing envs to bool.
-
-        Args:
-            string (str): value like "true", "True" etc..
-
-        Returns:
-            bool
-        """
-        return string.lower() == "true"
-
     # Used the same function from LLMWhisperer
     @staticmethod
     def calculate_page_count(

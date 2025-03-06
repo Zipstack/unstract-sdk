@@ -18,6 +18,7 @@ class PermanentFileStorage(FileStorage):
         FileStorageProvider.S3.value,
         FileStorageProvider.MINIO.value,
         FileStorageProvider.LOCAL.value,
+        FileStorageProvider.AZURE.value,
     ]
 
     def __init__(
@@ -35,6 +36,8 @@ class PermanentFileStorage(FileStorage):
             provider == FileStorageProvider.GCS
             or provider == FileStorageProvider.LOCAL
             or provider == FileStorageProvider.MINIO
+            or provider == FileStorageProvider.S3
+            or provider == FileStorageProvider.AZURE
         ):
             super().__init__(provider, **storage_config)
         else:
