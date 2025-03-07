@@ -5,7 +5,7 @@
 groups = ["default", "aws", "azure", "docs", "gcs", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6156a573aca4f914aae9547393ef566ee4fc5e2c08644b9ab6d0daf3e2f2ec40"
+content_hash = "sha256:4e24b4875a38c4b9192d2d4632b7f3eac3a5b618fb6e3cd9dcd6c5e8b2b15bcc"
 
 [[metadata.targets]]
 requires_python = "==3.9.6"
@@ -1762,7 +1762,7 @@ files = [
 
 [[package]]
 name = "llama-index-llms-azure-openai"
-version = "0.3.0"
+version = "0.3.1"
 requires_python = "<4.0,>=3.9"
 summary = "llama-index llms azure openai integration"
 groups = ["default"]
@@ -1774,8 +1774,8 @@ dependencies = [
     "llama-index-llms-openai<0.4.0,>=0.3.0",
 ]
 files = [
-    {file = "llama_index_llms_azure_openai-0.3.0-py3-none-any.whl", hash = "sha256:24091aedf7ba24a7b217d17c4358e62b5d6b43a4d3ca44750d442b02a440d26e"},
-    {file = "llama_index_llms_azure_openai-0.3.0.tar.gz", hash = "sha256:0feea9319d832c8b5e8e0f397c905e45df54c529b6a778825adcd0d254bd7d63"},
+    {file = "llama_index_llms_azure_openai-0.3.1-py3-none-any.whl", hash = "sha256:f9cc1f275288b17f44ce81939d71481a1b26b39e525c7233515147452d596b9e"},
+    {file = "llama_index_llms_azure_openai-0.3.1.tar.gz", hash = "sha256:d846e72017480739d385a420b3432f5f2bdd0e4fe7ce1dc5f25deac7d0a81f70"},
 ]
 
 [[package]]
@@ -1829,18 +1829,18 @@ files = [
 
 [[package]]
 name = "llama-index-llms-openai"
-version = "0.3.17"
+version = "0.3.25"
 requires_python = "<4.0,>=3.9"
 summary = "llama-index llms openai integration"
 groups = ["default"]
 marker = "python_full_version == \"3.9.6\""
 dependencies = [
-    "llama-index-core<0.13.0,>=0.12.4",
+    "llama-index-core<0.13.0,>=0.12.17",
     "openai<2.0.0,>=1.58.1",
 ]
 files = [
-    {file = "llama_index_llms_openai-0.3.17-py3-none-any.whl", hash = "sha256:06ae687bfbe17f9eadc09c7167ac2a67d8ff5548164166746be251698f5e7b58"},
-    {file = "llama_index_llms_openai-0.3.17.tar.gz", hash = "sha256:19f478054a017e5e3c16f4335a7e149a1f28cc59871c9873adc49a46b594ac99"},
+    {file = "llama_index_llms_openai-0.3.25-py3-none-any.whl", hash = "sha256:b21ea58f20c82f442b910b8f878bbbfd4937f601aa436cbe55b26c1d490762a6"},
+    {file = "llama_index_llms_openai-0.3.25.tar.gz", hash = "sha256:1e4fd1d166bb635ca7c03f0486c04d80978948c5b8d89c8b469ae5d02852cf4b"},
 ]
 
 [[package]]
