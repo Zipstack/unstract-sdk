@@ -36,36 +36,50 @@ class PromptTool:
 
     @log_elapsed(operation="ANSWER_PROMPTS")
     def answer_prompt(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self,
+        payload: dict[str, Any],
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         url_path = "answer-prompt"
         if self.is_public_call:
             url_path = "answer-prompt-public"
         return self._post_call(
-            url_path=url_path,
-            payload=payload,
-            params=params,
+            url_path=url_path, payload=payload, params=params, headers=headers
         )
 
     def single_pass_extraction(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self,
+        payload: dict[str, Any],
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         return self._post_call(
             url_path="single-pass-extraction",
             payload=payload,
             params=params,
+            headers=headers,
         )
 
     def summarize(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self,
+        payload: dict[str, Any],
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
-        return self._post_call(url_path="summarize", payload=payload, params=params)
+        return self._post_call(
+            url_path="summarize",
+            payload=payload,
+            params=params,
+            headers=headers,
+        )
 
     def _post_call(
         self,
         url_path: str,
         payload: dict[str, Any],
         params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
@@ -74,6 +88,7 @@ class PromptTool:
             url_path (str): URL path to the service endpoint
             payload (dict): Payload to send in the request body
             params (dict, optional): Query parameters to include in the request
+            headers (dict, optional): Headers to include in the request
 
         Returns:
             dict: Response from the prompt service
@@ -94,13 +109,19 @@ class PromptTool:
             "status_code": 500,
         }
         url: str = f"{self.base_url}/{url_path}"
-        headers: dict[str, str] = {}
+
+        default_headers = {}
+
         if not self.is_public_call:
-            headers = {"Authorization": f"Bearer {self.bearer_token}"}
+            default_headers = {"Authorization": f"Bearer {self.bearer_token}"}
+
+        if headers:
+            default_headers.update(headers)
+
         response: Response = Response()
         try:
             response = requests.post(
-                url=url, json=payload, params=params, headers=headers
+                url=url, json=payload, params=params, headers=default_headers
             )
             response.raise_for_status()
             result["status"] = "OK"

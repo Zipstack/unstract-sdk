@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from typing import Any, Optional
@@ -11,7 +10,6 @@ from unstract.sdk.adapters.x2text.dto import (
     TextExtractionResult,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
-    HTTPMethod,
     WhispererEndpoint,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams

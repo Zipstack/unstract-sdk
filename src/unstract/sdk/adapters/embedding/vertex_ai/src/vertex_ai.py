@@ -1,7 +1,6 @@
 import json
-import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials

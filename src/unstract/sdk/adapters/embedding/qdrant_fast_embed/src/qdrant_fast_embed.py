@@ -5,7 +5,6 @@ from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.fastembed import FastEmbedEmbedding
 
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
-from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 from unstract.sdk.adapters.exceptions import AdapterError
 
 
