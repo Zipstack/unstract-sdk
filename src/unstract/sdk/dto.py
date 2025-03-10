@@ -15,7 +15,6 @@ class InstanceIdentifiers:
 @dataclass
 class FileInfo:
     file_path: str
-    output_file_path: str
     file_hash: str
 
 
