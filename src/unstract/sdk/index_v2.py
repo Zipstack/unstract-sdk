@@ -56,7 +56,7 @@ class Index:
 
         Args:
             chunking_config : ChunkingConfig
-            file_info (FileInfo): Contains file-related 
+            file_info (FileInfo): Contains file-related
             information such as path and hash.
             instance_identifiers (InstanceIdentifiers): Identifiers for
             embedding, vector DB, tool, etc.
@@ -208,17 +208,25 @@ class Index:
 
     def _prepare_documents(self, doc_id, full_text) -> list:
         documents = []
-        for item in full_text:
-            text = item["text_contents"]
-            document = Document(
-                text=text,
-                doc_id=doc_id,
-                metadata={"section": item["section"]},
+        try :
+            for item in full_text:
+                text = item["text_contents"]
+                document = Document(
+                    text=text,
+                    doc_id=doc_id,
+                    metadata={"section": item["section"]},
+                )
+                document.id_ = doc_id
+                documents.append(document)
+            self.tool.stream_log(f"Number of documents: {len(documents)}")
+            return documents
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error deleting nodes for {doc_id}: {e}",
+                level=LogLevel.ERROR,
             )
-            document.id_ = doc_id
-            documents.append(document)
-        self.tool.stream_log(f"Number of documents: {len(documents)}")
-        return documents
+            raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
+
 
     def _is_no_op_adapter(
         self,
