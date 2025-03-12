@@ -162,7 +162,10 @@ class Index:
             usage_kwargs=usage_kwargs,
         )
         try:
-            if enable_highlight and (isinstance(x2text.x2text_instance, LLMWhisperer) or isinstance(x2text.x2text_instance, LLMWhispererV2)):
+            if enable_highlight and (
+                isinstance(x2text.x2text_instance, LLMWhisperer)
+                or isinstance(x2text.x2text_instance, LLMWhispererV2)
+            ):
                 process_response: TextExtractionResult = x2text.process(
                     input_file_path=file_path,
                     output_file_path=output_file_path,
@@ -172,7 +175,7 @@ class Index:
                 )
                 whisper_hash_value = process_response.extraction_metadata.whisper_hash
                 metadata = {X2TextConstants.WHISPER_HASH: whisper_hash_value}
-                if hasattr(self.tool, 'update_exec_metadata'):
+                if hasattr(self.tool, "update_exec_metadata"):
                     self.tool.update_exec_metadata(metadata)
             else:
                 process_response: TextExtractionResult = x2text.process(
@@ -202,6 +205,7 @@ class Index:
         return extracted_text
 
     # TODO: Reduce the number of params by some dataclass
+    # TODO: Remove unused `process_text` argument
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
     @capture_metrics
     def index(
