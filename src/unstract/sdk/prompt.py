@@ -46,6 +46,32 @@ class PromptTool:
             payload=payload,
             params=params,
         )
+    
+    @log_elapsed(operation="INDEX")
+    def index(
+        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+    ) -> dict[str, Any]:
+        url_path = "index"
+        if self.is_public_call:
+            url_path = "index-public"
+        return self._post_call(
+            url_path=url_path,
+            payload=payload,
+            params=params,
+        )
+    
+    @log_elapsed(operation="EXTRACT")
+    def extract(
+        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+    ) -> dict[str, Any]:
+        url_path = "extract"
+        if self.is_public_call:
+            url_path = "extract-public"
+        return self._post_call(
+            url_path=url_path,
+            payload=payload,
+            params=params,
+        )
 
     def single_pass_extraction(
         self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
