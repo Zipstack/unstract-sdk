@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional
 
 from llama_index.core import Document
@@ -26,15 +27,20 @@ from unstract.sdk.exceptions import IndexingError, SdkError
 from unstract.sdk.file_storage.impl import FileStorage
 from unstract.sdk.file_storage.provider import FileStorageProvider
 from unstract.sdk.tool.stream import StreamMixin
-from unstract.sdk.utils.common_utils import capture_metrics, log_elapsed
+from unstract.sdk.utils.common_utils import capture_metrics
 from unstract.sdk.utils.tool_utils import ToolUtils
 from unstract.sdk.vector_db import VectorDB
+
+logger = logging.getLogger(__name__)
 
 
 class Index:
     def __init__(
         self,
         tool: StreamMixin,
+        instance_identifiers: InstanceIdentifiers,
+        chunking_config: ChunkingConfig,
+        processing_options: ProcessingOptions,
         run_id: Optional[str] = None,
         capture_metrics: bool = False,
     ):
@@ -42,13 +48,14 @@ class Index:
         self.tool = tool
         self._run_id = run_id
         self._capture_metrics = capture_metrics
+        self.instance_identifiers = instance_identifiers
+        self.chunking_config = chunking_config
+        self.processing_options = processing_options
         self._metrics = {}
 
     def generate_index_key(
         self,
-        chuking_config: ChunkingConfig,
         file_info: FileInfo,
-        instance_identifiers: InstanceIdentifiers,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Generates a unique index key based on the provided configuration,
@@ -79,18 +86,18 @@ class Index:
         index_key = {
             "file_hash": file_hash,
             "vector_db_config": ToolAdapter.get_adapter_config(
-                self.tool, instance_identifiers.vector_db_instance_id
+                self.tool, self.instance_identifiers.vector_db_instance_id
             ),
             "embedding_config": ToolAdapter.get_adapter_config(
-                self.tool, instance_identifiers.embedding_instance_id
+                self.tool, self.instance_identifiers.embedding_instance_id
             ),
             "x2text_config": ToolAdapter.get_adapter_config(
-                self.tool, instance_identifiers.x2text_instance_id
+                self.tool, self.instance_identifiers.x2text_instance_id
             ),
             # Typed and hashed as strings since the final hash is persisted
             # and this is required to be backward compatible
-            "chunk_size": str(chuking_config.chunk_size),
-            "chunk_overlap": str(chuking_config.chunk_overlap),
+            "chunk_size": str(self.chunking_config.chunk_size),
+            "chunk_overlap": str(self.chunking_config.chunk_overlap),
         }
         # JSON keys are sorted to ensure that the same key gets hashed even in
         # case where the fields are reordered.
@@ -101,8 +108,6 @@ class Index:
     def is_document_indexed(
         self,
         doc_id: str,
-        instance_identifiers: InstanceIdentifiers,
-        processing_options: ProcessingOptions,
         embedding: Embedding,
         vector_db: VectorDB,
     ) -> bool:
@@ -112,56 +117,54 @@ class Index:
         Returns:
             str: The document ID.
         """
+        # Checking if document is already indexed against doc_id
+        doc_id_eq_filter = MetadataFilter.from_dict(
+            {"key": "doc_id", "operator": FilterOperator.EQ, "value": doc_id}
+        )
+        filters = MetadataFilters(filters=[doc_id_eq_filter])
+        q = VectorStoreQuery(
+            query_embedding=embedding.get_query_embedding(" "),
+            doc_ids=[doc_id],
+            filters=filters,
+        )
+
+        doc_id_found = False
         try:
-            # Checking if document is already indexed against doc_id
-            doc_id_eq_filter = MetadataFilter.from_dict(
-                {"key": "doc_id", "operator": FilterOperator.EQ, "value": doc_id}
-            )
-            filters = MetadataFilters(filters=[doc_id_eq_filter])
-            q = VectorStoreQuery(
-                query_embedding=embedding.get_query_embedding(" "),
-                doc_ids=[doc_id],
-                filters=filters,
-            )
-
-            doc_id_found = False
-            try:
-                n: VectorStoreQueryResult = vector_db.query(query=q)
-                if len(n.nodes) > 0:
-                    doc_id_found = True
-                    self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
-                else:
-                    self.tool.stream_log(f"No nodes found for {doc_id}")
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error querying {instance_identifiers.vector_db_instance_id}: {e},"
-                    " proceeding to index",
-                    level=LogLevel.ERROR,
-                )
-
-            if doc_id_found and not processing_options.reindex:
-                self.tool.stream_log(f"File was indexed already under {doc_id}")
-                return doc_id_found
-
+            n: VectorStoreQueryResult = vector_db.query(query=q)
+            if len(n.nodes) > 0:
+                doc_id_found = True
+                self.tool.stream_log(f"Found {len(n.nodes)} nodes for {doc_id}")
+            else:
+                self.tool.stream_log(f"No nodes found for {doc_id}")
         except Exception as e:
-            self.tool.stream_log(
-                f"Unexpected error during indexing check: {e}", level=LogLevel.ERROR
+            logger.warning(
+                f"Error querying {self.instance_identifiers.vector_db_instance_id}:"
+                f" {str(e)}, proceeding to index",
+                exc_info=True,
             )
+
+        if doc_id_found and not self.processing_options.reindex:
+            self.tool.stream_log(f"File was indexed already under {doc_id}")
+            return doc_id_found
 
         return doc_id_found
 
-    @log_elapsed(operation="INDEX")
     @capture_metrics
     def perform_indexing(
         self,
-        instance_identifiers: InstanceIdentifiers,
-        chunking_config: ChunkingConfig,
         vector_db: VectorDB,
         doc_id: str,
         extracted_text: str,
         doc_id_found: bool,
     ):
-        self._is_no_op_adapter(instance_identifiers, vector_db, doc_id)
+        if isinstance(
+            vector_db.get_vector_db(
+                adapter_instance_id=self.instance_identifiers.vector_db_instance_id,
+                embedding_dimension=1,
+            ),
+            (NoOpCustomVectorDB),
+        ):
+            return doc_id
 
         self.tool.stream_log("Indexing file...")
         full_text = [
@@ -174,16 +177,16 @@ class Index:
         documents = self._prepare_documents(doc_id, full_text)
         if doc_id_found:
             self.delete_nodes(vector_db, doc_id)
-        self._trigger_indexing(chunking_config, vector_db, documents)
+        self._trigger_indexing(vector_db, documents)
         return doc_id
 
-    def _trigger_indexing(self, chunking_config, vector_db, documents):
+    def _trigger_indexing(self, vector_db, documents):
         self.tool.stream_log("Adding nodes to vector db...")
         try:
             vector_db.index_document(
                 documents,
-                chunk_size=chunking_config.chunk_overlap,
-                chunk_overlap=chunking_config.chunk_overlap,
+                chunk_size=self.chunking_config.chunk_overlap,
+                chunk_overlap=self.chunking_config.chunk_overlap,
                 show_progress=True,
             )
             self.tool.stream_log("File has been indexed successfully")
@@ -227,18 +230,3 @@ class Index:
             raise SdkError(
                 f"Error while processing documents for indexing {doc_id}: {e}"
             ) from e
-
-    def _is_no_op_adapter(
-        self,
-        instance_identifiers: InstanceIdentifiers,
-        vector_db: VectorDB,
-        doc_id: str,
-    ):
-        if isinstance(
-            vector_db.get_vector_db(
-                adapter_instance_id=instance_identifiers.vector_db_instance_id,
-                embedding_dimension=1,
-            ),
-            (NoOpCustomVectorDB),
-        ):
-            return doc_id
