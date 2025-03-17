@@ -172,7 +172,8 @@ class Index:
         ]
         # Convert raw text to llama index usage Document
         documents = self._prepare_documents(doc_id, full_text)
-        self._delete_existing_nodes_on_reindex(vector_db, doc_id, doc_id_found)
+        if doc_id_found:
+            self.delete_nodes(vector_db, doc_id)
         self._trigger_indexing(chunking_config, vector_db, documents)
         return doc_id
 
@@ -193,22 +194,20 @@ class Index:
             )
             raise IndexingError(str(e)) from e
 
-    def _delete_existing_nodes_on_reindex(self, vector_db, doc_id, doc_id_found):
-        if doc_id_found:
-            # Delete the nodes for the doc_id
-            try:
-                vector_db.delete(ref_doc_id=doc_id)
-                self.tool.stream_log(f"Deleted nodes for {doc_id}")
-            except Exception as e:
-                self.tool.stream_log(
-                    f"Error deleting nodes for {doc_id}: {e}",
-                    level=LogLevel.ERROR,
-                )
-                raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
+    def delete_nodes(self, vector_db: VectorDB, doc_id: str):
+        try:
+            vector_db.delete(ref_doc_id=doc_id)
+            self.tool.stream_log(f"Deleted nodes for {doc_id}")
+        except Exception as e:
+            self.tool.stream_log(
+                f"Error deleting nodes for {doc_id}: {e}",
+                level=LogLevel.ERROR,
+            )
+            raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
 
-    def _prepare_documents(self, doc_id, full_text) -> list:
+    def _prepare_documents(self, doc_id: str, full_text: str) -> list:
         documents = []
-        try :
+        try:
             for item in full_text:
                 text = item["text_contents"]
                 document = Document(
@@ -222,11 +221,12 @@ class Index:
             return documents
         except Exception as e:
             self.tool.stream_log(
-                f"Error deleting nodes for {doc_id}: {e}",
+                f"Error while processing documents {doc_id}: {e}",
                 level=LogLevel.ERROR,
             )
-            raise SdkError(f"Error deleting nodes for {doc_id}: {e}") from e
-
+            raise SdkError(
+                f"Error while processing documents for indexing {doc_id}: {e}"
+            ) from e
 
     def _is_no_op_adapter(
         self,

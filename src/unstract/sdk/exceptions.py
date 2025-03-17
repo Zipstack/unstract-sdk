@@ -104,5 +104,5 @@ class RetrievalError(SdkError):
 
     DEFAULT_MESSAGE = (
         "Error while retrieving data from the VectorDB. "
-        "Please review the query parameters and ensure the database is accessible."
+        "Please contact the admin for further assistance."
     )

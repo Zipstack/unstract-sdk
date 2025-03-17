@@ -11,12 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class SimpleRetriever(BaseRetriever):
-    def __init__(self, vector_db: VectorDB, prompt: str, doc_id: str, top_k: int):
-        self.vector_db = vector_db
-        self.prompt = prompt
-        self.doc_id = doc_id
-        self.top_k = top_k
-
     def retrieve(self) -> set[str]:
         vector_query_engine: VectorStoreIndex = self.vector_db.get_vector_store_index()
         retriever = vector_query_engine.as_retriever(

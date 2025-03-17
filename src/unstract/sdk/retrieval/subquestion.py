@@ -14,20 +14,6 @@ class SubquestionRetrieval(BaseRetriever):
     """SubquestionRetrieval class for querying VectorDB using LlamaIndex's
     SubQuestionQueryEngine."""
 
-    def __init__(self, vector_db: VectorDB, prompt: str, doc_id: str, top_k: int):
-        """Initialize the SubquestionRetrieval class.
-
-        Args:
-            vector_db (VectorDB): The vector database instance.
-            prompt (str): The query prompt.
-            doc_id (str): Document identifier for query context.
-            top_k (int): Number of top results to retrieve.
-        """
-        self.vector_db = vector_db
-        self.prompt = prompt
-        self.doc_id = doc_id
-        self.top_k = top_k
-
     def retrieve(self) -> set[str]:
         """Retrieve text chunks from the VectorDB based on the provided prompt.
 
