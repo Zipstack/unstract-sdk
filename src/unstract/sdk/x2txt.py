@@ -123,8 +123,6 @@ class X2Text(metaclass=ABCMeta):
     ) -> None:
         file_size = ToolUtils.get_file_size(input_file_path, fs)
 
-        self._x2text_instance
-
         if mime_type == MimeType.PDF:
             pdf_contents = io.BytesIO(fs.read(path=input_file_path, mode="rb"))
             with pdfplumber.open(pdf_contents) as pdf:
