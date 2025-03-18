@@ -97,12 +97,3 @@ class FileOperationError(SdkError):
         "Please check specific storage error for "
         "further information"
     )
-
-
-class RetrievalError(SdkError):
-    """Custom exception raised for errors during retrieval from VectorDB."""
-
-    DEFAULT_MESSAGE = (
-        "Error while retrieving data from the VectorDB. "
-        "Please contact the admin for further assistance."
-    )
