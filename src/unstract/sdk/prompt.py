@@ -49,7 +49,10 @@ class PromptTool:
     
     @log_elapsed(operation="INDEX")
     def index(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self, 
+        payload: dict[str, Any], 
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         url_path = "index"
         if self.is_public_call:
@@ -58,11 +61,15 @@ class PromptTool:
             url_path=url_path,
             payload=payload,
             params=params,
+            headers=headers,
         )
     
     @log_elapsed(operation="EXTRACT")
     def extract(
-        self, payload: dict[str, Any], params: Optional[dict[str, str]] = None
+        self, 
+        payload: dict[str, Any], 
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         url_path = "extract"
         if self.is_public_call:
@@ -71,6 +78,7 @@ class PromptTool:
             url_path=url_path,
             payload=payload,
             params=params,
+            headers=headers,
         )
 
     def single_pass_extraction(
