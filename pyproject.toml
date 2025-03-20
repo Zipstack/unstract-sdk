@@ -39,7 +39,7 @@ dependencies = [
     "llama-index-llms-mistralai==0.3.1",
     "mistralai==1.2.5",
     "llama-index-llms-anyscale==0.3.0",
-    "llama-index-llms-anthropic==0.6.3",
+    "llama-index-llms-anthropic==0.6.10",
     "llama-index-llms-azure-openai==0.3.1",
     "llama-index-llms-vertex==0.4.2",
     "llama-index-llms-replicate==0.4.0",
