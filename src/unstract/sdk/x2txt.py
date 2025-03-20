@@ -123,15 +123,12 @@ class X2Text(metaclass=ABCMeta):
     ) -> None:
         file_size = ToolUtils.get_file_size(input_file_path, fs)
 
-        self._x2text_instance
-
         if mime_type == MimeType.PDF:
             pdf_contents = io.BytesIO(fs.read(path=input_file_path, mode="rb"))
             with pdfplumber.open(pdf_contents) as pdf:
                 # calculate the number of pages
                 page_count = len(pdf.pages)
             if isinstance(self._x2text_instance, LLMWhisperer):
-                self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT)
                 page_count = ToolUtils.calculate_page_count(
                     self._x2text_instance.config.get(WhispererConfig.PAGES_TO_EXTRACT),
                     page_count,
@@ -144,6 +141,7 @@ class X2Text(metaclass=ABCMeta):
                 kwargs=self._usage_kwargs,
             )
         else:
+            # TODO: Calculate page usage for other file types (3000 words = 1 page)
             # We are allowing certain image types,and raw texts. We will consider them
             # as single page documents as there in no concept of page numbers.
             Audit().push_page_usage_data(
