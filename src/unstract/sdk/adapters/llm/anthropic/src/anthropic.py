@@ -20,6 +20,8 @@ class Constants:
     TIMEOUT = "timeout"
     MAX_RETRIES = "max_retries"
     MAX_TOKENS = "max_tokens"
+    ENABLE_THINKING = "enable_thinking"
+    BUDGET_TOKENS = "budget_tokens"
 
 
 class AnthropicLLM(LLMAdapter):
@@ -53,6 +55,14 @@ class AnthropicLLM(LLMAdapter):
         max_tokens = int(
             self.config.get(Constants.MAX_TOKENS, DEFAULT_ANTHROPIC_MAX_TOKENS)
         )
+
+        thinking = self.config.get(Constants.ENABLE_THINKING)
+        thinking_dict = None
+
+        if thinking:
+            budget_tokens = self.config.get(Constants.BUDGET_TOKENS)
+            thinking_dict = {"type": "enabled", "budget_tokens": budget_tokens}
+            
         try:
             llm: LLM = Anthropic(
                 model=str(self.config.get(Constants.MODEL)),
@@ -65,6 +75,7 @@ class AnthropicLLM(LLMAdapter):
                 ),
                 temperature=0,
                 max_tokens=max_tokens,
+                thinking_dict=thinking_dict
             )
             return llm
         except Exception as e:
