@@ -77,7 +77,10 @@ class LLMAdapter(Adapter, ABC):
         completion_kwargs = {}
         if hasattr(llm, 'model') and getattr(llm, 'model') not in O1_MODELS:
             completion_kwargs['temperature'] = 0.003
-            
+
+        if hasattr(llm, 'thinking_dict') and getattr(llm, 'thinking_dict') is not None:
+            completion_kwargs['temperature'] = 1
+ 
         response = llm.complete(
             "The capital of Tamilnadu is ",
             **completion_kwargs
