@@ -73,7 +73,7 @@
             "type": "number",
             "minimum": 1024,
             "default": 1024,
-            "title": "Budget Tokens",
+            "title": "Thinking Budget Tokens",
             "description": "Sets the max tokens for Claude's internal reasoning when thinking is enabled"
           }
         },
