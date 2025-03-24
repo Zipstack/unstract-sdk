@@ -207,10 +207,23 @@ class FileStorage(FileStorageInterface):
             datetime: Last modified time in datetime
         """
         file_info = self.fs.info(path)
-        file_mtime = file_info["mtime"]
-        if not isinstance(file_mtime, datetime):
-            file_mtime = datetime.fromtimestamp(file_mtime)
-        return file_mtime
+
+        # Try different possible timestamp keys
+        file_mtime = None
+        for key in ["mtime", "LastModified", "modification_time"]:
+            file_mtime = file_info.get(key)
+            if file_mtime is not None:
+                break
+
+        if file_mtime is None:
+            raise FileOperationError(
+                f"Could not find modification time in file info: {file_info}"
+            )
+
+        if isinstance(file_mtime, datetime):
+            return file_mtime
+
+        return datetime.fromtimestamp(file_mtime)
 
     def mime_type(
         self,
