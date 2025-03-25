@@ -1,3 +1,4 @@
+import datetime
 import io
 import json
 import os.path
@@ -356,6 +357,32 @@ def test_make_dir(file_storage, folder_path, expected_result):
         file_storage.rm(path=folder_path, recursive=True)
     file_storage.mkdir(folder_path)
     assert file_storage.exists(path=folder_path) == expected_result
+
+
+@pytest.mark.parametrize(
+    "file_storage, folder_path",
+    [
+        (file_storage(provider=FileStorageProvider.GCS), TEST_CONSTANTS.READ_PDF_FILE),
+        (
+            file_storage(provider=FileStorageProvider.LOCAL),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+        ),
+        (file_storage(provider=FileStorageProvider.S3), TEST_CONSTANTS.READ_TEXT_FILE),
+        (
+            file_storage(provider=FileStorageProvider.MINIO),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+        ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+        ),
+    ],
+)
+def test_modification_time(file_storage, folder_path):
+    modification_time = file_storage.modification_time(path=folder_path)
+    assert modification_time is not None and isinstance(
+        modification_time, datetime.datetime
+    )
 
 
 @pytest.mark.parametrize(
