@@ -210,7 +210,7 @@ class FileStorage(FileStorageInterface):
 
         # Try different possible timestamp keys
         file_mtime = None
-        for key in ["mtime", "LastModified", "modification_time"]:
+        for key in ["mtime", "LastModified", "last_modified"]:
             file_mtime = file_info.get(key)
             if file_mtime is not None:
                 break

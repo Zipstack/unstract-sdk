@@ -372,6 +372,10 @@ def test_make_dir(file_storage, folder_path, expected_result):
             file_storage(provider=FileStorageProvider.MINIO),
             TEST_CONSTANTS.READ_TEXT_FILE,
         ),
+        (
+            file_storage(provider=FileStorageProvider.AZURE),
+            TEST_CONSTANTS.READ_TEXT_FILE,
+        ),
     ],
 )
 def test_modification_time(file_storage, folder_path):
