@@ -31,24 +31,17 @@ repos:
       - id: mixed-line-ending
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.4 # Check for the latest version
+    rev: v0.3.4
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        args: ["-d", "relaxed"]
-        language: system
-
   - repo: https://github.com/hadialqattan/pycln
     rev: v2.4.0
     hooks:
       - id: pycln
-        entry: uv run pycln # Ensure it runs inside `uv`
+        entry: uv run pycln
         args: [--config=pyproject.toml]
 
   - repo: https://github.com/pycqa/docformatter
@@ -65,15 +58,11 @@ repos:
         types:
           - python
 
-  - repo: https://github.com/asottile/yesqa
-    rev: v1.5.0
-    hooks:
-      - id: yesqa
   - repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
     rev: 0.6.11
     hooks:
       - id: uv-lock
+
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.11.2
     hooks:
@@ -81,27 +70,7 @@ repos:
         language: system
         entry: uv run mypy .
         pass_filenames: false
-        args:
-          [
-            --allow-subclassing-any,
-            --allow-untyped-decorators,
-            --check-untyped-defs,
-            --follow-imports,
-            "silent",
-            --ignore-missing-imports,
-            --implicit-reexport,
-            --pretty,
-            --python-version=3.9,
-            --show-column-numbers,
-            --show-error-codes,
-            --strict,
-            --warn-redundant-casts,
-            --warn-return-any,
-            --warn-unreachable,
-            --warn-unused-configs,
-            --warn-unused-ignores,
-            --allow-untyped-calls,
-          ]
+        additional_dependencies: []
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.42.0
@@ -110,6 +79,7 @@ repos:
         args: [--disable, MD013]
       - id: markdownlint-fix
         args: [--disable, MD013]
+
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.2
     hooks:

@@ -4206,17 +4206,20 @@ docs = [
     { name = "lazydocs" },
 ]
 test = [
+    { name = "adlfs" },
+    { name = "gcsfs" },
     { name = "parameterized" },
     { name = "pytest" },
     { name = "pytest-mock" },
+    { name = "s3fs" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "adlfs", marker = "extra == 'azure'", specifier = "==2024.7.0" },
+    { name = "adlfs", marker = "extra == 'azure'", specifier = "~=2024.7.0" },
     { name = "boto3", marker = "extra == 'aws'", specifier = "~=1.34.131" },
     { name = "filetype", specifier = "~=1.2.0" },
-    { name = "gcsfs", marker = "extra == 'gcs'", specifier = "==2024.10.0" },
+    { name = "gcsfs", marker = "extra == 'gcs'", specifier = "~=2024.10.0" },
     { name = "httpx", specifier = ">=0.25.2" },
     { name = "jsonschema", specifier = "~=4.18.2" },
     { name = "llama-index", specifier = "==0.12.8" },
@@ -4248,7 +4251,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = "==1.0.0" },
     { name = "python-magic", specifier = "~=0.4.27" },
     { name = "redis", specifier = ">=5.2.1" },
-    { name = "s3fs", extras = ["boto3"], marker = "extra == 'aws'", specifier = "==2024.10.0" },
+    { name = "s3fs", extras = ["boto3"], marker = "extra == 'aws'", specifier = "~=2024.10.0" },
     { name = "singleton-decorator", specifier = "~=1.0.0" },
     { name = "tiktoken", specifier = "~=0.9.0" },
     { name = "transformers", specifier = "==4.37.0" },
@@ -4267,9 +4270,12 @@ dev = [
 ]
 docs = [{ name = "lazydocs", specifier = "~=0.4.8" }]
 test = [
+    { name = "adlfs", specifier = "~=2024.7.0" },
+    { name = "gcsfs", specifier = "==2024.10.0" },
     { name = "parameterized", specifier = "==0.9.0" },
     { name = "pytest", specifier = "==8.3.3" },
     { name = "pytest-mock", specifier = "==3.14.0" },
+    { name = "s3fs", specifier = "==2024.10.0" },
 ]
 
 [[package]]
