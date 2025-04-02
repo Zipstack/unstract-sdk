@@ -1,0 +1,11 @@
+[project]
+name = "unstract-sdk-llm-litellm-bedrock"
+version = "0.1.0"
+description = "Bedrock LLM adapter using LiteLLM for Unstract SDK"
+dependencies = [
+    "litellm>=1.0.0",
+]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

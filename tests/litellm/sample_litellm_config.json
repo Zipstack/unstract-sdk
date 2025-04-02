@@ -1,0 +1,11 @@
+{
+    "model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "aws_access_key_id": "",
+    "aws_secret_access_key": "",
+    "region_name": "us-east-1",
+    "timeout": 0,
+    "max_retries": 0,
+    "context_size": 4096,
+    "max_tokens": 8192,
+    "temperature": 0
+}
