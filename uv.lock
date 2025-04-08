@@ -4185,7 +4185,7 @@ wheels = [
 
 [[package]]
 name = "unstract-sdk"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "filetype" },
     { name = "httpx" },
@@ -4300,7 +4300,7 @@ requires-dist = [
     { name = "tiktoken", specifier = "~=0.9.0" },
     { name = "transformers", specifier = "==4.37.0" },
 ]
-provides-extras = ["aws", "azure", "gcs"]
+provides-extras = ["aws", "gcs", "azure"]
 
 [package.metadata.requires-dev]
 dev = [
