@@ -36,6 +36,7 @@ class ToolExecutor:
 
     def _setup_for_run(self) -> None:
         """Helps initialize tool execution for RUN command."""
+        # TODO: Review if file storage equivalent is needed or remove this
         shutil.rmtree(self.tool.get_output_dir(), ignore_errors=True)
         Path(self.tool.get_output_dir()).mkdir(parents=True, exist_ok=True)
 
