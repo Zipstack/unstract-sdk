@@ -205,7 +205,7 @@ class Index:
         return extracted_text
 
     # TODO: Reduce the number of params by some dataclass
-    # TODO: Remove unused `process_text` argument
+    # TODO: Deprecate and remove `process_text` argument
     @log_elapsed(operation="CHECK_AND_INDEX(overall)")
     @capture_metrics
     def index(
