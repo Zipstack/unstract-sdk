@@ -2,6 +2,24 @@
 name = "unstract-sdk"
 dynamic = ["version"]
 description = "A framework for writing Unstract Tools/Apps"
+readme = "README.md"
+urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }
+license = { text = "AGPL v3" }
+authors = [{ name = "Zipstack Inc", email = "devsupport@zipstack.com" }]
+keywords = ["unstract tools-development-kit apps development-kit sdk"]
+requires-python = ">=3.9, <3.13"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
 dependencies = [
     # Specs and validation
     "jsonschema~=4.18.2",
@@ -53,26 +71,6 @@ dependencies = [
     "redis>=5.2.1",
     "llmwhisperer-client>=2.2.1",
 ]
-readme = "README.md"
-urls = { Homepage = "https://unstract.com", "Release notes" = "https://github.com/Zipstack/unstract-sdk/releases", Source = "https://github.com/Zipstack/unstract-sdk" }
-license = { text = "AGPL v3" }
-authors = [{ name = "Zipstack Inc", email = "devsupport@zipstack.com" }]
-keywords = ["unstract tools-development-kit apps development-kit sdk"]
-requires-python = ">=3.9, <3.13"
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS :: MacOS X",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
-
-[project.scripts]
-unstract-tool-gen = "unstract.sdk.scripts.tool_gen:main"
 
 [project.optional-dependencies]
 aws = ["s3fs[boto3]~=2024.10.0", "boto3~=1.34.131"]
@@ -98,6 +96,9 @@ test = [
     "s3fs==2024.10.0",
     "adlfs~=2024.7.0",
 ]
+
+[project.scripts]
+unstract-tool-gen = "unstract.sdk.scripts.tool_gen:main"
 
 [build-system]
 requires = ["hatchling"]
