@@ -61,25 +61,27 @@ Index Version **0.9.28** as on January 14th, 2024
 
 Ensure that you have all the required dependencies and pre-commit hooks installed
 ```shell
-pdm install
+uv sync
 pre-commit install
 ```
 
 Once the changes have been made, it can be tested with [Unstract](https://github.com/Zipstack/unstract) through the following means.
 
-#### With PDM
-Specify the SDK as a dependency to a project using a tool like `pdm` by adding the following to your `pyproject.toml`
+#### With UV
+Specify the SDK as a dependency to a project using a tool like `uv` by adding the following to your `pyproject.toml`
 
 ```toml
-[tool.pdm.dev-dependencies]
-local_copies = [
-    "-e unstract-adapters @ file:///${UNSTRACT_ADAPTERS_PATH}",
-    "-e unstract-sdk @ file:///${UNSTRACT_SDK_PATH}",
+dependencies = [
+    "unstract-sdk"
 ]
-```
-Or by running the below command
-```shell
-pdm add -e /path/to/unstract-sdk --dev
+
+[dependency-groups]
+dev = [
+"unstract-sdk"
+]
+
+[tool.uv.sources]
+unstract-sdk = { path = "${UNSTRACT_SDK_PATH", editable = true  }
 ```
 
 #### With pip
@@ -90,23 +92,24 @@ pdm add -e /path/to/unstract-sdk --dev
 NOTE: Building locally might require the below section to be replaced in the `unstract-sdk`'s build system configuration
 ```
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 ```
 - Another option is to provide a git URL in `requirements.txt`, this can come in handy while building tool
 docker images. Don't forget to run `apt install git` within the `Dockerfile` for this
 ```shell
-unstract-sdk @ git+https://github.com/Zipstack/unstract-sdk@feature-branch
+[tool.uv.sources]
+unstract-sdk = { git = "git+https://github.com/Zipstack/unstract-sdk@feature-branch" }
 ```
 
 - Or try installing a [local PyPI server](https://pypi.org/project/pypiserver/) and upload / download your package from this server
 
 #### Additonal dependencies for tool
-Tools may need to be backed up by a file storage. unstract.sdk.file_storage contains the required interfaces for the 
-same. fssepc is being used underneath to implement these interfaces. Hence, one can choose to use a file_system 
-supported by fsspec for this. However, the required dependencies need to be added in the tool dependency manager. 
-Eg. If the tool is using Minio as the underlying file storage, then s3fs can be added to support it. 
-Similarly, for Google Cloud Storage, gcsfs is to be added. 
+Tools may need to be backed up by a file storage. unstract.sdk.file_storage contains the required interfaces for the
+same. fssepc is being used underneath to implement these interfaces. Hence, one can choose to use a file_system
+supported by fsspec for this. However, the required dependencies need to be added in the tool dependency manager.
+Eg. If the tool is using Minio as the underlying file storage, then s3fs can be added to support it.
+Similarly, for Google Cloud Storage, gcsfs is to be added.
 The following versions are tested in the SDK using unit test cases for the above package.
     gcsfs==2024.10.0
     s3fs==2024.10.0
