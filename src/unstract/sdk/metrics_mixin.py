@@ -32,9 +32,7 @@ class MetricsMixin:
                 decode_responses=True,
             )
         except Exception as e:
-            logger.error(
-                "Failed to initialize Redis client" f" for run_id={run_id}: {e}"
-            )
+            logger.error("Failed to initialize Redis client" f" for run_id={run_id}: {e}")
 
         self.redis_key = f"metrics:{self.run_id}:{self.op_id}"
 
@@ -56,7 +54,6 @@ class MetricsMixin:
         Returns:
             dict: The calculated time taken and the associated run_id and op_id.
         """
-
         if self.redis_client is None:
             logger.error("Redis client is not initialized. Cannot collect metrics.")
             return {self.TIME_TAKEN_KEY: None}

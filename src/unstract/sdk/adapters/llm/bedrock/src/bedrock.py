@@ -1,9 +1,8 @@
 import os
-from typing import Any, Optional
+from typing import Any
 
 from llama_index.core.llms import LLM
 from llama_index.llms.bedrock import Bedrock
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -47,11 +46,11 @@ class BedrockLLM(LLMAdapter):
 
     @staticmethod
     def get_icon() -> str:
-        return "/icons/adapter-icons/Bedrock.png"  
+        return "/icons/adapter-icons/Bedrock.png"
 
     def get_llm_instance(self) -> LLM:
         try:
-            context_size: Optional[int] = (
+            context_size: int | None = (
                 int(self.config.get(Constants.CONTEXT_SIZE, 0))
                 if self.config.get(Constants.CONTEXT_SIZE)
                 else None

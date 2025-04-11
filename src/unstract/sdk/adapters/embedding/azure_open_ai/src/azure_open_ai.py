@@ -4,7 +4,6 @@ from typing import Any
 import httpx
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.azure_openai import AzureOpenAIEmbedding
-
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 from unstract.sdk.adapters.exceptions import AdapterError
@@ -71,5 +70,3 @@ class AzureOpenAI(EmbeddingAdapter):
             return embedding
         except Exception as e:
             raise AdapterError(str(e))
-
-     

@@ -1,10 +1,9 @@
 import io
 from abc import ABCMeta
-from typing import Any, Optional
+from typing import Any
 
 import pdfplumber
 from deprecated import deprecated
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.x2text import adapters
@@ -26,7 +25,7 @@ class X2Text(metaclass=ABCMeta):
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None,
+        adapter_instance_id: str | None = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
@@ -60,20 +59,18 @@ class X2Text(metaclass=ABCMeta):
                 ][Common.ADAPTER]
                 x2text_metadata = x2text_config.get(Common.ADAPTER_METADATA)
                 # Add x2text service host, port and platform_service_key
-                x2text_metadata[
+                x2text_metadata[X2TextConstants.X2TEXT_HOST] = self._tool.get_env_or_die(
                     X2TextConstants.X2TEXT_HOST
-                ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_HOST)
-                x2text_metadata[
+                )
+                x2text_metadata[X2TextConstants.X2TEXT_PORT] = self._tool.get_env_or_die(
                     X2TextConstants.X2TEXT_PORT
-                ] = self._tool.get_env_or_die(X2TextConstants.X2TEXT_PORT)
+                )
 
-                if not SdkHelper.is_public_adapter(
-                    adapter_id=self._adapter_instance_id
-                ):
-                    x2text_metadata[
-                        X2TextConstants.PLATFORM_SERVICE_API_KEY
-                    ] = self._tool.get_env_or_die(
-                        X2TextConstants.PLATFORM_SERVICE_API_KEY
+                if not SdkHelper.is_public_adapter(adapter_id=self._adapter_instance_id):
+                    x2text_metadata[X2TextConstants.PLATFORM_SERVICE_API_KEY] = (
+                        self._tool.get_env_or_die(
+                            X2TextConstants.PLATFORM_SERVICE_API_KEY
+                        )
                     )
 
                 self._x2text_instance = x2text_adapter(x2text_metadata)
@@ -90,7 +87,7 @@ class X2Text(metaclass=ABCMeta):
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:

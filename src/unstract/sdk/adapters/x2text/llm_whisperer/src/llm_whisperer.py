@@ -3,12 +3,11 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
-
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
@@ -56,8 +55,6 @@ class LLMWhisperer(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhisperer.png"
 
-     
-
     def _get_request_headers(self) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLMWhisperer.
 
@@ -73,9 +70,9 @@ class LLMWhisperer(X2TextAdapter):
         self,
         request_method: HTTPMethod,
         request_endpoint: str,
-        headers: Optional[dict[str, Any]] = None,
-        params: Optional[dict[str, Any]] = None,
-        data: Optional[Any] = None,
+        headers: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        data: Any | None = None,
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -329,7 +326,7 @@ class LLMWhisperer(X2TextAdapter):
 
     def _extract_text_from_response(
         self,
-        output_file_path: Optional[str],
+        output_file_path: str | None,
         response: requests.Response,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
@@ -396,9 +393,7 @@ class LLMWhisperer(X2TextAdapter):
                     data=metadata_json,
                 )
             except Exception as e:
-                logger.error(
-                    f"Error while writing metadata to {metadata_file_path}: {e}"
-                )
+                logger.error(f"Error while writing metadata to {metadata_file_path}: {e}")
 
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")
@@ -407,7 +402,7 @@ class LLMWhisperer(X2TextAdapter):
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
@@ -422,7 +417,6 @@ class LLMWhisperer(X2TextAdapter):
         Returns:
             str: Extracted text
         """
-
         response: requests.Response = self._send_whisper_request(
             input_file_path,
             fs,

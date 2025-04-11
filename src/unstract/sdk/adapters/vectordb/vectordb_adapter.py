@@ -1,10 +1,9 @@
 from abc import ABC
-from typing import Any, Union
+from typing import Any
 
 from llama_index.core.schema import BaseNode
 from llama_index.core.vector_stores import SimpleVectorStore
 from llama_index.core.vector_stores.types import BasePydanticVectorStore, VectorStore
-
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
 from unstract.sdk.exceptions import VectorDBError
@@ -14,13 +13,13 @@ class VectorDBAdapter(Adapter, ABC):
     def __init__(
         self,
         name: str,
-        vector_db_instance: Union[VectorStore, BasePydanticVectorStore],
+        vector_db_instance: VectorStore | BasePydanticVectorStore,
     ):
         super().__init__(name)
         self.name = name
-        self._vector_db_instance: Union[
-            VectorStore, BasePydanticVectorStore
-        ] = vector_db_instance
+        self._vector_db_instance: VectorStore | BasePydanticVectorStore = (
+            vector_db_instance
+        )
 
     @staticmethod
     def get_id() -> str:
@@ -58,7 +57,7 @@ class VectorDBAdapter(Adapter, ABC):
 
     def get_vector_db_instance(
         self, vector_db_config: dict[str, Any]
-    ) -> Union[BasePydanticVectorStore, VectorStore]:
+    ) -> BasePydanticVectorStore | VectorStore:
         """Instantiate the llama index VectorStore / BasePydanticVectorStore
         class.
 

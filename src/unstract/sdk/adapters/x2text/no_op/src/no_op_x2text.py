@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from typing import Any, Optional
+from typing import Any
 
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
@@ -33,12 +33,10 @@ class NoOpX2Text(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/noOpx2Text.png"
 
-     
-
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:

@@ -1,8 +1,6 @@
 import argparse
-from typing import Optional
 
 from dotenv import find_dotenv, load_dotenv
-
 from unstract.sdk.constants import LogLevel
 
 
@@ -45,7 +43,7 @@ class ToolArgsParser:
         return parsed_args
 
     @staticmethod
-    def load_environment(path: Optional[str] = None) -> None:
+    def load_environment(path: str | None = None) -> None:
         """Loads env variables with python-dotenv.
 
         Args:

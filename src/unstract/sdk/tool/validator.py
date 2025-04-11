@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator, ValidationError, validators
-
 from unstract.sdk.constants import MetadataKey, PropKey
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.mime_types import EXT_MIME_MAP
@@ -25,9 +24,7 @@ def extend_with_default(validator_class: Any) -> Any:
     """
     validate_properties = validator_class.VALIDATORS["properties"]
 
-    def set_defaults(
-        validator: Any, properties: Any, instance: Any, schema: Any
-    ) -> Any:
+    def set_defaults(validator: Any, properties: Any, instance: Any, schema: Any) -> Any:
         for property_, subschema in properties.items():
             if "default" in subschema:
                 instance.setdefault(property_, subschema["default"])
@@ -87,9 +84,7 @@ class ToolValidator:
         self._validate_file_size(input_file)
         self._validate_file_type(input_file)
 
-    def _validate_settings_and_fill_defaults(
-        self, tool_settings: dict[str, Any]
-    ) -> None:
+    def _validate_settings_and_fill_defaults(self, tool_settings: dict[str, Any]) -> None:
         """Validates and obtains settings for a tool.
 
         Validation is done against the tool's settings based
@@ -143,9 +138,7 @@ class ToolValidator:
         """
         size_match = re.match(PropKey.FILE_SIZE_REGEX, size_string)
         if not size_match:
-            self.tool.stream_error_and_exit(
-                f"Invalid size string format: {size_string}"
-            )
+            self.tool.stream_error_and_exit(f"Invalid size string format: {size_string}")
 
         size, unit = size_match.groups()
         size_in_bytes = int(size)

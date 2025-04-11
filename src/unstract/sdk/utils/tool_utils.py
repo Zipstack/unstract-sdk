@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import magic
-
 from unstract.sdk.exceptions import FileStorageError
 from unstract.sdk.file_storage import (
     FileStorage,
@@ -62,7 +61,6 @@ class ToolUtils:
         Returns:
             str: SHA256 hash of the file
         """
-
         # Adding the following DeprecationWarning manually as the package "deprecated"
         # does not support deprecation on static methods.
         warnings.warn(
@@ -152,6 +150,7 @@ class ToolUtils:
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> int:
         """Gets the file size in bytes for an input file.
+
         Args:
             input_file (Path): Path object of the input file
 

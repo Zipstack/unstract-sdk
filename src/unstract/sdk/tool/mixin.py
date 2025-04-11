@@ -20,6 +20,7 @@ class ToolConfigHelper:
         Args:
             spec_file (str): The path to the JSON schema file.
             The default is config/spec.json.
+
         Returns:
             str: The JSON schema of the tool.
         """
@@ -35,6 +36,7 @@ class ToolConfigHelper:
         Args:
             properties_file (str): The path to the properties file.
             The default is config/properties.json.
+
         Returns:
             str: The properties of the tool.
         """
@@ -50,10 +52,10 @@ class ToolConfigHelper:
         Args:
             variables_file (str): The path to the JSON schema file.
             The default is config/runtime_variables.json.
+
         Returns:
             str: The JSON schema for the runtime variables.
         """
-
         try:
             return ToolUtils.load_json(variables_file, fs)
         # Allow runtime variables definition to be optional
@@ -71,6 +73,7 @@ class ToolConfigHelper:
         Args:
             icon_file (str): The path to the icon file.
                 The default is config/icon.svg.
+
         Returns:
             str: The icon of the tool.
         """

@@ -1,21 +1,20 @@
 import json
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials
 from llama_index.core.llms import LLM
 from llama_index.llms.vertex import Vertex
+from unstract.sdk.adapters.exceptions import LLMError
+from unstract.sdk.adapters.llm.constants import LLMKeys
+from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from vertexai.generative_models import Candidate, FinishReason, ResponseValidationError
 from vertexai.generative_models._generative_models import (
     HarmBlockThreshold,
     HarmCategory,
 )
-
-from unstract.sdk.adapters.exceptions import LLMError
-from unstract.sdk.adapters.llm.constants import LLMKeys
-from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +75,6 @@ class VertexAILLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/VertexAI.png"
 
-     
-
     def get_llm_instance(self) -> LLM:
         input_credentials = self.config.get(Constants.JSON_CREDENTIALS, "{}")
         try:
@@ -112,9 +109,9 @@ class VertexAILLM(LLMAdapter):
             safety_settings_default_config,
         )
 
-        vertex_safety_settings: dict[
-            HarmCategory, HarmBlockThreshold
-        ] = self._get_vertex_safety_settings(safety_settings_user_config)
+        vertex_safety_settings: dict[HarmCategory, HarmBlockThreshold] = (
+            self._get_vertex_safety_settings(safety_settings_user_config)
+        )
 
         llm: LLM = Vertex(
             project=str(self.config.get(Constants.PROJECT)),
@@ -131,55 +128,55 @@ class VertexAILLM(LLMAdapter):
         self, safety_settings_user_config: dict[str, str]
     ) -> dict[HarmCategory, HarmBlockThreshold]:
         vertex_safety_settings: dict[HarmCategory, HarmBlockThreshold] = dict()
-        vertex_safety_settings[
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT
-        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-            (
-                safety_settings_user_config.get(
-                    SafetySettingsConstants.DANGEROUS_CONTENT,
-                    Constants.BLOCK_ONLY_HIGH,
+        vertex_safety_settings[HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT] = (
+            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+                (
+                    safety_settings_user_config.get(
+                        SafetySettingsConstants.DANGEROUS_CONTENT,
+                        Constants.BLOCK_ONLY_HIGH,
+                    )
                 )
-            )
-        ]
-        vertex_safety_settings[
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH
-        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-            (
-                safety_settings_user_config.get(
-                    SafetySettingsConstants.HATE_SPEECH,
-                    Constants.BLOCK_ONLY_HIGH,
+            ]
+        )
+        vertex_safety_settings[HarmCategory.HARM_CATEGORY_HATE_SPEECH] = (
+            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+                (
+                    safety_settings_user_config.get(
+                        SafetySettingsConstants.HATE_SPEECH,
+                        Constants.BLOCK_ONLY_HIGH,
+                    )
                 )
-            )
-        ]
-        vertex_safety_settings[
-            HarmCategory.HARM_CATEGORY_HARASSMENT
-        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-            (
-                safety_settings_user_config.get(
-                    SafetySettingsConstants.HARASSMENT,
-                    Constants.BLOCK_ONLY_HIGH,
+            ]
+        )
+        vertex_safety_settings[HarmCategory.HARM_CATEGORY_HARASSMENT] = (
+            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+                (
+                    safety_settings_user_config.get(
+                        SafetySettingsConstants.HARASSMENT,
+                        Constants.BLOCK_ONLY_HIGH,
+                    )
                 )
-            )
-        ]
-        vertex_safety_settings[
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT
-        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-            (
-                safety_settings_user_config.get(
-                    SafetySettingsConstants.SEXUAL_CONTENT,
-                    Constants.BLOCK_ONLY_HIGH,
+            ]
+        )
+        vertex_safety_settings[HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT] = (
+            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+                (
+                    safety_settings_user_config.get(
+                        SafetySettingsConstants.SEXUAL_CONTENT,
+                        Constants.BLOCK_ONLY_HIGH,
+                    )
                 )
-            )
-        ]
-        vertex_safety_settings[
-            HarmCategory.HARM_CATEGORY_UNSPECIFIED
-        ] = UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
-            (
-                safety_settings_user_config.get(
-                    SafetySettingsConstants.OTHER, Constants.BLOCK_ONLY_HIGH
+            ]
+        )
+        vertex_safety_settings[HarmCategory.HARM_CATEGORY_UNSPECIFIED] = (
+            UNSTRACT_VERTEX_SAFETY_THRESHOLD_MAPPING[
+                (
+                    safety_settings_user_config.get(
+                        SafetySettingsConstants.OTHER, Constants.BLOCK_ONLY_HIGH
+                    )
                 )
-            )
-        ]
+            ]
+        )
         return vertex_safety_settings
 
     @staticmethod
@@ -200,7 +197,7 @@ class VertexAILLM(LLMAdapter):
             "since its a completion call and not chat."
         )
         resp = e.responses[0]
-        candidates: list["Candidate"] = resp.candidates
+        candidates: list[Candidate] = resp.candidates
         if not candidates:
             msg = str(resp.prompt_feedback)
         reason_messages = {
@@ -241,7 +238,7 @@ class VertexAILLM(LLMAdapter):
         }
 
         err_list = []
-        status_code: Optional[int] = None
+        status_code: int | None = None
         for candidate in candidates:
             reason: FinishReason = candidate.finish_reason
 

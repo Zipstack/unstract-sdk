@@ -1,9 +1,8 @@
 import os
-from typing import Any, Optional
+from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 from unstract.sdk.adapters.exceptions import AdapterError
@@ -45,7 +44,7 @@ class HuggingFace(EmbeddingAdapter):
             embedding_batch_size = EmbeddingHelper.get_embedding_batch_size(
                 config=self.config
             )
-            max_length: Optional[int] = (
+            max_length: int | None = (
                 int(self.config.get(Constants.MAX_LENGTH, 0))
                 if self.config.get(Constants.MAX_LENGTH)
                 else None
@@ -61,5 +60,3 @@ class HuggingFace(EmbeddingAdapter):
             return embedding
         except Exception as e:
             raise AdapterError(str(e))
-
-     

@@ -1,11 +1,10 @@
 import logging
 import os
 import pathlib
-from typing import Any, Optional
+from typing import Any
 
 from httpx import ConnectError
 from llama_parse import LlamaParse
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llama_parse.src.constants import LlamaParseConfig
@@ -37,8 +36,6 @@ class LlamaParseAdapter(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
-
-     
 
     def _call_parser(
         self,
@@ -84,8 +81,7 @@ class LlamaParseAdapter(X2TextAdapter):
         except ConnectError as connec_err:
             logger.error(f"Invalid Base URL given. : {connec_err}")
             raise AdapterError(
-                "Unable to connect to llama-parse`s service, "
-                "please check the Base URL"
+                "Unable to connect to llama-parse`s service, " "please check the Base URL"
             )
         except Exception as exe:
             logger.error(
@@ -99,7 +95,7 @@ class LlamaParseAdapter(X2TextAdapter):
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:

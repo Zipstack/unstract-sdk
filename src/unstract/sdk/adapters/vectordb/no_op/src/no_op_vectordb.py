@@ -4,7 +4,6 @@ from typing import Any
 
 from llama_index.core.schema import BaseNode
 from llama_index.core.vector_stores.types import VectorStore
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
@@ -38,8 +37,6 @@ class NoOpVectorDB(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/noOpVectorDb.png"
-
-     
 
     def get_vector_db_instance(self) -> VectorStore:
         return self._vector_db_instance

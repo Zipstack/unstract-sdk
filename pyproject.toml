@@ -157,15 +157,13 @@ select = [
 fixable = ["ALL"]
 ignore = [
     "D100",   # Missing docstring in public module
+    "D101",   # Missing docstring in public class
+    "D102",   # Missing docstring in public method
     "D104",   # Missing docstring in public package
+    "D103",   # Missing docstring in public function
+    "D106",   # Missing docstring in public nested class
     "ANN101", # Missing type annotation for self
     "ANN102", # Missing type annotation for cls
-]
-
-[tool.ruff.lint.per-file-ignores]
-"test_*.py" = [
-    "ANN201", # Missing return type annotation for public function
-    "D103",   # Missing docstring in public function
 ]
 
 [tool.ruff.format]
