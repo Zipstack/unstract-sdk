@@ -39,12 +39,8 @@ class WhispererEnv:
     Can be used to alter behaviour at runtime.
 
     Attributes:
-        POLL_INTERVAL: Time in seconds to wait before polling
-            LLMWhisperer's status API. Defaults to 30s
-        MAX_POLLS: Total number of times to poll the status API.
-            Set to -1 to poll indefinitely. Defaults to -1
-        STATUS_RETRIES: Number of times to retry calling LLLMWhisperer's
-        status API on failure during polling. Defaults to 5.
+        WAIT_TIMEOUT: Timeout for the extraction in seconds. Defaults to 300s
+        LOG_LEVEL: Logging level for the client library. Defaults to INFO
     """
 
     WAIT_TIMEOUT = "ADAPTER_LLMW_WAIT_TIMEOUT"
@@ -108,6 +104,6 @@ class WhispererDefaults:
     URL_IN_POST = False
     TAG = "default"
     TEXT_ONLY = False
-    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 300))
+    WAIT_TIMEOUT = int(os.getenv(WhispererEnv.WAIT_TIMEOUT, 900))
     WAIT_FOR_COMPLETION = True
     LOGGING_LEVEL = os.getenv(WhispererEnv.LOG_LEVEL, "INFO")
