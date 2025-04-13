@@ -1,10 +1,9 @@
 import os
-from typing import Any, Optional
+from typing import Any
 
 from google.api_core.exceptions import GoogleAPICallError
 from llama_index.core.llms import LLM
 from llama_index.llms.palm import PaLM
-
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.exceptions import LLMError
 
@@ -44,11 +43,9 @@ class PaLMLLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/PaLM.png"
 
-     
-
     def get_llm_instance(self) -> LLM:
         try:
-            num_output: Optional[int] = (
+            num_output: int | None = (
                 int(self.config.get(Constants.NUM_OUTPUT, Constants.DEFAULT_MAX_TOKENS))
                 if self.config.get(Constants.NUM_OUTPUT) is not None
                 else None

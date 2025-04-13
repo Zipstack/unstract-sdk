@@ -1,7 +1,6 @@
-from typing import Any, Optional
+from typing import Any
 
 import requests
-
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
@@ -14,11 +13,8 @@ class ToolCache(PlatformBase):
         - PLATFORM_SERVICE_API_KEY environment variable is required.
     """
 
-    def __init__(
-        self, tool: BaseTool, platform_host: str, platform_port: int
-    ) -> None:
-        """
-        Args:
+    def __init__(self, tool: BaseTool, platform_host: str, platform_port: int) -> None:
+        """Args:
             tool (AbstractTool): Instance of AbstractTool
             platform_host (str): The host of the platform.
             platform_port (int): The port of the platform.
@@ -42,7 +38,6 @@ class ToolCache(PlatformBase):
         Returns:
             bool: Whether the operation was successful.
         """
-
         url = f"{self.base_url}/cache"
         json = {"key": key, "value": value}
         headers = {"Authorization": f"Bearer {self.bearer_token}"}
@@ -58,7 +53,7 @@ class ToolCache(PlatformBase):
             )
             return False
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Gets the value for a key in the cache.
 
         Args:
@@ -67,20 +62,15 @@ class ToolCache(PlatformBase):
         Returns:
             str: The value.
         """
-
         url = f"{self.base_url}/cache?key={key}"
         headers = {"Authorization": f"Bearer {self.bearer_token}"}
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            self.tool.stream_log(
-                f"Successfully retrieved cached data for key: {key}"
-            )
+            self.tool.stream_log(f"Successfully retrieved cached data for key: {key}")
             return response.text
         elif response.status_code == 404:
-            self.tool.stream_log(
-                f"Data not found for key: {key}", level=LogLevel.WARN
-            )
+            self.tool.stream_log(f"Data not found for key: {key}", level=LogLevel.WARN)
             return None
         else:
             self.tool.stream_log(
@@ -104,14 +94,11 @@ class ToolCache(PlatformBase):
         response = requests.delete(url, headers=headers)
 
         if response.status_code == 200:
-            self.tool.stream_log(
-                f"Successfully deleted cached data for key: {key}"
-            )
+            self.tool.stream_log(f"Successfully deleted cached data for key: {key}")
             return True
         else:
             self.tool.stream_log(
-                "Error while deleting cached data "
-                f"for key: {key} / {response.reason}",
+                "Error while deleting cached data " f"for key: {key} / {response.reason}",
                 level=LogLevel.ERROR,
             )
             return False

@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Optional, Union
+from typing import Any
 
 import filetype
 import magic
-
 from unstract.sdk.exceptions import FileOperationError, FileStorageError
 from unstract.sdk.file_storage.constants import FileOperationParams
 from unstract.sdk.file_storage.impl import FileStorage
@@ -77,8 +76,8 @@ class PermanentFileStorage(FileStorage):
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         length: int = FileOperationParams.READ_ENTIRE_LENGTH,
-        legacy_storage_path: Optional[str] = None,
-    ) -> Union[bytes, str]:
+        legacy_storage_path: str | None = None,
+    ) -> bytes | str:
         """Read the file pointed to by the file_handle.
 
         Args:
@@ -108,7 +107,7 @@ class PermanentFileStorage(FileStorage):
         self,
         path: str,
         read_length: int = FileOperationParams.READ_ENTIRE_LENGTH,
-        legacy_storage_path: Optional[str] = None,
+        legacy_storage_path: str | None = None,
     ) -> str:
         """Gets the file MIME type for an input file. Uses libmagic to perform
         the same.
@@ -131,9 +130,7 @@ class PermanentFileStorage(FileStorage):
         mime_type = magic.from_buffer(sample_contents, mime=True)
         return mime_type
 
-    def guess_extension(
-        self, path: str, legacy_storage_path: Optional[str] = None
-    ) -> str:
+    def guess_extension(self, path: str, legacy_storage_path: str | None = None) -> str:
         """Returns the extension of the file passed.
 
         Args:

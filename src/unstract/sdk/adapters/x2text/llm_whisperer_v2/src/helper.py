@@ -2,7 +2,7 @@ import json
 import logging
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests import Response
@@ -11,9 +11,9 @@ from unstract.llmwhisperer.client_v2 import (
     LLMWhispererClientException,
     LLMWhispererClientV2,
 )
-
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
+from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     Modes,
     OutputModes,
@@ -22,7 +22,6 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererHeader,
     WhisperStatus,
 )
-from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
 from unstract.sdk.constants import MimeType
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
@@ -77,10 +76,10 @@ class LLMWhispererHelper:
     @staticmethod
     def make_request(
         config: dict[str, Any],
-        headers: Optional[dict[str, Any]] = None,
-        params: Optional[dict[str, Any]] = None,
-        data: Optional[Any] = None,
-        type: str = "whisper"
+        headers: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        data: Any | None = None,
+        type: str = "whisper",
     ) -> Response:
         """Makes a request to LLMWhisperer service.
 
@@ -111,8 +110,8 @@ class LLMWhispererHelper:
             if type == "whisper":
                 response = client.whisper(**params, stream=data)
                 if response["status_code"] == 200:
-                    response["extraction"][X2TextConstants.WHISPER_HASH_V2] = response.get(
-                        X2TextConstants.WHISPER_HASH_V2, ""
+                    response["extraction"][X2TextConstants.WHISPER_HASH_V2] = (
+                        response.get(X2TextConstants.WHISPER_HASH_V2, "")
                     )
                     return response["extraction"]
                 else:
@@ -257,9 +256,7 @@ class LLMWhispererHelper:
 
     @staticmethod
     def make_highlight_data_request(
-        config: dict[str, Any],
-        whisper_hash: str,
-        enable_highlight: bool
+        config: dict[str, Any], whisper_hash: str, enable_highlight: bool
     ) -> dict[Any, Any]:
         """Makes a call to get highlight data from LLMWhisperer.
 
@@ -285,10 +282,10 @@ class LLMWhispererHelper:
             type="highlight",
         )
         return retrieve_response
-        
+
     @staticmethod
     def extract_text_from_response(
-        output_file_path: Optional[str],
+        output_file_path: str | None,
         response: dict[str, Any],
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:

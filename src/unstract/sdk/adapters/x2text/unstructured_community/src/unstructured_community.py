@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.helper import UnstructuredHelper
@@ -33,12 +33,10 @@ class UnstructuredCommunity(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/UnstructuredIO.png"
 
-     
-
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:

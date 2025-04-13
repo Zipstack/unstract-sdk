@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 def resolve_err_status_code(client_status_code: int) -> int:
     """Resolves the status code to return in case of errors.
 
@@ -25,14 +22,14 @@ def resolve_err_status_code(client_status_code: int) -> int:
 
 class SdkError(Exception):
     DEFAULT_MESSAGE = "Something went wrong"
-    actual_err: Optional[Exception] = None
-    status_code: Optional[int] = None
+    actual_err: Exception | None = None
+    status_code: int | None = None
 
     def __init__(
         self,
         message: str = DEFAULT_MESSAGE,
-        status_code: Optional[int] = None,
-        actual_err: Optional[Exception] = None,
+        status_code: int | None = None,
+        actual_err: Exception | None = None,
     ):
         super().__init__(message)
         # Make it user friendly wherever possible

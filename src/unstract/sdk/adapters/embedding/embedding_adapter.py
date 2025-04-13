@@ -3,11 +3,10 @@ from typing import Any
 
 from llama_index.core import MockEmbedding
 from llama_index.core.embeddings import BaseEmbedding
-
 from unstract.sdk.adapters.base import Adapter
+from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 from unstract.sdk.adapters.enums import AdapterTypes
 
-from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 
 class EmbeddingAdapter(Adapter, ABC):
     def __init__(self, name: str):
@@ -47,7 +46,7 @@ class EmbeddingAdapter(Adapter, ABC):
             Raises exceptions for any error
         """
         return MockEmbedding(embed_dim=1)
-    
+
     def test_connection(self) -> bool:
         embedding = self.get_embedding_instance()
         test_result: bool = EmbeddingHelper.test_embedding_instance(embedding)

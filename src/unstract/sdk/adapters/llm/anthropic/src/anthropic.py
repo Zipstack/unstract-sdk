@@ -5,7 +5,6 @@ from anthropic import APIError
 from llama_index.core.llms import LLM
 from llama_index.llms.anthropic import Anthropic
 from llama_index.llms.anthropic.base import DEFAULT_ANTHROPIC_MAX_TOKENS
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -22,6 +21,7 @@ class Constants:
     MAX_TOKENS = "max_tokens"
     ENABLE_THINKING = "enable_thinking"
     BUDGET_TOKENS = "budget_tokens"
+
 
 class AnthropicLLM(LLMAdapter):
     def __init__(self, settings: dict[str, Any]):
@@ -63,7 +63,7 @@ class AnthropicLLM(LLMAdapter):
             budget_tokens = self.config.get(Constants.BUDGET_TOKENS)
             thinking_dict = {"type": "enabled", "budget_tokens": budget_tokens}
             temperature = 1
-            
+
         try:
             llm: LLM = Anthropic(
                 model=str(self.config.get(Constants.MODEL)),
@@ -76,7 +76,7 @@ class AnthropicLLM(LLMAdapter):
                 ),
                 temperature=temperature,
                 max_tokens=max_tokens,
-                thinking_dict=thinking_dict
+                thinking_dict=thinking_dict,
             )
             return llm
         except Exception as e:

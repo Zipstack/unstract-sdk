@@ -1,7 +1,6 @@
-from typing import Any, Optional
+from typing import Any
 
 import requests
-
 from unstract.sdk.constants import LogLevel, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
@@ -20,8 +19,7 @@ class PlatformBase:
         platform_host: str,
         platform_port: str,
     ) -> None:
-        """
-        Args:
+        """Args:
             tool (AbstractTool): Instance of AbstractTool
             platform_host (str): Host of platform service
             platform_port (str): Port of platform service
@@ -54,7 +52,7 @@ class PlatformHelper(PlatformBase):
             tool=tool, platform_host=platform_host, platform_port=platform_port
         )
 
-    def get_platform_details(self) -> Optional[dict[str, Any]]:
+    def get_platform_details(self) -> dict[str, Any] | None:
         """Obtains platform details associated with the platform key.
 
         Currently helps fetch organization ID related to the key.

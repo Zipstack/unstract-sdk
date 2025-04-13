@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Union
+from typing import Any
 
 from fsspec import AbstractFileSystem
-
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 
 
@@ -16,7 +15,7 @@ class FileStorageInterface(ABC):
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         length: int = FileOperationParams.READ_ENTIRE_LENGTH,
-    ) -> Union[bytes, str]:
+    ) -> bytes | str:
         pass
 
     @abstractmethod
@@ -26,14 +25,14 @@ class FileStorageInterface(ABC):
         mode: str,
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
-        data: Union[bytes, str] = "",
+        data: bytes | str = "",
     ) -> int:
         pass
 
     @abstractmethod
     def seek(
         self,
-        file_handle: Union[AbstractFileSystem],
+        file_handle: AbstractFileSystem,
         location: int = 0,
         position: FileSeekPosition = FileSeekPosition.START,
     ) -> int:

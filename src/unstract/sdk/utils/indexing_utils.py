@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
@@ -16,8 +15,8 @@ class IndexingUtils:
         chunk_size: str,
         chunk_overlap: str,
         tool: BaseTool,
-        file_path: Optional[str] = None,
-        file_hash: Optional[str] = None,
+        file_path: str | None = None,
+        file_hash: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Generates a unique index key based on the provided configuration,

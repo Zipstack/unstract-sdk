@@ -2,12 +2,11 @@ import json
 import logging
 import os
 import unittest
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import Mock, patch
 
 from dotenv import load_dotenv
 from parameterized import parameterized
-
 from unstract.sdk.index import Index
 from unstract.sdk.tool.base import BaseTool
 
@@ -101,8 +100,8 @@ class ToolLLMTest(unittest.TestCase):
         x2text: str,
         chunk_size: str,
         chunk_overlap: str,
-        file_path: Optional[str] = None,
-        file_hash: Optional[str] = None,
+        file_path: str | None = None,
+        file_hash: str | None = None,
     ):
         expected = "77843eb8d9e30ad56bfcb018c2633fa32feef2f0c09762b6b820c75664b64c1b"
         index = Index(tool=self.tool)

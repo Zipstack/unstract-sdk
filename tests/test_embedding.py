@@ -5,7 +5,6 @@ import unittest
 from dotenv import load_dotenv
 from llama_index.core.embeddings import BaseEmbedding
 from parameterized import parameterized
-
 from unstract.sdk.embedding import ToolEmbedding
 from unstract.sdk.tool.base import BaseTool
 
@@ -34,9 +33,7 @@ class ToolEmbeddingTest(unittest.TestCase):
         embed_model = embedding.get_embedding(adapter_instance_id)
         self.assertIsNotNone(embed_model)
         self.assertIsInstance(embed_model, BaseEmbedding)
-        response = embed_model._get_text_embedding(
-            ToolEmbeddingTest.TEST_SNIPPET
-        )
+        response = embed_model._get_text_embedding(ToolEmbeddingTest.TEST_SNIPPET)
         self.assertIsNotNone(response)
 
     @parameterized.expand(get_test_values("EMBEDDING_TEST_VALUES"))

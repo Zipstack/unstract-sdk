@@ -1,6 +1,7 @@
 import logging
 import re
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from deprecated import deprecated
 from llama_index.core.base.llms.types import CompletionResponseGen
@@ -8,7 +9,6 @@ from llama_index.core.llms import LLM as LlamaIndexLLM
 from llama_index.core.llms import CompletionResponse
 from openai import APIError as OpenAIAPIError
 from openai import RateLimitError as OpenAIRateLimitError
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.llm import adapters
@@ -35,7 +35,7 @@ class LLM:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None,
+        adapter_instance_id: str | None = None,
         usage_kwargs: dict[Any, Any] = {},
         capture_metrics: bool = False,
     ):
@@ -76,7 +76,7 @@ class LLM:
         self,
         prompt: str,
         extract_json: bool = True,
-        process_text: Optional[Callable[[str], str]] = None,
+        process_text: Callable[[str], str] | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
         """Generates a completion response for the given prompt and captures
@@ -176,7 +176,7 @@ class LLM:
                                         output.
                 The default is 0.
 
-            Returns:
+        Returns:
                 int: The maximum number of tokens that can be used for the LLM.
         """
         return self.MAX_TOKENS - reserved_for_output
@@ -187,7 +187,7 @@ class LLM:
         Args:
             max_tokens (int): The number of tokens to be used at the maximum
 
-            Returns:
+        Returns:
                 None
         """
         self._llm_instance.max_tokens = max_tokens
@@ -198,7 +198,7 @@ class LLM:
         Args:
             NA
 
-            Returns:
+        Returns:
                 Class name
         """
         return self._llm_instance.class_name()
@@ -215,7 +215,7 @@ class LLM:
         return self._llm_instance.model
 
     @deprecated("Use LLM instead of ToolLLM")
-    def get_llm(self, adapter_instance_id: Optional[str] = None) -> LlamaIndexLLM:
+    def get_llm(self, adapter_instance_id: str | None = None) -> LlamaIndexLLM:
         if not self._llm_instance:
             self._adapter_instance_id = adapter_instance_id
             self._initialise()
@@ -230,7 +230,7 @@ class LLM:
         prompt: str,
         retries: int = 3,
         **kwargs: Any,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         # Setup callback manager to collect Usage stats
         CallbackManager.set_callback_manager(
             platform_api_key=platform_api_key, llm=llm, **kwargs

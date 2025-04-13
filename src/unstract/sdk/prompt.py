@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests import ConnectionError, RequestException, Response
-
 from unstract.sdk.constants import LogLevel, MimeType, PromptStudioKeys, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
@@ -22,11 +21,10 @@ class PromptTool:
         prompt_port: str,
         is_public_call: bool = False,
     ) -> None:
-        """
-        Args:
-            tool (AbstractTool): Instance of AbstractTool
-            prompt_host (str): Host of platform service
-            prompt_host (str): Port of platform service
+        """Args:
+        tool (AbstractTool): Instance of AbstractTool
+        prompt_host (str): Host of platform service
+        prompt_host (str): Port of platform service
         """
         self.tool = tool
         self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
@@ -38,8 +36,8 @@ class PromptTool:
     def answer_prompt(
         self,
         payload: dict[str, Any],
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url_path = "answer-prompt"
         if self.is_public_call:
@@ -47,13 +45,13 @@ class PromptTool:
         return self._post_call(
             url_path=url_path, payload=payload, params=params, headers=headers
         )
-    
+
     @log_elapsed(operation="INDEX")
     def index(
-        self, 
-        payload: dict[str, Any], 
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        self,
+        payload: dict[str, Any],
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url_path = "index"
         if self.is_public_call:
@@ -64,13 +62,13 @@ class PromptTool:
             params=params,
             headers=headers,
         )
-    
+
     @log_elapsed(operation="EXTRACT")
     def extract(
-        self, 
-        payload: dict[str, Any], 
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        self,
+        payload: dict[str, Any],
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         url_path = "extract"
         if self.is_public_call:
@@ -85,8 +83,8 @@ class PromptTool:
     def single_pass_extraction(
         self,
         payload: dict[str, Any],
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         return self._post_call(
             url_path="single-pass-extraction",
@@ -98,8 +96,8 @@ class PromptTool:
     def summarize(
         self,
         payload: dict[str, Any],
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         return self._post_call(
             url_path="summarize",
@@ -112,8 +110,8 @@ class PromptTool:
         self,
         url_path: str,
         payload: dict[str, Any],
-        params: Optional[dict[str, str]] = None,
-        headers: Optional[dict[str, str]] = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         """Invokes and communicates to prompt service to fetch response for the
         prompt.
@@ -192,7 +190,7 @@ class PromptTool:
     @staticmethod
     def get_exported_tool(
         tool: BaseTool, prompt_registry_id: str
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get exported custom tool by the help of unstract DB tool.
 
         Args:

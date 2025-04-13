@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional, Union, List
 
 
 @dataclass
@@ -13,7 +12,7 @@ class WhispererRequestParams:
     """
 
     # TODO: Extend this DTO to include all Whisperer API parameters
-    tag: Optional[Union[str, List[str]]] = None
+    tag: str | list[str] | None = None
     enable_highlight: bool = False
 
     def __post_init__(self) -> None:

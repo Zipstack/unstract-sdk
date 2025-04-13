@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Optional
 
 from llama_index.core import (
     MockEmbedding,
@@ -10,7 +9,6 @@ from llama_index.core import (
 )
 from llama_index.core.llms import MockLLM
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
-
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.exceptions import VectorDBError
 
@@ -20,7 +18,7 @@ logger = logging.getLogger(__name__)
 class VectorDBHelper:
     @staticmethod
     def test_vector_db_instance(
-        vector_store: Optional[BasePydanticVectorStore],
+        vector_store: BasePydanticVectorStore | None,
     ) -> bool:
         try:
             if vector_store is None:
@@ -64,8 +62,7 @@ class VectorDBHelper:
         collection_name_prefix: str,
         embedding_dimension: int,
     ) -> str:
-        """
-        Notes:
+        """Notes:
             This function constructs the collection / table name to store the
             documents in the vector db.
             If user supplies this field in the config metadata then system

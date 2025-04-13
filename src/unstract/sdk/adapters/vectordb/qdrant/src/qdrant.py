@@ -1,12 +1,11 @@
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
-
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
 from unstract.sdk.adapters.vectordb.vectordb_adapter import VectorDBAdapter
@@ -23,7 +22,7 @@ class Constants:
 class Qdrant(VectorDBAdapter):
     def __init__(self, settings: dict[str, Any]):
         self._config = settings
-        self._client: Optional[QdrantClient] = None
+        self._client: QdrantClient | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Qdrant", self._vector_db_instance)
@@ -46,8 +45,6 @@ class Qdrant(VectorDBAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/qdrant.png"
 
-     
-
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance
 
@@ -58,7 +55,7 @@ class Qdrant(VectorDBAdapter):
                 self._config.get(VectorDbConstants.EMBEDDING_DIMENSION),
             )
             url = self._config.get(Constants.URL)
-            api_key: Optional[str] = self._config.get(Constants.API_KEY, None)
+            api_key: str | None = self._config.get(Constants.API_KEY, None)
             if api_key:
                 self._client = QdrantClient(url=url, api_key=api_key)
             else:

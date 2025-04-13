@@ -4,7 +4,6 @@ from typing import Any
 import httpx
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.openai import OpenAIEmbedding
-
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
 
@@ -66,5 +65,3 @@ class OpenAI(EmbeddingAdapter):
             return embedding
         except Exception as e:
             raise AdapterError(str(e))
-
-     

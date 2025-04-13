@@ -5,7 +5,6 @@ import os
 from typing import Any
 
 from deprecated import deprecated
-
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
 from unstract.sdk.utils import Utils
 from unstract.sdk.utils.common_utils import UNSTRACT_TO_PY_LOG_LEVEL
@@ -21,11 +20,10 @@ class StreamMixin:
     """
 
     def __init__(self, log_level: LogLevel = LogLevel.INFO, **kwargs) -> None:
-        """
-        Args:
-            log_level (LogLevel): The log level for filtering of log messages.
-            The default is INFO.
-                Allowed values are DEBUG, INFO, WARN, ERROR, and FATAL.
+        """Args:
+        log_level (LogLevel): The log level for filtering of log messages.
+        The default is INFO.
+            Allowed values are DEBUG, INFO, WARN, ERROR, and FATAL.
 
         """
         self.log_level = log_level
@@ -153,6 +151,7 @@ class StreamMixin:
         Args:
             properties (str): The properties of the tool.
             Typically returned by the properties() method.
+
         Returns:
             None
         """
@@ -190,6 +189,7 @@ class StreamMixin:
         Args:
             icon (str): The icon of the tool.
                 Typically returned by the icon() method.
+
         Returns:
             None
         """
@@ -227,6 +227,7 @@ class StreamMixin:
             cost (float): The cost of the tool.
             cost_units (str): The cost units of the tool.
             **kwargs: Additional keyword arguments to include in the record.
+
         Returns:
             None
         """
@@ -248,6 +249,7 @@ class StreamMixin:
         Args:
             message (str): The single step message.
             **kwargs: Additional keyword arguments to include in the record.
+
         Returns:
             None
         """
@@ -269,6 +271,7 @@ class StreamMixin:
             result (dict): The result of the tool. Refer to the
                 Unstract protocol for the format of the result.
             **kwargs: Additional keyword arguments to include in the record.
+
         Returns:
             None
         """

@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Union
+from collections.abc import Callable
 
 import tiktoken
 from deprecated import deprecated
@@ -7,7 +7,6 @@ from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackMana
 from llama_index.core.callbacks import TokenCountingHandler
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
-
 from unstract.sdk.utils.usage_handler import UsageHandler
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class CallbackManager:
     @staticmethod
     def set_callback(
         platform_api_key: str,
-        model: Union[LLM, BaseEmbedding],
+        model: LLM | BaseEmbedding,
         kwargs,
     ) -> None:
         """Sets the standard callback manager for the llm. This is to be called
@@ -57,13 +56,8 @@ class CallbackManager:
                 embedding=embedding
             )
         """
-
         # Nothing to do if callback manager is already set for the instance
-        if (
-            model
-            and model.callback_manager
-            and len(model.callback_manager.handlers) > 0
-        ):
+        if model and model.callback_manager and len(model.callback_manager.handlers) > 0:
             return
 
         model.callback_manager = CallbackManager.get_callback_manager(
@@ -72,7 +66,7 @@ class CallbackManager:
 
     @staticmethod
     def get_callback_manager(
-        model: Union[LLM, BaseEmbedding],
+        model: LLM | BaseEmbedding,
         platform_api_key: str,
         kwargs,
     ) -> LlamaIndexCallbackManager:
@@ -110,7 +104,7 @@ class CallbackManager:
 
     @staticmethod
     def get_tokenizer(
-        model: Optional[Union[LLM, BaseEmbedding, None]],
+        model: LLM | BaseEmbedding | None,
         fallback_tokenizer: Callable[[str], list] = tiktoken.encoding_for_model(
             "gpt-3.5-turbo"
         ).encode,
@@ -127,7 +121,6 @@ class CallbackManager:
         Raises:
             OSError: If an error occurs while loading the tokenizer.
         """
-
         try:
             if isinstance(model, LLM):
                 model_name: str = model.metadata.model_name
@@ -146,8 +139,8 @@ class CallbackManager:
     @deprecated("Use set_callback() instead")
     def set_callback_manager(
         platform_api_key: str,
-        llm: Optional[LLM] = None,
-        embedding: Optional[BaseEmbedding] = None,
+        llm: LLM | None = None,
+        embedding: BaseEmbedding | None = None,
         **kwargs,
     ) -> LlamaIndexCallbackManager:
         callback_manager: LlamaIndexCallbackManager = LlamaIndexCallbackManager()

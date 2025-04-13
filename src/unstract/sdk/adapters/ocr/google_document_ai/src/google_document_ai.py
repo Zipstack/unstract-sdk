@@ -2,13 +2,12 @@ import base64
 import json
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from filetype import filetype
 from google.auth.transport import requests as google_requests
 from google.oauth2.service_account import Credentials
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.ocr.constants import FileType
 from unstract.sdk.adapters.ocr.ocr_adapter import OCRAdapter
@@ -58,8 +57,6 @@ class GoogleDocumentAI(OCRAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/GoogleDocumentAI.png"
-
-     
 
     """ Construct the request body to be sent to Google AI Document server """
 
@@ -113,7 +110,7 @@ class GoogleDocumentAI(OCRAdapter):
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         try:

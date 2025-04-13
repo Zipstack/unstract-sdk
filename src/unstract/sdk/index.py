@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from deprecated import deprecated
 from llama_index.core import Document
@@ -12,7 +13,6 @@ from llama_index.core.vector_stores import (
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.no_op.src.no_op_custom_vectordb import (
@@ -43,7 +43,7 @@ class Index:
     def __init__(
         self,
         tool: BaseTool,
-        run_id: Optional[str] = None,
+        run_id: str | None = None,
         capture_metrics: bool = False,
     ):
         # TODO: Inherit from StreamMixin and avoid using BaseTool
@@ -124,12 +124,12 @@ class Index:
         self,
         x2text_instance_id: str,
         file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
-        process_text: Optional[Callable[[str], str]] = None,
+        process_text: Callable[[str], str] | None = None,
         fs: FileStorage = FileStorage(FileStorageProvider.LOCAL),
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> str:
         """Extracts text from a document.
 
@@ -218,13 +218,13 @@ class Index:
         chunk_size: int,
         chunk_overlap: int,
         reindex: bool = False,
-        file_hash: Optional[str] = None,
-        output_file_path: Optional[str] = None,
+        file_hash: str | None = None,
+        output_file_path: str | None = None,
         enable_highlight: bool = False,
         usage_kwargs: dict[Any, Any] = {},
-        process_text: Optional[Callable[[str], str]] = None,
+        process_text: Callable[[str], str] | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> str:
         """Indexes an individual file using the passed arguments.
 
@@ -448,8 +448,8 @@ class Index:
         x2text: str,
         chunk_size: str,
         chunk_overlap: str,
-        file_path: Optional[str] = None,
-        file_hash: Optional[str] = None,
+        file_path: str | None = None,
+        file_hash: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         """Generates a unique ID useful for identifying files during indexing.
@@ -508,8 +508,8 @@ class Index:
         x2text: str,
         chunk_size: str,
         chunk_overlap: str,
-        file_path: Optional[str] = None,
-        file_hash: Optional[str] = None,
+        file_path: str | None = None,
+        file_hash: str | None = None,
     ) -> str:
         return self.generate_index_key(
             vector_db,
@@ -533,8 +533,8 @@ class Index:
         chunk_size: int,
         chunk_overlap: int,
         reindex: bool = False,
-        file_hash: Optional[str] = None,
-        output_file_path: Optional[str] = None,
+        file_hash: str | None = None,
+        output_file_path: str | None = None,
     ) -> str:
         return self.index(
             tool_id=tool_id,
@@ -552,7 +552,7 @@ class Index:
     @deprecated("Deprecated class and method. Use Index and query_index() instead")
     def get_text_from_index(
         self, embedding_type: str, vector_db: str, doc_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         return self.query_index(
             embedding_instance_id=embedding_type,
             vector_db_instance_id=vector_db,
