@@ -162,6 +162,7 @@ ignore = [
     "D104",   # Missing docstring in public package
     "D103",   # Missing docstring in public function
     "D106",   # Missing docstring in public nested class
+    "D417",   # Missing argument description in the docstring
     "ANN101", # Missing type annotation for self
     "ANN102", # Missing type annotation for cls
 ]
