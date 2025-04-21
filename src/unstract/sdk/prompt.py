@@ -21,10 +21,13 @@ class PromptTool:
         prompt_port: str,
         is_public_call: bool = False,
     ) -> None:
-        """Args:
-        tool (AbstractTool): Instance of AbstractTool
-        prompt_host (str): Host of platform service
-        prompt_host (str): Port of platform service
+        """Class to interact with prompt-service.
+
+        Args:
+            tool (AbstractTool): Instance of AbstractTool
+            prompt_host (str): Host of platform service
+            prompt_port (str): Port of platform service
+            is_public_call (bool): Whether the call is public. Defaults to False
         """
         self.tool = tool
         self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
@@ -113,8 +116,7 @@ class PromptTool:
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        """Invokes and communicates to prompt service to fetch response for the
-        prompt.
+        """Communicates to prompt service to fetch response for the prompt.
 
         Args:
             url_path (str): URL path to the service endpoint
