@@ -6,6 +6,7 @@ from typing import Any
 
 from deprecated import deprecated
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
+from unstract.sdk.exceptions import SdkError
 from unstract.sdk.utils import Utils
 from unstract.sdk.utils.common_utils import UNSTRACT_TO_PY_LOG_LEVEL
 
@@ -19,12 +20,14 @@ class StreamMixin:
     to stdout.
     """
 
-    def __init__(self, log_level: LogLevel = LogLevel.INFO, **kwargs) -> None:
-        """Args:
-        log_level (LogLevel): The log level for filtering of log messages.
-        The default is INFO.
-            Allowed values are DEBUG, INFO, WARN, ERROR, and FATAL.
+    def __init__(
+        self, log_level: LogLevel = LogLevel.INFO, **kwargs: dict[str, Any]
+    ) -> None:
+        """Constructor for StreamMixin.
 
+        Args:
+            log_level (LogLevel): The log level for filtering of log messages.
+            The default is INFO. Allowed values are DEBUG, INFO, WARN, ERROR, and FATAL.
         """
         self.log_level = log_level
         self._exec_by_tool = Utils.str_to_bool(
@@ -35,7 +38,7 @@ class StreamMixin:
         super().__init__(**kwargs)
 
     @property
-    def is_exec_by_tool(self):
+    def is_exec_by_tool(self) -> bool:
         """Flag to determine if SDK library is used in a tool's context.
 
         Returns:
@@ -51,20 +54,43 @@ class StreamMixin:
             return
         handler = logging.StreamHandler()
         handler.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
+
+        # Determine if OpenTelemetry trace context should be included in logs
+        otel_trace_context = (
+            " trace_id:%(otelTraceID)s span_id:%(otelSpanID)s"
+            if os.environ.get("OTEL_TRACES_EXPORTER", "none").lower() != "none"
+            else ""
+        )
+
         handler.setFormatter(
             logging.Formatter(
-                "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+                "%(levelname)s : [%(asctime)s]"
+                "[pid:%(process)d tid:%(thread)d]" + otel_trace_context + " "
+                "%(name)s:- %(message)s"
             )
         )
         rootlogger.addHandler(handler)
         rootlogger.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
+
+        noisy_lib_list = [
+            "asyncio",
+            "aiobotocore",
+            "boto3",
+            "botocore",
+            "fsspec",
+            "requests",
+            "s3fs",
+            "urllib3",
+        ]
+        for noisy_lib in noisy_lib_list:
+            logging.getLogger(noisy_lib).setLevel(logging.WARNING)
 
     def stream_log(
         self,
         log: str,
         level: LogLevel = LogLevel.INFO,
         stage: str = LogStage.TOOL_RUN,
-        **kwargs: Any,
+        **kwargs: dict[str, Any],
     ) -> None:
         """Streams a log message using the Unstract protocol LOG to stdout.
 
@@ -106,7 +132,7 @@ class StreamMixin:
         if self._exec_by_tool:
             exit(1)
         else:
-            raise RuntimeError("RuntimeError from SDK, check the above log for details")
+            raise SdkError(f"SDK Error: {message}")
 
     def get_env_or_die(self, env_key: str) -> str:
         """Returns the value of an env variable.
@@ -126,8 +152,7 @@ class StreamMixin:
 
     @staticmethod
     def stream_spec(spec: str) -> None:
-        """Streams JSON schema of the tool using the Unstract protocol SPEC to
-        stdout.
+        """Streams JSON schema of tool using Unstract protocol SPEC to stdout.
 
         Args:
             spec (str): The JSON schema of the tool.
@@ -145,8 +170,7 @@ class StreamMixin:
 
     @staticmethod
     def stream_properties(properties: str) -> None:
-        """Streams the properties of the tool using the Unstract protocol
-        PROPERTIES to stdout.
+        """Streams tool properties JSON.
 
         Args:
             properties (str): The properties of the tool.
@@ -164,8 +188,10 @@ class StreamMixin:
 
     @staticmethod
     def stream_variables(variables: str) -> None:
-        """Streams JSON schema of the tool's variables using the Unstract
-        protocol VARIABLES to stdout.
+        """Stream JSON variables.
+
+        Streams JSON schema of the tool's variables using the
+        Unstract protocol VARIABLES to stdout.
 
         Args:
             variables (str): The tool's runtime variables.
@@ -183,8 +209,7 @@ class StreamMixin:
 
     @staticmethod
     def stream_icon(icon: str) -> None:
-        """Streams the icon of the tool using the Unstract protocol ICON to
-        stdout.
+        """Streams tool's icon JSON.
 
         Args:
             icon (str): The icon of the tool.
@@ -201,7 +226,7 @@ class StreamMixin:
         print(json.dumps(record))
 
     @staticmethod
-    def stream_update(message: str, state: str, **kwargs: Any) -> None:
+    def stream_update(message: str, state: str, **kwargs: dict[str, Any]) -> None:
         """Streams a log message using the Unstract protocol UPDATE to stdout.
 
         Args:
@@ -219,9 +244,8 @@ class StreamMixin:
 
     @staticmethod
     @deprecated(version="0.4.4", reason="Unused in workflow execution")
-    def stream_cost(cost: float, cost_units: str, **kwargs: Any) -> None:
-        """Streams the cost of the tool using the Unstract protocol COST to
-        stdout.
+    def stream_cost(cost: float, cost_units: str, **kwargs: dict[str, Any]) -> None:
+        """Streams tool cost (deprecated).
 
         Args:
             cost (float): The cost of the tool.
@@ -242,9 +266,10 @@ class StreamMixin:
 
     @staticmethod
     @deprecated(version="0.4.4", reason="Unused in workflow execution")
-    def stream_single_step_message(message: str, **kwargs: Any) -> None:
-        """Streams a single step message using the Unstract protocol
-        SINGLE_STEP_MESSAGE to stdout.
+    def stream_single_step_message(message: str, **kwargs: dict[str, Any]) -> None:
+        """Stream single step message.
+
+        Streams a single step message to stdout.
 
         Args:
             message (str): The single step message.
@@ -263,9 +288,8 @@ class StreamMixin:
 
     @staticmethod
     @deprecated(version="0.4.4", reason="Use `BaseTool.write_to_result()` instead")
-    def stream_result(result: dict[Any, Any], **kwargs: Any) -> None:
-        """Streams the result of the tool using the Unstract protocol RESULT to
-        stdout.
+    def stream_result(result: dict[Any, Any], **kwargs: dict[str, Any]) -> None:
+        """Streams tool result (review if required).
 
         Args:
             result (dict): The result of the tool. Refer to the
