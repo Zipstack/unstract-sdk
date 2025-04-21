@@ -5,11 +5,11 @@ from llama_index.core.llms import LLM
 from llama_index.llms.openai import OpenAI
 from llama_index.llms.openai.utils import O1_MODELS
 from openai import APIError as OpenAIAPIError
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 from unstract.sdk.exceptions import LLMError
+
 
 class Constants:
     MODEL = "model"
@@ -23,7 +23,6 @@ class Constants:
 
 
 class OpenAILLM(LLMAdapter):
-    
     def __init__(self, settings: dict[str, Any]):
         super().__init__("OpenAI")
         self.config = settings
@@ -61,9 +60,13 @@ class OpenAILLM(LLMAdapter):
                 "api_key": str(self.config.get(Constants.API_KEY)),
                 "api_base": str(self.config.get(Constants.API_BASE)),
                 "api_version": str(self.config.get(Constants.API_VERSION)),
-                "max_retries": int(self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)),
+                "max_retries": int(
+                    self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
+                ),
                 "api_type": "openai",
-                "timeout": float(self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)),
+                "timeout": float(
+                    self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
+                ),
                 "max_tokens": max_tokens,
             }
 

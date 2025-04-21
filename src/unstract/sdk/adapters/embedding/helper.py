@@ -1,8 +1,7 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
-
 from unstract.sdk.adapters.exceptions import AdapterError
 
 logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ class EmbeddingHelper:
         return embedding_batch_size
 
     @staticmethod
-    def test_embedding_instance(embedding: Optional[BaseEmbedding]) -> bool:
+    def test_embedding_instance(embedding: BaseEmbedding | None) -> bool:
         try:
             if embedding is None:
                 return False

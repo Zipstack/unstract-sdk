@@ -11,7 +11,6 @@ from llama_index.core.vector_stores.types import (
 )
 from parameterized import parameterized
 from unstract.adapters.vectordb.helper import VectorDBHelper
-
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.vector_db import ToolVectorDB
 
@@ -46,9 +45,7 @@ class ToolVectorDBTest(unittest.TestCase):
             adapter_instance_id, mock_embedding.embed_dim
         )
         self.assertIsNotNone(vector_store)
-        self.assertIsInstance(
-            vector_store, (BasePydanticVectorStore, VectorStore)
-        )
+        self.assertIsInstance(vector_store, (BasePydanticVectorStore, VectorStore))
 
         result = VectorDBHelper.test_vector_db_instance(vector_store)
         self.assertEqual(result, True)

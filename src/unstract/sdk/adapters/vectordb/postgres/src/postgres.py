@@ -1,12 +1,11 @@
 import os
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote_plus
 
 import psycopg2
 from llama_index.core.vector_stores.types import BasePydanticVectorStore
 from llama_index.vector_stores.postgres import PGVectorStore
 from psycopg2._psycopg import connection
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
@@ -26,7 +25,7 @@ class Constants:
 class Postgres(VectorDBAdapter):
     def __init__(self, settings: dict[str, Any]):
         self._config = settings
-        self._client: Optional[connection] = None
+        self._client: connection | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._schema_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._vector_db_instance = self._get_vector_db_instance()
@@ -49,8 +48,6 @@ class Postgres(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/postgres.png"
-
-     
 
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance
@@ -99,9 +96,7 @@ class Postgres(VectorDBAdapter):
 
     def test_connection(self) -> bool:
         vector_db = self.get_vector_db_instance()
-        test_result: bool = VectorDBHelper.test_vector_db_instance(
-            vector_store=vector_db
-        )
+        test_result: bool = VectorDBHelper.test_vector_db_instance(vector_store=vector_db)
 
         # Delete the collection that was created for testing
         if self._client is not None:

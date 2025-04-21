@@ -3,10 +3,10 @@ from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.bedrock import BedrockEmbedding
-
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.embedding.helper import EmbeddingHelper
 from unstract.sdk.adapters.exceptions import AdapterError
+
 
 class Constants:
     MODEL = "model"
@@ -17,6 +17,7 @@ class Constants:
     REGION_NAME = "region_name"
     DEFAULT_TIMEOUT = 240
     DEFAULT_MAX_RETRIES = 3
+
 
 class Bedrock(EmbeddingAdapter):
     def __init__(self, settings: dict[str, Any]):
@@ -66,5 +67,3 @@ class Bedrock(EmbeddingAdapter):
             return embedding
         except Exception as e:
             raise AdapterError(str(e))
-        
-     

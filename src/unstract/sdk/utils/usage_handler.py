@@ -1,11 +1,10 @@
-from typing import Any, Optional
+from typing import Any
 
 from llama_index.core.callbacks import CBEventType, TokenCountingHandler
 from llama_index.core.callbacks.base_handler import BaseCallbackHandler
 from llama_index.core.callbacks.schema import EventPayload
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
-
 from unstract.sdk.audit import Audit
 from unstract.sdk.constants import LogLevel
 from unstract.sdk.tool.stream import StreamMixin
@@ -35,11 +34,11 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
     def __init__(
         self,
         platform_api_key: str,
-        token_counter: Optional[TokenCountingHandler] = None,
+        token_counter: TokenCountingHandler | None = None,
         llm_model: LLM = None,
         embed_model: BaseEmbedding = None,
-        event_starts_to_ignore: Optional[list[CBEventType]] = None,
-        event_ends_to_ignore: Optional[list[CBEventType]] = None,
+        event_starts_to_ignore: list[CBEventType] | None = None,
+        event_ends_to_ignore: list[CBEventType] | None = None,
         verbose: bool = False,
         log_level: LogLevel = LogLevel.INFO,
         kwargs: dict[Any, Any] = None,
@@ -56,20 +55,20 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
             event_ends_to_ignore=event_ends_to_ignore or [],
         )
 
-    def start_trace(self, trace_id: Optional[str] = None) -> None:
+    def start_trace(self, trace_id: str | None = None) -> None:
         return
 
     def end_trace(
         self,
-        trace_id: Optional[str] = None,
-        trace_map: Optional[dict[str, list[str]]] = None,
+        trace_id: str | None = None,
+        trace_map: dict[str, list[str]] | None = None,
     ) -> None:
         return
 
     def on_event_start(
         self,
         event_type: CBEventType,
-        payload: Optional[dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
         event_id: str = "",
         parent_id: str = "",
         kwargs: dict[Any, Any] = None,
@@ -79,7 +78,7 @@ class UsageHandler(StreamMixin, BaseCallbackHandler):
     def on_event_end(
         self,
         event_type: CBEventType,
-        payload: Optional[dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
         event_id: str = "",
         kwargs: dict[Any, Any] = None,
     ) -> None:

@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from unstract.sdk.constants import (
     Command,
@@ -112,6 +112,7 @@ class BaseTool(ABC, StreamMixin):
 
         Args:
             command (str): The static command.
+
         Returns:
             None
         """
@@ -130,9 +131,7 @@ class BaseTool(ABC, StreamMixin):
         base_path = self.execution_dir
         file_path = base_path / file_to_get
         if raise_err and not self.workflow_filestorage.exists(path=file_path):
-            self.stream_error_and_exit(
-                f"{file_to_get} is missing in EXECUTION_DATA_DIR"
-            )
+            self.stream_error_and_exit(f"{file_to_get} is missing in EXECUTION_DATA_DIR")
 
         return str(file_path)
 
@@ -254,7 +253,7 @@ class BaseTool(ABC, StreamMixin):
 
         self._write_exec_metadata(metadata=self._exec_metadata)
 
-    def write_tool_result(self, data: Union[str, dict[str, Any]]) -> None:
+    def write_tool_result(self, data: str | dict[str, Any]) -> None:
         """Helps write contents of the tool result into TOOL_DATA_DIR.
 
         Args:

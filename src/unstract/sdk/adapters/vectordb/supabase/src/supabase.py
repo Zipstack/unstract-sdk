@@ -1,15 +1,14 @@
 import os
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote_plus
 
 from llama_index.core.vector_stores.types import VectorStore
 from llama_index.vector_stores.supabase import SupabaseVectorStore
-from vecs import Client
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.vectordb.constants import VectorDbConstants
 from unstract.sdk.adapters.vectordb.helper import VectorDBHelper
 from unstract.sdk.adapters.vectordb.vectordb_adapter import VectorDBAdapter
+from vecs import Client
 
 
 class Constants:
@@ -24,7 +23,7 @@ class Constants:
 class Supabase(VectorDBAdapter):
     def __init__(self, settings: dict[str, Any]):
         self._config = settings
-        self._client: Optional[Client] = None
+        self._client: Client | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Supabase", self._vector_db_instance)
@@ -46,8 +45,6 @@ class Supabase(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/supabase.png"
-
-     
 
     def get_vector_db_instance(self) -> VectorStore:
         return self._vector_db_instance
@@ -88,9 +85,7 @@ class Supabase(VectorDBAdapter):
 
     def test_connection(self) -> bool:
         vector_db = self.get_vector_db_instance()
-        test_result: bool = VectorDBHelper.test_vector_db_instance(
-            vector_store=vector_db
-        )
+        test_result: bool = VectorDBHelper.test_vector_db_instance(vector_store=vector_db)
         # Delete the collection that was created for testing
         if self._client is not None:
             self._client.delete_collection(self._collection_name)

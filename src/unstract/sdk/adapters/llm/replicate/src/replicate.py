@@ -3,7 +3,6 @@ from typing import Any
 
 from llama_index.core.llms import LLM
 from llama_index.llms.replicate import Replicate
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
 
@@ -39,8 +38,6 @@ class ReplicateLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Replicate.png"
-
-     
 
     @staticmethod
     def can_write() -> bool:

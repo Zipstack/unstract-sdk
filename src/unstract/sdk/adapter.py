@@ -1,9 +1,8 @@
 import json
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import ConnectionError, HTTPError
-
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.constants import AdapterKeys, LogLevel, ToolEnv
 from unstract.sdk.exceptions import SdkError
@@ -25,8 +24,7 @@ class ToolAdapter(PlatformBase):
         platform_host: str,
         platform_port: str,
     ) -> None:
-        """
-        Args:
+        """Args:
             tool (AbstractTool): Instance of AbstractTool
             platform_host (str): Host of platform service
             platform_port (str): Port of platform service
@@ -89,7 +87,7 @@ class ToolAdapter(PlatformBase):
     @staticmethod
     def get_adapter_config(
         tool: BaseTool, adapter_instance_id: str
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get adapter spec by the help of unstract DB tool.
 
         This method first checks if the adapter_instance_id matches

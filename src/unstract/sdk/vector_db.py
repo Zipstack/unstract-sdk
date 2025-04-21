@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Sequence
-from typing import Any, Optional, Union
+from typing import Any
 
 from deprecated import deprecated
 from llama_index.core import StorageContext, VectorStoreIndex
@@ -12,7 +12,6 @@ from llama_index.core.vector_stores.types import (
     VectorStore,
     VectorStoreQueryResult,
 )
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.vectordb import adapters
@@ -42,8 +41,8 @@ class VectorDB:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None,
-        embedding: Optional[Embedding] = None,
+        adapter_instance_id: str | None = None,
+        embedding: Embedding | None = None,
     ):
         self._tool = tool
         self._adapter_instance_id = adapter_instance_id
@@ -52,14 +51,14 @@ class VectorDB:
         self._embedding_dimension = VectorDB.DEFAULT_EMBEDDING_DIMENSION
         self._initialise(embedding)
 
-    def _initialise(self, embedding: Optional[Embedding] = None):
+    def _initialise(self, embedding: Embedding | None = None):
         if embedding:
             self._embedding_instance = embedding._embedding_instance
             self._embedding_dimension = embedding._length
         if self._adapter_instance_id:
-            self._vector_db_instance: Union[
-                BasePydanticVectorStore, VectorStore
-            ] = self._get_vector_db()
+            self._vector_db_instance: BasePydanticVectorStore | VectorStore = (
+                self._get_vector_db()
+            )
 
     def _get_org_id(self) -> str:
         platform_helper = PlatformHelper(
@@ -75,7 +74,7 @@ class VectorDB:
         account_id = platform_details.get("organization_id")
         return account_id
 
-    def _get_vector_db(self) -> Union[BasePydanticVectorStore, VectorStore]:
+    def _get_vector_db(self) -> BasePydanticVectorStore | VectorStore:
         """Gets an instance of LlamaIndex's VectorStore.
 
         Returns:
@@ -83,9 +82,7 @@ class VectorDB:
         """
         try:
             if not self._adapter_instance_id:
-                raise VectorDBError(
-                    "Adapter instance ID not set. Initialisation failed"
-                )
+                raise VectorDBError("Adapter instance ID not set. Initialisation failed")
 
             vector_db_config = ToolAdapter.get_adapter_config(
                 self._tool, self._adapter_instance_id
@@ -108,9 +105,9 @@ class VectorDB:
                 org = self._get_org_id()
                 vector_db_metadata[VectorDbConstants.VECTOR_DB_NAME] = org
 
-            vector_db_metadata[
-                VectorDbConstants.EMBEDDING_DIMENSION
-            ] = self._embedding_dimension
+            vector_db_metadata[VectorDbConstants.EMBEDDING_DIMENSION] = (
+                self._embedding_dimension
+            )
 
             self.vector_db_adapter_class = vector_db_adapter(vector_db_metadata)
             return self.vector_db_adapter_class.get_vector_db_instance()
@@ -151,7 +148,7 @@ class VectorDB:
     def get_vector_store_index_from_storage_context(
         self,
         documents: Sequence[Document],
-        storage_context: Optional[StorageContext] = None,
+        storage_context: StorageContext | None = None,
         show_progress: bool = False,
         callback_manager=None,
         **kwargs,
@@ -216,7 +213,7 @@ class VectorDB:
         Args:
             NA
 
-            Returns:
+        Returns:
                 Class name
         """
         return self._vector_db_instance.class_name()
@@ -224,7 +221,7 @@ class VectorDB:
     @deprecated("Use VectorDB instead of ToolVectorDB")
     def get_vector_db(
         self, adapter_instance_id: str, embedding_dimension: int
-    ) -> Union[BasePydanticVectorStore, VectorStore]:
+    ) -> BasePydanticVectorStore | VectorStore:
         if not self._vector_db_instance:
             self._adapter_instance_id = adapter_instance_id
             self._initialise()

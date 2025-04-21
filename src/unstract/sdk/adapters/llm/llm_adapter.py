@@ -1,11 +1,9 @@
 import logging
 import re
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from llama_index.core.llms import LLM, MockLLM
 from llama_index.llms.openai.utils import O1_MODELS
-
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
 from unstract.sdk.adapters.exceptions import LLMError
@@ -67,7 +65,7 @@ class LLMAdapter(Adapter, ABC):
         return MockLLM()
 
     @staticmethod
-    def _test_llm_instance(llm: Optional[LLM]) -> bool:
+    def _test_llm_instance(llm: LLM | None) -> bool:
         if llm is None:
             raise LLMError(
                 message="Unable to connect to LLM, please recheck the configuration",
@@ -75,16 +73,13 @@ class LLMAdapter(Adapter, ABC):
             )
         # Get completion kwargs based on model capabilities
         completion_kwargs = {}
-        if hasattr(llm, 'model') and getattr(llm, 'model') not in O1_MODELS:
-            completion_kwargs['temperature'] = 0.003
+        if hasattr(llm, "model") and llm.model not in O1_MODELS:
+            completion_kwargs["temperature"] = 0.003
 
-        if hasattr(llm, 'thinking_dict') and getattr(llm, 'thinking_dict') is not None:
-            completion_kwargs['temperature'] = 1
- 
-        response = llm.complete(
-            "The capital of Tamilnadu is ",
-            **completion_kwargs
-        )
+        if hasattr(llm, "thinking_dict") and llm.thinking_dict is not None:
+            completion_kwargs["temperature"] = 1
+
+        response = llm.complete("The capital of Tamilnadu is ", **completion_kwargs)
         response_lower_case: str = response.text.lower()
         find_match = re.search("chennai", response_lower_case)
         if find_match:

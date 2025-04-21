@@ -1,8 +1,6 @@
 from abc import ABCMeta
-from typing import Optional
 
 from deprecated import deprecated
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.ocr import adapters
@@ -16,7 +14,7 @@ class OCR(metaclass=ABCMeta):
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None,
+        adapter_instance_id: str | None = None,
     ):
         self._tool = tool
         self._ocr_adapters = adapters
@@ -28,7 +26,7 @@ class OCR(metaclass=ABCMeta):
         if self._adapter_instance_id:
             self._ocr_instance: OCRAdapter = self._get_ocr()
 
-    def _get_ocr(self) -> Optional[OCRAdapter]:
+    def _get_ocr(self) -> OCRAdapter | None:
         try:
             if not self._adapter_instance_id:
                 raise OCRError("Adapter instance ID not set. " "Initialisation failed")
@@ -52,9 +50,7 @@ class OCR(metaclass=ABCMeta):
             )
             return None
 
-    def process(
-        self, input_file_path: str, output_file_path: Optional[str] = None
-    ) -> str:
+    def process(self, input_file_path: str, output_file_path: str | None = None) -> str:
         return self._ocr_instance.process(input_file_path, output_file_path)
 
     @deprecated("Instantiate OCR and call process() instead")

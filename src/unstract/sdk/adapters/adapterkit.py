@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from singleton_decorator import singleton
-
 from unstract.sdk.adapters import AdapterDict
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.constants import Common
@@ -34,16 +33,14 @@ class Adapterkit:
 
     def get_adapter_class_by_adapter_id(self, adapter_id: str) -> Adapter:
         if adapter_id in self._adapters:
-            adapter_class: Adapter = self._adapters[adapter_id][
-                Common.METADATA
-            ][Common.ADAPTER]
+            adapter_class: Adapter = self._adapters[adapter_id][Common.METADATA][
+                Common.ADAPTER
+            ]
             return adapter_class
         else:
             raise RuntimeError(f"Couldn't obtain adapter for {adapter_id}")
 
-    def get_adapter_by_id(
-        self, adapter_id: str, *args: Any, **kwargs: Any
-    ) -> Adapter:
+    def get_adapter_by_id(self, adapter_id: str, *args: Any, **kwargs: Any) -> Adapter:
         """Instantiates and returns a adapter.
 
         Args:
@@ -55,17 +52,13 @@ class Adapterkit:
         Returns:
             Adapter: Concrete impl of the `Adapter` base
         """
-        adapter_class: Adapter = self.get_adapter_class_by_adapter_id(
-            adapter_id
-        )
+        adapter_class: Adapter = self.get_adapter_class_by_adapter_id(adapter_id)
         return adapter_class(*args, **kwargs)
 
     def get_adapters_list(self) -> list[dict[str, Any]]:
         adapters = []
         for adapter_id, adapter_registry_metadata in self._adapters.items():
-            m: Adapter = adapter_registry_metadata[Common.METADATA][
-                Common.ADAPTER
-            ]
+            m: Adapter = adapter_registry_metadata[Common.METADATA][Common.ADAPTER]
             _id = m.get_id()
             name = m.get_name()
             adapter_type = m.get_adapter_type().name

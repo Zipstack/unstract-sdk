@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from llama_index.core.callbacks.schema import EventPayload
 from llama_index.core.llms import ChatResponse, CompletionResponse
@@ -49,13 +49,11 @@ class TokenCounter:
 
     @staticmethod
     def _get_tokens_from_response(
-        response: Union[CompletionResponse, ChatResponse, dict]
+        response: CompletionResponse | ChatResponse | dict,
     ) -> tuple[int, int]:
         """Get the token counts from a raw response."""
         prompt_tokens, completion_tokens = 0, 0
-        if isinstance(response, CompletionResponse) or isinstance(
-            response, ChatResponse
-        ):
+        if isinstance(response, CompletionResponse) or isinstance(response, ChatResponse):
             raw_response = response.raw
             if not isinstance(raw_response, dict):
                 raw_response = dict(raw_response)

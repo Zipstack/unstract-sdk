@@ -2,13 +2,12 @@ import json
 import logging
 from datetime import datetime
 from hashlib import sha256
-from typing import Any, Union
+from typing import Any
 
 import filetype
 import fsspec
 import magic
 import yaml
-
 from unstract.sdk.exceptions import FileOperationError
 from unstract.sdk.file_storage.constants import FileOperationParams, FileSeekPosition
 from unstract.sdk.file_storage.helper import FileStorageHelper, skip_local_cache
@@ -36,7 +35,7 @@ class FileStorage(FileStorageInterface):
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
         length: int = FileOperationParams.READ_ENTIRE_LENGTH,
-    ) -> Union[bytes, str]:
+    ) -> bytes | str:
         """Read the file pointed to by the file_handle.
 
         Args:
@@ -62,7 +61,7 @@ class FileStorage(FileStorageInterface):
         mode: str,
         encoding: str = FileOperationParams.DEFAULT_ENCODING,
         seek_position: int = 0,
-        data: Union[bytes, str] = "",
+        data: bytes | str = "",
     ) -> int:
         """Write data in the file pointed to by the file-handle.
 
@@ -306,7 +305,6 @@ class FileStorage(FileStorageInterface):
         Returns:
             str: SHA256 hash of the file
         """
-
         h = sha256()
         b = bytearray(128 * 1024)
         mv = memoryview(b)

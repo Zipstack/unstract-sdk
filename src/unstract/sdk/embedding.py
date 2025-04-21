@@ -1,10 +1,9 @@
-from typing import Any, Optional
+from typing import Any
 
 from deprecated import deprecated
 from llama_index.core.base.embeddings.base import Embedding
 from llama_index.core.callbacks import CallbackManager as LlamaIndexCallbackManager
 from llama_index.core.embeddings import BaseEmbedding
-
 from unstract.sdk.adapter import ToolAdapter
 from unstract.sdk.adapters.constants import Common
 from unstract.sdk.adapters.embedding import adapters
@@ -23,7 +22,7 @@ class Embedding:
     def __init__(
         self,
         tool: BaseTool,
-        adapter_instance_id: Optional[str] = None,
+        adapter_instance_id: str | None = None,
         usage_kwargs: dict[Any, Any] = {},
     ):
         self._tool = tool
@@ -88,9 +87,7 @@ class Embedding:
         return self._embedding_instance.get_query_embedding(query)
 
     def _get_embedding_length(self) -> int:
-        embedding_list = self._embedding_instance._get_text_embedding(
-            self._TEST_SNIPPET
-        )
+        embedding_list = self._embedding_instance._get_text_embedding(self._TEST_SNIPPET)
         embedding_dimension = len(embedding_list)
         return embedding_dimension
 
@@ -100,7 +97,7 @@ class Embedding:
         Args:
             NA
 
-            Returns:
+        Returns:
                 Class name
         """
         return self._embedding_instance.class_name()
@@ -111,7 +108,7 @@ class Embedding:
         Args:
             NA
 
-            Returns:
+        Returns:
                 llama-index callback manager
         """
         return self._embedding_instance.callback_manager

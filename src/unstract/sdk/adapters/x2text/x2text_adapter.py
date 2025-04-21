@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Optional
+from typing import Any
 
 from unstract.sdk.adapters.base import Adapter
 from unstract.sdk.adapters.enums import AdapterTypes
@@ -38,7 +38,7 @@ class X2TextAdapter(Adapter, ABC):
     def process(
         self,
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:

@@ -3,7 +3,6 @@ from typing import Any
 
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.embeddings.fastembed import FastEmbedEmbedding
-
 from unstract.sdk.adapters.embedding.embedding_adapter import EmbeddingAdapter
 from unstract.sdk.adapters.exceptions import AdapterError
 
@@ -44,5 +43,3 @@ class QdrantFastEmbedM(EmbeddingAdapter):
             return embedding
         except Exception as e:
             raise AdapterError(str(e))
-
-     

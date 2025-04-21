@@ -160,14 +160,11 @@ ignore = [
     "D101",   # Missing docstring in public class
     "D102",   # Missing docstring in public method
     "D104",   # Missing docstring in public package
+    "D103",   # Missing docstring in public function
+    "D106",   # Missing docstring in public nested class
+    "D417",   # Missing argument description in the docstring
     "ANN101", # Missing type annotation for self
     "ANN102", # Missing type annotation for cls
-]
-
-[tool.ruff.lint.per-file-ignores]
-"test_*.py" = [
-    "ANN201", # Missing return type annotation for public function
-    "D103",   # Missing docstring in public function
 ]
 
 [tool.ruff.format]

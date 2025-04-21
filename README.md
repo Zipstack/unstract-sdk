@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/Zipstack/unstract-sdk/main/docs/assets/unstract_u_logo.png" style="height: 120px">
+<img src="https://raw.githubusercontent.com/Zipstack/unstract-sdk/main/docs/assets/unstract_u_logo.png" style="height: 60px">
 
 # Unstract
 
@@ -18,13 +18,13 @@ They also contain helper methods/classes to aid with other tasks such as indexin
 - The below libraries need to be installed to run the SDK
   - Linux
 
-    ```
+    ```bash
     sudo apt install build-essential pkg-config libmagic-dev
     ```
 
   - Mac
 
-    ```
+    ```bash
     brew install pkg-config libmagic pandoc tesseract-ocr
     ```
 
@@ -60,6 +60,7 @@ Index Version **0.9.28** as on January 14th, 2024
 ### Developing with the SDK
 
 Ensure that you have all the required dependencies and pre-commit hooks installed
+
 ```shell
 uv sync
 pre-commit install
@@ -68,6 +69,7 @@ pre-commit install
 Once the changes have been made, it can be tested with [Unstract](https://github.com/Zipstack/unstract) through the following means.
 
 #### With UV
+
 Specify the SDK as a dependency to a project using a tool like `uv` by adding the following to your `pyproject.toml`
 
 ```toml
@@ -85,19 +87,25 @@ unstract-sdk = { path = "${UNSTRACT_SDK_PATH", editable = true  }
 ```
 
 #### With pip
+
 - If the project is using `pip` it might be possible to add it as a dependency in `requirements.txt`
-```
+
+```shell
 -e /path/to/unstract-sdk
 ```
+
 NOTE: Building locally might require the below section to be replaced in the `unstract-sdk`'s build system configuration
-```
+
+```toml
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 ```
+
 - Another option is to provide a git URL in `requirements.txt`, this can come in handy while building tool
 docker images. Don't forget to run `apt install git` within the `Dockerfile` for this
-```shell
+
+```toml
 [tool.uv.sources]
 unstract-sdk = { git = "git+https://github.com/Zipstack/unstract-sdk@feature-branch" }
 ```
@@ -105,15 +113,18 @@ unstract-sdk = { git = "git+https://github.com/Zipstack/unstract-sdk@feature-bra
 - Or try installing a [local PyPI server](https://pypi.org/project/pypiserver/) and upload / download your package from this server
 
 #### Additonal dependencies for tool
-Tools may need to be backed up by a file storage. unstract.sdk.file_storage contains the required interfaces for the
-same. fssepc is being used underneath to implement these interfaces. Hence, one can choose to use a file_system
-supported by fsspec for this. However, the required dependencies need to be added in the tool dependency manager.
-Eg. If the tool is using Minio as the underlying file storage, then s3fs can be added to support it.
-Similarly, for Google Cloud Storage, gcsfs is to be added.
-The following versions are tested in the SDK using unit test cases for the above package.
-    gcsfs==2024.10.0
-    s3fs==2024.10.0
 
+Tools may need to be backed up by a file storage. `unstract.sdk.file_storage` contains the required interfaces for the
+same. `fsspec` is being used underneath to implement these interfaces. Hence, one can choose to use a file system
+supported by fsspec for this. However, the required dependencies need to be added in the tool dependency manager.
+Eg. If the tool is using Minio as the underlying file storage, then `s3fs` can be added to support it.
+Similarly, for Google Cloud Storage, `gcsfs` needs to be added.
+The following versions are tested in the SDK using unit test cases for the above package.
+
+```toml
+  gcsfs==2024.10.0
+  s3fs==2024.10.0
+```
 
 ### Documentation generation
 

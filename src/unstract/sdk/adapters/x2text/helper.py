@@ -1,10 +1,9 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
@@ -20,7 +19,7 @@ class X2TextHelper:
     @staticmethod
     def parse_response(
         response: Response,
-        out_file_path: Optional[str] = None,
+        out_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> tuple[str, bool]:
         """Parses the response from a request.
@@ -64,7 +63,7 @@ class UnstructuredHelper:
     def process_document(
         unstructured_adapter_config: dict[str, Any],
         input_file_path: str,
-        output_file_path: Optional[str] = None,
+        output_file_path: str | None = None,
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
     ) -> str:
         try:
@@ -102,12 +101,8 @@ class UnstructuredHelper:
     ) -> Response:
         unstructured_url = unstructured_adapter_config.get(UnstructuredHelper.URL)
 
-        x2text_service_url = unstructured_adapter_config.get(
-            X2TextConstants.X2TEXT_HOST
-        )
-        x2text_service_port = unstructured_adapter_config.get(
-            X2TextConstants.X2TEXT_PORT
-        )
+        x2text_service_url = unstructured_adapter_config.get(X2TextConstants.X2TEXT_HOST)
+        x2text_service_port = unstructured_adapter_config.get(X2TextConstants.X2TEXT_PORT)
         platform_service_api_key = unstructured_adapter_config.get(
             X2TextConstants.PLATFORM_SERVICE_API_KEY
         )
@@ -124,23 +119,19 @@ class UnstructuredHelper:
             body["unstructured-api-key"] = api_key
 
         x2text_url = (
-            f"{x2text_service_url}:{x2text_service_port}"
-            f"/api/v1/x2text/{request_type}"
+            f"{x2text_service_url}:{x2text_service_port}" f"/api/v1/x2text/{request_type}"
         )
         # Add files only if the request is for process
         files = None
         if "files" in kwargs:
             files = kwargs["files"] if kwargs["files"] is not None else None
         try:
-            response = requests.post(
-                x2text_url, headers=headers, data=body, files=files
-            )
+            response = requests.post(x2text_url, headers=headers, data=body, files=files)
             response.raise_for_status()
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
             raise AdapterError(
-                "Unable to connect to unstructured-io's service, "
-                "please check the URL"
+                "Unable to connect to unstructured-io's service, " "please check the URL"
             )
         except Timeout as e:
             msg = "Request to unstructured-io's service has timed out"
