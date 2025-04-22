@@ -49,16 +49,27 @@ class PlatformHelper(PlatformBase):
         - PLATFORM_SERVICE_API_KEY environment variable is required.
     """
 
-    def __init__(self, tool: BaseTool, platform_host: str, platform_port: str) -> None:
+    def __init__(
+        self,
+        tool: BaseTool,
+        platform_host: str,
+        platform_port: str,
+        request_id: str | None = None,
+    ) -> None:
         """Constructor for helper to connect to platform service.
 
         Args:
             tool (AbstractTool): Instance of AbstractTool
             platform_host (str): Host of platform service
             platform_port (str): Port of platform service
+            request_id (str | None, optional): Request ID for the service.
+                Defaults to None.
         """
         super().__init__(
-            tool=tool, platform_host=platform_host, platform_port=platform_port
+            tool=tool,
+            platform_host=platform_host,
+            platform_port=platform_port,
+            request_id=request_id,
         )
 
     def _get_headers(self, headers: dict[str, str] | None = None) -> dict[str, str]:
@@ -81,7 +92,7 @@ class PlatformHelper(PlatformBase):
         payload: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
-        method: str = "POST",  # Added method parameter with default value "POST"
+        method: str = "GET",
     ) -> dict[str, Any]:
         """Talks to platform-service to make GET / POST calls.
 
