@@ -194,7 +194,7 @@ class PromptTool:
             elif method.upper() == "GET":
                 return response.json()
         except ConnectionError as connect_err:
-            msg = "Unable to connect to prompt service. Please contact admin."
+            msg = "Unable to connect to prompt service. "
             self.tool.stream_log(msg, level=LogLevel.ERROR)
             logger.error(f"{msg}: {connect_err}")
             result["error"] = msg
