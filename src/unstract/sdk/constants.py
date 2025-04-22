@@ -57,8 +57,7 @@ class LogStage:
 
 
 class LogState:
-    """State of logs INPUT_UPDATE tag for update the FE input component
-    OUTPUT_UPDATE tag for update the FE output component."""
+    """Tags to update corresponding FE component."""
 
     INPUT_UPDATE = "INPUT_UPDATE"
     OUTPUT_UPDATE = "OUTPUT_UPDATE"
@@ -175,3 +174,10 @@ class UsageKwargs:
     FILE_NAME = "file_name"
     WORKFLOW_ID = "workflow_id"
     EXECUTION_ID = "execution_id"
+
+
+class RequestHeader:
+    """Keys used in request headers."""
+
+    REQUEST_ID = "X-Request-ID"
+    AUTHORIZATION = "Authorization"

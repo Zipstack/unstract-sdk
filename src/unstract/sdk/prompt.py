@@ -3,7 +3,12 @@ from typing import Any
 
 import requests
 from requests import ConnectionError, RequestException, Response
-from unstract.sdk.constants import LogLevel, MimeType, PromptStudioKeys, ToolEnv
+from unstract.sdk.constants import (
+    LogLevel,
+    MimeType,
+    RequestHeader,
+    ToolEnv,
+)
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.common_utils import log_elapsed
@@ -20,6 +25,7 @@ class PromptTool:
         prompt_host: str,
         prompt_port: str,
         is_public_call: bool = False,
+        request_id: str | None = None,
     ) -> None:
         """Class to interact with prompt-service.
 
@@ -32,6 +38,7 @@ class PromptTool:
         self.tool = tool
         self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
         self.is_public_call = is_public_call
+        self.request_id = request_id
         if not is_public_call:
             self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
@@ -45,7 +52,7 @@ class PromptTool:
         url_path = "answer-prompt"
         if self.is_public_call:
             url_path = "answer-prompt-public"
-        return self._post_call(
+        return self._call_service(
             url_path=url_path, payload=payload, params=params, headers=headers
         )
 
@@ -59,7 +66,7 @@ class PromptTool:
         url_path = "index"
         if self.is_public_call:
             url_path = "index-public"
-        return self._post_call(
+        return self._call_service(
             url_path=url_path,
             payload=payload,
             params=params,
@@ -76,7 +83,7 @@ class PromptTool:
         url_path = "extract"
         if self.is_public_call:
             url_path = "extract-public"
-        return self._post_call(
+        return self._call_service(
             url_path=url_path,
             payload=payload,
             params=params,
@@ -89,7 +96,7 @@ class PromptTool:
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        return self._post_call(
+        return self._call_service(
             url_path="single-pass-extraction",
             payload=payload,
             params=params,
@@ -102,27 +109,48 @@ class PromptTool:
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        return self._post_call(
+        return self._call_service(
             url_path="summarize",
             payload=payload,
             params=params,
             headers=headers,
         )
 
-    def _post_call(
+    def _get_headers(self, headers: dict[str, str] | None = None) -> dict[str, str]:
+        """Get default headers for requests.
+
+        Returns:
+            dict[str, str]: Default headers including request ID and authorization
+        """
+        request_headers = {RequestHeader.REQUEST_ID: self.request_id}
+        if self.is_public_call:
+            return request_headers
+        request_headers.update(
+            {RequestHeader.AUTHORIZATION: f"Bearer {self.bearer_token}"}
+        )
+
+        if headers:
+            request_headers.update(headers)
+        return request_headers
+
+    def _call_service(
         self,
         url_path: str,
-        payload: dict[str, Any],
+        payload: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
+        method: str = "POST",  # Added method parameter with default value "POST"
     ) -> dict[str, Any]:
         """Communicates to prompt service to fetch response for the prompt.
 
+        Only POST calls are made to prompt-service though functionality exists.
+
         Args:
             url_path (str): URL path to the service endpoint
-            payload (dict): Payload to send in the request body
+            payload (dict, optional): Payload to send in the request body
             params (dict, optional): Query parameters to include in the request
             headers (dict, optional): Headers to include in the request
+            method (str): HTTP method to use for the request (GET or POST)
 
         Returns:
             dict: Response from the prompt service
@@ -144,27 +172,33 @@ class PromptTool:
         }
         url: str = f"{self.base_url}/{url_path}"
 
-        default_headers = {}
-
-        if not self.is_public_call:
-            default_headers = {"Authorization": f"Bearer {self.bearer_token}"}
-
-        if headers:
-            default_headers.update(headers)
+        req_headers = self._get_headers(headers)
 
         response: Response = Response()
         try:
-            response = requests.post(
-                url=url, json=payload, params=params, headers=default_headers
-            )
+            if method.upper() == "POST":
+                response = requests.post(
+                    url=url, json=payload, params=params, headers=req_headers
+                )
+            elif method.upper() == "GET":
+                response = requests.get(url=url, params=params, headers=req_headers)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+
             response.raise_for_status()
-            result["status"] = "OK"
-            result["structure_output"] = response.text
-            result["status_code"] = 200
+
+            if method.upper() == "POST":
+                result["status"] = "OK"
+                result["structure_output"] = response.text
+                result["status_code"] = 200
+            elif method.upper() == "GET":
+                return response.json()
         except ConnectionError as connect_err:
             msg = "Unable to connect to prompt service. Please contact admin."
-            self._stringify_and_stream_err(connect_err, msg)
+            self.tool.stream_log(msg, level=LogLevel.ERROR)
+            logger.error(f"{msg}: {connect_err}")
             result["error"] = msg
+            result["status_code"] = response.status_code
         except RequestException as e:
             # Extract error information from the response if available
             error_message = str(e)
@@ -182,45 +216,3 @@ class PromptTool:
                 level=LogLevel.ERROR,
             )
         return result
-
-    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> None:
-        error_message = str(err)
-        trace = f"{msg}: {error_message}"
-        self.tool.stream_log(trace, level=LogLevel.ERROR)
-        logger.error(trace)
-
-    @staticmethod
-    def get_exported_tool(
-        tool: BaseTool, prompt_registry_id: str
-    ) -> dict[str, Any] | None:
-        """Get exported custom tool by the help of unstract DB tool.
-
-        Args:
-            prompt_registry_id (str): ID of the prompt_registry_id
-            tool (AbstractTool): Instance of AbstractTool
-        Required env variables:
-            PLATFORM_HOST: Host of platform service
-            PLATFORM_PORT: Port of platform service
-        """
-        platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
-        platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
-        base_url = SdkHelper.get_platform_base_url(platform_host, platform_port)
-        bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-        url = f"{base_url}/custom_tool_instance"
-        query_params = {PromptStudioKeys.PROMPT_REGISTRY_ID: prompt_registry_id}
-        headers = {"Authorization": f"Bearer {bearer_token}"}
-        response = requests.get(url, headers=headers, params=query_params)
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code == 404:
-            tool.stream_error_and_exit(
-                f"Exported tool '{prompt_registry_id}' is not found"
-            )
-            return None
-        else:
-            tool.stream_error_and_exit(
-                f"Error while retrieving tool metadata "
-                "for the exported tool: "
-                f"{prompt_registry_id} / {response.reason}"
-            )
-            return None

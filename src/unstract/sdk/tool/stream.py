@@ -132,7 +132,7 @@ class StreamMixin:
         if self._exec_by_tool:
             exit(1)
         else:
-            raise SdkError(f"SDK Error: {message}")
+            raise SdkError(message)
 
     def get_env_or_die(self, env_key: str) -> str:
         """Returns the value of an env variable.

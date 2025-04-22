@@ -1,5 +1,6 @@
 import argparse
 import logging
+import pprint
 import shutil
 from json import loads
 from pathlib import Path
@@ -17,6 +18,11 @@ class ToolExecutor:
     """Takes care of executing a tool's intended command."""
 
     def __init__(self, tool: BaseTool) -> None:
+        """Constructor for executor.
+
+        Args:
+            tool (AbstractTool): Instance of AbstractTool
+        """
         self.tool = tool
 
     def execute(self, args: argparse.Namespace) -> None:
@@ -58,13 +64,12 @@ class ToolExecutor:
             f"Execution ID: {self.tool.execution_id}, "
             f"SDK Version: {get_sdk_version()}"
         )
+        self.tool.stream_log(
+            f"Executing for file: '{self.tool.get_exec_metadata['source_name']}', "
+            f"with tool settings: {pprint.pformat(settings)}"
+        )
         validator = ToolValidator(self.tool)
         settings = validator.validate_pre_execution(settings=settings)
-
-        self.tool.stream_log(
-            f"Executing for file: {self.tool.get_exec_metadata['source_name']}, "
-            f"with tool settings: {settings}"
-        )
 
         try:
             self.tool.run(
