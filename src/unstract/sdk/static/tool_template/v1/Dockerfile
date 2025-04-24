@@ -1,7 +1,7 @@
 FROM python:3.9-slim
 
 LABEL maintainer="Zipstack Inc."
-ENV UNSTRACT_ENTRYPOINT "python /app/src/main.py"
+
 
 # Set the working directory in the container
 WORKDIR /app

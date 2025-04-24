@@ -144,7 +144,7 @@ class PlatformHelper(PlatformBase):
             elif response.text:
                 error_message = response.text
             self.tool.stream_error_and_exit(
-                f"Error from platform service: {error_message}"
+                f"Error from platform service. {error_message}"
             )
         return response.json()
 
