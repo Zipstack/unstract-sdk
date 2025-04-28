@@ -37,11 +37,11 @@ def handle_service_exceptions(context: str) -> Callable[[Callable[P, R]], Callab
             except ConnectionError as e:
                 msg = f"Error while {context}. Unable to connect to prompt service."
                 logger.error(f"{msg}\n{e}")
-                args[0].tool.stream_error_and_exit(msg)
+                args[0].tool.stream_error_and_exit(msg, e)
             except RequestException as e:
                 error_message = str(e)
                 response = getattr(e, "response", None)
-                if response:
+                if response is not None:
                     if (
                         MimeType.JSON in response.headers.get("Content-Type", "").lower()
                         and "error" in response.json()
@@ -50,7 +50,7 @@ def handle_service_exceptions(context: str) -> Callable[[Callable[P, R]], Callab
                     elif response.text:
                         error_message = response.text
                 msg = f"Error while {context}. {error_message}"
-                args[0].tool.stream_error_and_exit(msg)
+                args[0].tool.stream_error_and_exit(msg, e)
 
         return wrapper
 

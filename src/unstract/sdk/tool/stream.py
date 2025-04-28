@@ -8,7 +8,6 @@ from deprecated import deprecated
 from unstract.sdk.constants import Command, LogLevel, LogStage, ToolEnv
 from unstract.sdk.exceptions import SdkError
 from unstract.sdk.utils import Utils
-from unstract.sdk.utils.common_utils import UNSTRACT_TO_PY_LOG_LEVEL
 
 
 class StreamMixin:
@@ -53,7 +52,8 @@ class StreamMixin:
         if rootlogger.hasHandlers():
             return
         handler = logging.StreamHandler()
-        handler.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
+        py_log_level = getattr(logging, self.log_level.upper(), logging.INFO)
+        handler.setLevel(level=py_log_level)
 
         # Determine if OpenTelemetry trace context should be included in logs
         otel_trace_context = (
@@ -70,7 +70,6 @@ class StreamMixin:
             )
         )
         rootlogger.addHandler(handler)
-        rootlogger.setLevel(level=UNSTRACT_TO_PY_LOG_LEVEL[self.log_level])
 
         noisy_lib_list = [
             "asyncio",
@@ -122,17 +121,18 @@ class StreamMixin:
         }
         print(json.dumps(record))
 
-    def stream_error_and_exit(self, message: str) -> None:
+    def stream_error_and_exit(self, message: str, err: Exception | None = None) -> None:
         """Stream error log and exit.
 
         Args:
             message (str): Error message
+            err (Exception): Actual exception that occurred
         """
         self.stream_log(message, level=LogLevel.ERROR)
         if self._exec_by_tool:
             exit(1)
         else:
-            raise SdkError(message)
+            raise SdkError(message, actual_err=err)
 
     def get_env_or_die(self, env_key: str) -> str:
         """Returns the value of an env variable.
