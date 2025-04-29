@@ -52,7 +52,7 @@ class StreamMixin:
         if rootlogger.hasHandlers():
             return
         handler = logging.StreamHandler()
-        py_log_level = getattr(logging, self.log_level.upper(), logging.INFO)
+        py_log_level = getattr(logging, self.log_level.value, logging.INFO)
         handler.setLevel(level=py_log_level)
 
         # Determine if OpenTelemetry trace context should be included in logs
