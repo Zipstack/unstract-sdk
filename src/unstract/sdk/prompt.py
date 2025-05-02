@@ -2,6 +2,7 @@ import functools
 import logging
 from collections.abc import Callable
 from typing import Any, ParamSpec, TypeVar
+from deprecated import deprecated
 
 import requests
 from requests import ConnectionError, RequestException, Response
@@ -13,6 +14,7 @@ from unstract.sdk.constants import (
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.common_utils import log_elapsed
+from unstract.sdk.platform import PlatformHelper
 
 logger = logging.getLogger(__name__)
 
@@ -219,3 +221,24 @@ class PromptTool:
 
         response.raise_for_status()
         return response.json()
+
+    @staticmethod
+    @deprecated(version="v0.71.0", reason="Use remote FS APIs from SDK")
+    def get_exported_tool(
+        tool: BaseTool, prompt_registry_id: str
+    ) -> dict[str, Any] | None:
+        """Get exported custom tool by the help of unstract DB tool.
+
+        Args:
+            prompt_registry_id (str): ID of the prompt_registry_id
+            tool (AbstractTool): Instance of AbstractTool
+        Required env variables:
+            PLATFORM_HOST: Host of platform service
+            PLATFORM_PORT: Port of platform service
+        """
+        platform_helper: PlatformHelper = PlatformHelper(
+            tool=tool,
+            platform_port=tool.get_env_or_die(ToolEnv.PLATFORM_PORT),
+            platform_host=tool.get_env_or_die(ToolEnv.PLATFORM_HOST),
+        )
+        return platform_helper.get_exported_tool(prompt_registry_id=prompt_registry_id)
