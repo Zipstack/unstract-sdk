@@ -2,9 +2,9 @@ import functools
 import logging
 from collections.abc import Callable
 from typing import Any, ParamSpec, TypeVar
-from deprecated import deprecated
 
 import requests
+from deprecated import deprecated
 from requests import ConnectionError, RequestException, Response
 from unstract.sdk.constants import (
     MimeType,
@@ -12,9 +12,9 @@ from unstract.sdk.constants import (
     ToolEnv,
 )
 from unstract.sdk.helper import SdkHelper
+from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.common_utils import log_elapsed
-from unstract.sdk.platform import PlatformHelper
 
 logger = logging.getLogger(__name__)
 
