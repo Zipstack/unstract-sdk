@@ -223,7 +223,9 @@ class PromptTool:
         return response.json()
 
     @staticmethod
-    @deprecated(version="v0.71.0", reason="Use remote FS APIs from SDK")
+    @deprecated(
+        version="v0.71.0", reason="Use `PlatformHelper.get_prompt_studio_tool` instead"
+    )
     def get_exported_tool(
         tool: BaseTool, prompt_registry_id: str
     ) -> dict[str, Any] | None:
@@ -241,4 +243,6 @@ class PromptTool:
             platform_port=tool.get_env_or_die(ToolEnv.PLATFORM_PORT),
             platform_host=tool.get_env_or_die(ToolEnv.PLATFORM_HOST),
         )
-        return platform_helper.get_exported_tool(prompt_registry_id=prompt_registry_id)
+        return platform_helper.get_prompt_studio_tool(
+            prompt_registry_id=prompt_registry_id
+        )

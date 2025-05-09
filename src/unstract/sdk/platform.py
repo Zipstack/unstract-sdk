@@ -165,12 +165,11 @@ class PlatformHelper(PlatformBase):
         )
         return response.get("details")
 
-    def get_exported_tool(self, prompt_registry_id: str) -> dict[str, Any]:
+    def get_prompt_studio_tool(self, prompt_registry_id: str) -> dict[str, Any]:
         """Get exported custom tool by the help of unstract DB tool.
 
         Args:
             prompt_registry_id (str): ID of the prompt_registry_id
-            tool (AbstractTool): Instance of AbstractTool
         Required env variables:
             PLATFORM_HOST: Host of platform service
             PLATFORM_PORT: Port of platform service
