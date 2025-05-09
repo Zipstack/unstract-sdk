@@ -1,14 +1,62 @@
+import functools
 import logging
-from typing import Any
+from collections.abc import Callable
+from typing import Any, ParamSpec, TypeVar
 
 import requests
+from deprecated import deprecated
 from requests import ConnectionError, RequestException, Response
-from unstract.sdk.constants import LogLevel, MimeType, PromptStudioKeys, ToolEnv
+from unstract.sdk.constants import (
+    MimeType,
+    RequestHeader,
+    ToolEnv,
+)
 from unstract.sdk.helper import SdkHelper
+from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.utils.common_utils import log_elapsed
 
 logger = logging.getLogger(__name__)
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def handle_service_exceptions(context: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    """Decorator to handle exceptions in PromptTool service calls.
+
+    Args:
+        context (str): Context string describing where the error occurred
+    Returns:
+        Callable: Decorated function that handles service exceptions
+    """
+
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
+        @functools.wraps(func)
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            try:
+                return func(*args, **kwargs)
+            except ConnectionError as e:
+                msg = f"Error while {context}. Unable to connect to prompt service."
+                logger.error(f"{msg}\n{e}")
+                args[0].tool.stream_error_and_exit(msg, e)
+            except RequestException as e:
+                error_message = str(e)
+                response = getattr(e, "response", None)
+                if response is not None:
+                    if (
+                        MimeType.JSON in response.headers.get("Content-Type", "").lower()
+                        and "error" in response.json()
+                    ):
+                        error_message = response.json()["error"]
+                    elif response.text:
+                        error_message = response.text
+                msg = f"Error while {context}. {error_message}"
+                args[0].tool.stream_error_and_exit(msg, e)
+
+        return wrapper
+
+    return decorator
 
 
 class PromptTool:
@@ -20,6 +68,7 @@ class PromptTool:
         prompt_host: str,
         prompt_port: str,
         is_public_call: bool = False,
+        request_id: str | None = None,
     ) -> None:
         """Class to interact with prompt-service.
 
@@ -32,10 +81,12 @@ class PromptTool:
         self.tool = tool
         self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
         self.is_public_call = is_public_call
+        self.request_id = request_id
         if not is_public_call:
             self.bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
 
     @log_elapsed(operation="ANSWER_PROMPTS")
+    @handle_service_exceptions("answering prompt(s)")
     def answer_prompt(
         self,
         payload: dict[str, Any],
@@ -45,28 +96,31 @@ class PromptTool:
         url_path = "answer-prompt"
         if self.is_public_call:
             url_path = "answer-prompt-public"
-        return self._post_call(
+        return self._call_service(
             url_path=url_path, payload=payload, params=params, headers=headers
         )
 
     @log_elapsed(operation="INDEX")
+    @handle_service_exceptions("indexing")
     def index(
         self,
         payload: dict[str, Any],
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         url_path = "index"
         if self.is_public_call:
             url_path = "index-public"
-        return self._post_call(
+        prompt_service_response = self._call_service(
             url_path=url_path,
             payload=payload,
             params=params,
             headers=headers,
         )
+        return prompt_service_response.get("doc_id")
 
     @log_elapsed(operation="EXTRACT")
+    @handle_service_exceptions("extracting")
     def extract(
         self,
         payload: dict[str, Any],
@@ -76,120 +130,100 @@ class PromptTool:
         url_path = "extract"
         if self.is_public_call:
             url_path = "extract-public"
-        return self._post_call(
+        prompt_service_response = self._call_service(
             url_path=url_path,
             payload=payload,
             params=params,
             headers=headers,
         )
+        return prompt_service_response.get("extracted_text")
 
+    @log_elapsed(operation="SINGLE_PASS_EXTRACTION")
+    @handle_service_exceptions("single pass extraction")
     def single_pass_extraction(
         self,
         payload: dict[str, Any],
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        return self._post_call(
+        return self._call_service(
             url_path="single-pass-extraction",
             payload=payload,
             params=params,
             headers=headers,
         )
 
+    @log_elapsed(operation="SUMMARIZATION")
+    @handle_service_exceptions("summarizing")
     def summarize(
         self,
         payload: dict[str, Any],
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        return self._post_call(
+        return self._call_service(
             url_path="summarize",
             payload=payload,
             params=params,
             headers=headers,
         )
 
-    def _post_call(
+    def _get_headers(self, headers: dict[str, str] | None = None) -> dict[str, str]:
+        """Get default headers for requests.
+
+        Returns:
+            dict[str, str]: Default headers including request ID and authorization
+        """
+        request_headers = {RequestHeader.REQUEST_ID: self.request_id}
+        if self.is_public_call:
+            return request_headers
+        request_headers.update(
+            {RequestHeader.AUTHORIZATION: f"Bearer {self.bearer_token}"}
+        )
+
+        if headers:
+            request_headers.update(headers)
+        return request_headers
+
+    def _call_service(
         self,
         url_path: str,
-        payload: dict[str, Any],
+        payload: dict[str, Any] | None = None,
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
+        method: str = "POST",
     ) -> dict[str, Any]:
         """Communicates to prompt service to fetch response for the prompt.
 
+        Only POST calls are made to prompt-service though functionality exists.
+
         Args:
             url_path (str): URL path to the service endpoint
-            payload (dict): Payload to send in the request body
+            payload (dict, optional): Payload to send in the request body
             params (dict, optional): Query parameters to include in the request
             headers (dict, optional): Headers to include in the request
+            method (str): HTTP method to use for the request (GET or POST)
 
         Returns:
             dict: Response from the prompt service
-
-            Sample Response:
-            {
-                "status": "OK",
-                "error": "",
-                "cost": 0,
-                structure_output : {}
-            }
         """
-        result: dict[str, Any] = {
-            "status": "ERROR",
-            "error": "",
-            "cost": 0,
-            "structure_output": "",
-            "status_code": 500,
-        }
         url: str = f"{self.base_url}/{url_path}"
-
-        default_headers = {}
-
-        if not self.is_public_call:
-            default_headers = {"Authorization": f"Bearer {self.bearer_token}"}
-
-        if headers:
-            default_headers.update(headers)
-
+        req_headers = self._get_headers(headers)
         response: Response = Response()
-        try:
+        if method.upper() == "POST":
             response = requests.post(
-                url=url, json=payload, params=params, headers=default_headers
+                url=url, json=payload, params=params, headers=req_headers
             )
-            response.raise_for_status()
-            result["status"] = "OK"
-            result["structure_output"] = response.text
-            result["status_code"] = 200
-        except ConnectionError as connect_err:
-            msg = "Unable to connect to prompt service. Please contact admin."
-            self._stringify_and_stream_err(connect_err, msg)
-            result["error"] = msg
-        except RequestException as e:
-            # Extract error information from the response if available
-            error_message = str(e)
-            content_type = response.headers.get("Content-Type", "").lower()
-            if MimeType.JSON in content_type:
-                response_json = response.json()
-                if "error" in response_json:
-                    error_message = response_json["error"]
-            elif response.text:
-                error_message = response.text
-            result["error"] = error_message
-            result["status_code"] = response.status_code
-            self.tool.stream_log(
-                f"Error while fetching response for prompt: {result['error']}",
-                level=LogLevel.ERROR,
-            )
-        return result
+        elif method.upper() == "GET":
+            response = requests.get(url=url, params=params, headers=req_headers)
+        else:
+            raise ValueError(f"Unsupported HTTP method: {method}")
 
-    def _stringify_and_stream_err(self, err: RequestException, msg: str) -> None:
-        error_message = str(err)
-        trace = f"{msg}: {error_message}"
-        self.tool.stream_log(trace, level=LogLevel.ERROR)
-        logger.error(trace)
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
+    @deprecated(version="v0.71.0", reason="Use remote FS APIs from SDK")
     def get_exported_tool(
         tool: BaseTool, prompt_registry_id: str
     ) -> dict[str, Any] | None:
@@ -202,25 +236,9 @@ class PromptTool:
             PLATFORM_HOST: Host of platform service
             PLATFORM_PORT: Port of platform service
         """
-        platform_host = tool.get_env_or_die(ToolEnv.PLATFORM_HOST)
-        platform_port = tool.get_env_or_die(ToolEnv.PLATFORM_PORT)
-        base_url = SdkHelper.get_platform_base_url(platform_host, platform_port)
-        bearer_token = tool.get_env_or_die(ToolEnv.PLATFORM_API_KEY)
-        url = f"{base_url}/custom_tool_instance"
-        query_params = {PromptStudioKeys.PROMPT_REGISTRY_ID: prompt_registry_id}
-        headers = {"Authorization": f"Bearer {bearer_token}"}
-        response = requests.get(url, headers=headers, params=query_params)
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code == 404:
-            tool.stream_error_and_exit(
-                f"Exported tool '{prompt_registry_id}' is not found"
-            )
-            return None
-        else:
-            tool.stream_error_and_exit(
-                f"Error while retrieving tool metadata "
-                "for the exported tool: "
-                f"{prompt_registry_id} / {response.reason}"
-            )
-            return None
+        platform_helper: PlatformHelper = PlatformHelper(
+            tool=tool,
+            platform_port=tool.get_env_or_die(ToolEnv.PLATFORM_PORT),
+            platform_host=tool.get_env_or_die(ToolEnv.PLATFORM_HOST),
+        )
+        return platform_helper.get_exported_tool(prompt_registry_id=prompt_registry_id)

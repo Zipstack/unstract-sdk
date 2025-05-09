@@ -17,6 +17,11 @@ class ToolExecutor:
     """Takes care of executing a tool's intended command."""
 
     def __init__(self, tool: BaseTool) -> None:
+        """Constructor for executor.
+
+        Args:
+            tool (AbstractTool): Instance of AbstractTool
+        """
         self.tool = tool
 
     def execute(self, args: argparse.Namespace) -> None:
@@ -62,7 +67,7 @@ class ToolExecutor:
         settings = validator.validate_pre_execution(settings=settings)
 
         self.tool.stream_log(
-            f"Executing for file: {self.tool.get_exec_metadata['source_name']}, "
+            f"Executing for file: '{self.tool.get_exec_metadata['source_name']}', "
             f"with tool settings: {settings}"
         )
 
