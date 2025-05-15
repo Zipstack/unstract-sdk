@@ -100,7 +100,14 @@ class LLM:
             response: CompletionResponse = self._llm_instance.complete(prompt, **kwargs)
             process_text_output = {}
             if extract_json:
-                match = LLM.json_regex.search(response.text)
+                response_text = response.text
+                start = response_text.find("###")
+                if start != -1:
+                    response_text = response_text[start + 3:].lstrip()
+                end = response_text.rfind("###")
+                if end != -1:
+                    response_text = response_text[:end].rstrip()
+                match = LLM.json_regex.search(response_text)
                 if match:
                     response.text = match.group(0)
             if process_text:
