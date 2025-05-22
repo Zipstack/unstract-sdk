@@ -1867,7 +1867,7 @@ wheels = [
 
 [[package]]
 name = "llama-index-llms-azure-openai"
-version = "0.3.1"
+version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-identity" },
@@ -1875,9 +1875,9 @@ dependencies = [
     { name = "llama-index-core" },
     { name = "llama-index-llms-openai" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/d4/bc65c5771e963adb722027757cef187450ea1c13f35acaae3a2e84ba8535/llama_index_llms_azure_openai-0.3.1.tar.gz", hash = "sha256:d846e72017480739d385a420b3432f5f2bdd0e4fe7ce1dc5f25deac7d0a81f70", size = 6282, upload-time = "2025-03-03T20:54:56.514Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0c/cf/23c516c5a61c9b7a481c383862ebd99cc5e6a35f820dab871bb12b453b71/llama_index_llms_azure_openai-0.3.2.tar.gz", hash = "sha256:c6ae4e6d896abc784a1d60e02a537c91e019317de69d02256424eab80c988646", size = 6287, upload-time = "2025-03-06T19:31:06.818Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/8e/d59b0fc05e0ff7532899335116f5371f679205a5c079a5cfe0ce88ab79f2/llama_index_llms_azure_openai-0.3.1-py3-none-any.whl", hash = "sha256:f9cc1f275288b17f44ce81939d71481a1b26b39e525c7233515147452d596b9e", size = 7276, upload-time = "2025-03-03T20:54:54.984Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/2f/efab9bd63f7f3dd9ec83c945c9516beffcff14ffd4a8187150b46e69124b/llama_index_llms_azure_openai-0.3.2-py3-none-any.whl", hash = "sha256:1a831035129042327f50d243a17918c481dfae39fd5a7ddaaaa0a712fb18ab8e", size = 7283, upload-time = "2025-03-06T19:31:05.92Z" },
 ]
 
 [[package]]
@@ -4293,7 +4293,7 @@ requires-dist = [
     { name = "llama-index-embeddings-vertex", specifier = "==0.3.1" },
     { name = "llama-index-llms-anthropic", specifier = "==0.6.14" },
     { name = "llama-index-llms-anyscale", specifier = "==0.3.0" },
-    { name = "llama-index-llms-azure-openai", specifier = "==0.3.1" },
+    { name = "llama-index-llms-azure-openai", specifier = "==0.3.2" },
     { name = "llama-index-llms-bedrock", specifier = "==0.3.3" },
     { name = "llama-index-llms-mistralai", specifier = "==0.3.1" },
     { name = "llama-index-llms-ollama", specifier = "==0.5.0" },
