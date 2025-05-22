@@ -60,6 +60,53 @@
       "title": "Timeout",
       "default": 900,
       "description": "Timeout in seconds"
+    },
+    "enable_reasoning": {
+      "type": "boolean",
+      "title": "Enable Reasoning",
+      "default": false,
+      "description": "Allow the model to apply extra reasoning for complex tasks. May increase latency and cost. Only applicable for [O series models](https://platform.openai.com/docs/models#reasoning)."
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "enable_reasoning": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reasoning_effort": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "title": "Reasoning Effort",
+            "description": "Sets the Reasoning Strength when Reasoning Effort is enabled"
+          }
+        },
+        "required": [
+          "reasoning_effort"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "enable_reasoning": {
+            "const": false
+          }
+        }
+      },
+      "then": {
+        "properties": {}
+      }
+    }
+  ]
 }
