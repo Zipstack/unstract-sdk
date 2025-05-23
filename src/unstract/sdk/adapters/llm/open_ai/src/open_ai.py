@@ -20,6 +20,8 @@ class Constants:
     API_BASE = "api_base"
     API_VERSION = "api_version"
     MAX_TOKENS = "max_tokens"
+    RESONING_EFFORT = "reasoning_effort"
+    ENABLE_REASONING = "enable_reasoning"
 
 
 class OpenAILLM(LLMAdapter):
@@ -54,6 +56,7 @@ class OpenAILLM(LLMAdapter):
             max_tokens = self.config.get(Constants.MAX_TOKENS)
             max_tokens = int(max_tokens) if max_tokens else None
             model = str(self.config.get(Constants.MODEL))
+            enable_reasoning = self.config.get(Constants.ENABLE_REASONING)
 
             llm_kwargs = {
                 "model": model,
@@ -70,9 +73,14 @@ class OpenAILLM(LLMAdapter):
                 "max_tokens": max_tokens,
             }
 
-            # O-series models default to temperature=1, ignoring passed values, so it's not set explicitly.
+            # O-series models default to temperature=1
             if model not in O1_MODELS:
                 llm_kwargs["temperature"] = 0
+
+            if enable_reasoning:
+                llm_kwargs["reasoning_effort"] = self.config.get(
+                    Constants.RESONING_EFFORT
+                )
 
             llm = OpenAI(**llm_kwargs)
             return llm
