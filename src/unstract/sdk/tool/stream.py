@@ -54,18 +54,12 @@ class StreamMixin:
         handler = logging.StreamHandler()
         py_log_level = getattr(logging, self.log_level.value, logging.INFO)
         handler.setLevel(level=py_log_level)
-
-        # Determine if OpenTelemetry trace context should be included in logs
-        otel_trace_context = (
-            " trace_id:%(otelTraceID)s span_id:%(otelSpanID)s"
-            if os.environ.get("OTEL_TRACES_EXPORTER", "none").lower() != "none"
-            else ""
-        )
+        rootlogger.setLevel(level=py_log_level)
 
         handler.setFormatter(
             logging.Formatter(
                 "%(levelname)s : [%(asctime)s]"
-                "[pid:%(process)d tid:%(thread)d]" + otel_trace_context + " "
+                "[pid:%(process)d tid:%(thread)d]"
                 "%(name)s:- %(message)s"
             )
         )
