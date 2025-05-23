@@ -65,7 +65,7 @@
       "type": "boolean",
       "title": "Enable Reasoning",
       "default": false,
-      "description": "Allow the model to apply extra reasoning for complex tasks. May increase latency and cost. Only applicable for [O series models](https://platform.openai.com/docs/models#reasoning)."
+      "description": "Allow the model to apply extra reasoning for complex tasks. May slightly increase latency and cost, typically within 20–50% depending on the level selected. Only applicable for [O series models](https://platform.openai.com/docs/models#reasoning)."
     }
   },
   "allOf": [
