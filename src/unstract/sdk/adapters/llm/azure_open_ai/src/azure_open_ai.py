@@ -55,21 +55,44 @@ class AzureOpenAILLM(LLMAdapter):
         )
         max_tokens = self.config.get(Constants.MAX_TOKENS)
         max_tokens = int(max_tokens) if max_tokens else None
+        enable_reasoning = self.config.get(LLMKeys.ENABLE_REASONING)
+        # if enable_reasoning:
+        #         llm_kwargs["reasoning_effort"] = self.config.get(
+        #             LLMKeys.RESONING_EFFORT
+        #         )
         try:
-            llm: LLM = AzureOpenAI(
-                model=self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
-                deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
-                api_key=str(self.config.get(Constants.API_KEY)),
-                api_version=str(self.config.get(Constants.API_VERSION)),
-                azure_endpoint=str(self.config.get(Constants.AZURE_ENDPONT)),
-                api_type=Constants.API_TYPE,
-                temperature=0,
-                timeout=float(
-                    self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
-                ),
-                max_retries=max_retries,
-                max_tokens=max_tokens,
-            )
+            if enable_reasoning:
+                llm: LLM = AzureOpenAI(
+                    model=self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
+                    deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
+                    api_key=str(self.config.get(Constants.API_KEY)),
+                    api_version=str(self.config.get(Constants.API_VERSION)),
+                    azure_endpoint=str(self.config.get(Constants.AZURE_ENDPONT)),
+                    api_type=Constants.API_TYPE,
+                    temperature=0,
+                    timeout=float(
+                        self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
+                    ),
+                    max_retries=max_retries,
+                    max_tokens=max_tokens,
+                    RESONING_EFFORT=self.config.get(LLMKeys.RESONING_EFFORT, None),
+                )
+            else:
+                llm: LLM = AzureOpenAI(
+                    model=self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
+                    deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
+                    api_key=str(self.config.get(Constants.API_KEY)),
+                    api_version=str(self.config.get(Constants.API_VERSION)),
+                    azure_endpoint=str(self.config.get(Constants.AZURE_ENDPONT)),
+                    api_type=Constants.API_TYPE,
+                    temperature=0,
+                    timeout=float(
+                        self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
+                    ),
+                    max_retries=max_retries,
+                    max_tokens=max_tokens,
+                )
+
             return llm
         except Exception as e:
             raise AdapterError(str(e))
