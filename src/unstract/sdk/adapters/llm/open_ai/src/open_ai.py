@@ -20,7 +20,7 @@ class Constants:
     API_BASE = "api_base"
     API_VERSION = "api_version"
     MAX_TOKENS = "max_tokens"
-    RESONING_EFFORT = "reasoning_effort"
+    REASONING_EFFORT = "reasoning_effort"
     ENABLE_REASONING = "enable_reasoning"
 
 
@@ -79,7 +79,7 @@ class OpenAILLM(LLMAdapter):
 
             if enable_reasoning:
                 llm_kwargs["reasoning_effort"] = self.config.get(
-                    Constants.RESONING_EFFORT
+                    Constants.REASONING_EFFORT
                 )
 
             llm = OpenAI(**llm_kwargs)
