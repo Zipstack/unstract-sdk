@@ -49,6 +49,23 @@ class BedrockLLM(LLMAdapter):
         return "/icons/adapter-icons/Bedrock.png"
 
     def get_llm_instance(self) -> LLM:
+
+        thinking = self.config.get(Constants.ENABLE_THINKING)
+        thinking_dict = None
+        temperature = 0
+
+        if thinking:
+            additional_kwargs = {
+                "additionalModelRequestFields": {
+                    "thinking": {
+                        "type": "enabled",
+                        "budget_tokens": self.config.get(Constants.BUDGET_TOKENS)
+                    }
+                }
+            }
+            temperature = 1
+
+
         try:
             context_size: int | None = (
                 int(self.config.get(Constants.CONTEXT_SIZE, 0))
@@ -69,9 +86,10 @@ class BedrockLLM(LLMAdapter):
                 max_retries=int(
                     self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
-                temperature=0,
+                temperature=temperature,
                 context_size=context_size,
                 max_tokens=max_tokens,
+                additional_kwargs=additional_kwargs,
             )
             return llm
         except Exception as e:

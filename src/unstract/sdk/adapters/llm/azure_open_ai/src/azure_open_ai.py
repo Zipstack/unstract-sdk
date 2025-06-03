@@ -20,6 +20,9 @@ class Constants:
     API_TYPE = "azure"
     TIMEOUT = "timeout"
     DEFAULT_MODEL = "gpt-35-turbo"
+    ENABLE_REASONING = "enable_reasoning"
+    REASONING_EFFORT = "reasoning_effort"
+    TEMPERATURE = "temperature"
 
 
 class AzureOpenAILLM(LLMAdapter):
@@ -55,21 +58,28 @@ class AzureOpenAILLM(LLMAdapter):
         )
         max_tokens = self.config.get(Constants.MAX_TOKENS)
         max_tokens = int(max_tokens) if max_tokens else None
+        enable_reasoning = self.config.get(Constants.ENABLE_REASONING)
+
+        llm_kwargs = {
+            "model": self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
+            "deployment_name": str(self.config.get(Constants.DEPLOYMENT_NAME)),
+            "api_key": str(self.config.get(Constants.API_KEY)),
+            "api_version": str(self.config.get(Constants.API_VERSION)),
+            "azure_endpoint": str(self.config.get(Constants.AZURE_ENDPONT)),
+            "api_type": Constants.API_TYPE,
+            "temperature": int(self.config.get(Constants.TEMPERATURE)),
+            "timeout": float(self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)),
+            "max_retries": max_retries,
+            "max_tokens": max_tokens
+        }
+
+        if enable_reasoning:
+                llm_kwargs["reasoning_effort"] = self.config.get(
+                    Constants.REASONING_EFFORT
+                )
+
         try:
-            llm: LLM = AzureOpenAI(
-                model=self.config.get(Constants.MODEL, Constants.DEFAULT_MODEL),
-                deployment_name=str(self.config.get(Constants.DEPLOYMENT_NAME)),
-                api_key=str(self.config.get(Constants.API_KEY)),
-                api_version=str(self.config.get(Constants.API_VERSION)),
-                azure_endpoint=str(self.config.get(Constants.AZURE_ENDPONT)),
-                api_type=Constants.API_TYPE,
-                temperature=0,
-                timeout=float(
-                    self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
-                ),
-                max_retries=max_retries,
-                max_tokens=max_tokens,
-            )
+            llm: LLM = AzureOpenAI(**llm_kwargs)
             return llm
         except Exception as e:
             raise AdapterError(str(e))
