@@ -1881,17 +1881,17 @@ wheels = [
 ]
 
 [[package]]
-name = "llama-index-llms-bedrock"
-version = "0.3.8"
+name = "llama-index-llms-bedrock-converse"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "aioboto3" },
     { name = "boto3" },
     { name = "llama-index-core" },
-    { name = "llama-index-llms-anthropic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ae/b1/f7172ba0c6d808863ea545a2b99c7b4a51b8109caba9df67e44cd8971ca5/llama_index_llms_bedrock-0.3.8.tar.gz", hash = "sha256:8ca2914842a1d09079c35429b15dc50659d697ae84a15a89076a12f90505800e", size = 10771, upload-time = "2025-03-26T16:15:09.008Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/aa/2f2ebf5b319ffee0fde902727932e2d103a1447f644fe7a80898ac512216/llama_index_llms_bedrock_converse-0.7.1.tar.gz", hash = "sha256:673655be73d0d05f5096a7368bb523efbb8aae656cfa3c30f2305dfce2a92e05", size = 14437, upload-time = "2025-06-03T14:36:03.262Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/2f/7fc5206467151f64764bae61abd0fbbb8392fe84def15b1467f7fb174d7b/llama_index_llms_bedrock-0.3.8-py3-none-any.whl", hash = "sha256:58b804a206146bd7228590a4ee92ce13806a21040d92cb61e3046f2ee64f66cd", size = 11516, upload-time = "2025-03-26T16:15:07.722Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/65/bbf2a7880c3f96f0ea47f424fe83cf06d455b211f68571ad66f8e4a09980/llama_index_llms_bedrock_converse-0.7.1-py3-none-any.whl", hash = "sha256:3ddcbcf730f3a3500a54126130bd57ee77f6669d62be0a3a9524f07e3a4dba22", size = 14990, upload-time = "2025-06-03T14:36:01.852Z" },
 ]
 
 [[package]]
@@ -4218,7 +4218,7 @@ dependencies = [
     { name = "llama-index-llms-anthropic" },
     { name = "llama-index-llms-anyscale" },
     { name = "llama-index-llms-azure-openai" },
-    { name = "llama-index-llms-bedrock" },
+    { name = "llama-index-llms-bedrock-converse" },
     { name = "llama-index-llms-mistralai" },
     { name = "llama-index-llms-ollama" },
     { name = "llama-index-llms-openai" },
@@ -4294,7 +4294,7 @@ requires-dist = [
     { name = "llama-index-llms-anthropic", specifier = "==0.6.14" },
     { name = "llama-index-llms-anyscale", specifier = "==0.3.1" },
     { name = "llama-index-llms-azure-openai", specifier = "==0.3.3" },
-    { name = "llama-index-llms-bedrock", specifier = "==0.3.8" },
+    { name = "llama-index-llms-bedrock-converse", specifier = "==0.7.1" },
     { name = "llama-index-llms-mistralai", specifier = "==0.3.1" },
     { name = "llama-index-llms-ollama", specifier = "==0.5.0" },
     { name = "llama-index-llms-openai", specifier = "==0.4.1" },

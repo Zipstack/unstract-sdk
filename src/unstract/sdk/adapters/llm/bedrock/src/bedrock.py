@@ -2,7 +2,7 @@ import os
 from typing import Any
 
 from llama_index.core.llms import LLM
-from llama_index.llms.bedrock import Bedrock
+from llama_index.llms.bedrock_converse import BedrockConverse
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -19,6 +19,8 @@ class Constants:
     CONTEXT_SIZE = "context_size"
     MAX_TOKENS = "max_tokens"
     DEFAULT_MAX_TOKENS = 512  # Default at llama-index
+    ENABLE_THINKING = "enable_thinking"
+    BUDGET_TOKENS = "budget_tokens"
 
 
 class BedrockLLM(LLMAdapter):
@@ -67,15 +69,10 @@ class BedrockLLM(LLMAdapter):
 
 
         try:
-            context_size: int | None = (
-                int(self.config.get(Constants.CONTEXT_SIZE, 0))
-                if self.config.get(Constants.CONTEXT_SIZE)
-                else None
-            )
             max_tokens = int(
                 self.config.get(Constants.MAX_TOKENS, Constants.DEFAULT_MAX_TOKENS)
             )
-            llm: LLM = Bedrock(
+            llm: LLM = BedrockConverse(
                 model=self.config.get(Constants.MODEL),
                 aws_access_key_id=self.config.get(Constants.ACCESS_KEY_ID),
                 aws_secret_access_key=self.config.get(Constants.SECRET_ACCESS_KEY),
@@ -87,7 +84,6 @@ class BedrockLLM(LLMAdapter):
                     self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
                 ),
                 temperature=temperature,
-                context_size=context_size,
                 max_tokens=max_tokens,
                 additional_kwargs=additional_kwargs,
             )

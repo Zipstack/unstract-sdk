@@ -38,13 +38,6 @@
       "title": "AWS Region name",
       "description": "Provide the AWS Region name where the service is running. Eg. us-east-1"
     },
-    "context_size": {
-      "type": "number",
-      "minimum": 0,
-      "multipleOf": 1,
-      "title": "Context Size",
-      "description": "The maximum number of context (input) tokens for the model. For setting default in supported models, leave this empty."
-    },
     "max_tokens": {
       "type": "number",
       "minimum": 0,
