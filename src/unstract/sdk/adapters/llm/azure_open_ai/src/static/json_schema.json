@@ -60,13 +60,6 @@
       "default": 5,
       "description": "Maximum number of retries to attempt when a request fails."
     },
-    "temperature": {
-      "type": "number",
-      "minimum": 0,
-      "title": "Temperature",
-      "default": 0.003,
-      "description": "Temperature of the model. Please set the value to 1 when using a reasoning model."
-    },
     "timeout": {
       "type": "number",
       "minimum": 0,
