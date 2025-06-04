@@ -55,6 +55,7 @@ class BedrockLLM(LLMAdapter):
         thinking = self.config.get(Constants.ENABLE_THINKING)
         thinking_dict = None
         temperature = 0
+        additional_kwargs = None
 
         if thinking:
             additional_kwargs = {
@@ -66,7 +67,6 @@ class BedrockLLM(LLMAdapter):
                 }
             }
             temperature = 1
-
 
         try:
             max_tokens = int(
