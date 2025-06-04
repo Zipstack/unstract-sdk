@@ -74,7 +74,7 @@ class AzureOpenAILLM(LLMAdapter):
         }
 
         if enable_reasoning:
-                llm_kwargs["reasoning_effort"] = self.config.get(
+            llm_kwargs["reasoning_effort"] = self.config.get(
                     Constants.REASONING_EFFORT
                 )
 
