@@ -95,11 +95,13 @@ class TokenCounter:
             "prompt_tokens",
             "input_tokens",
             "prompt_eval_count",
+            "inputTokens",
         )
         possible_output_keys = (
             "completion_tokens",
             "output_tokens",
             "eval_count",
+            "outputTokens",
         )
 
         prompt_tokens = 0
