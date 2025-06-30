@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from collections.abc import Callable
 from typing import Any
@@ -31,6 +32,7 @@ class LLM:
     llm_adapters = adapters
     MAX_TOKENS = 1024 * 4
     RESPONSE = "response"
+    JSON_SELECTION_MARKER = os.environ.get("JSON_SELECTION_MARKER", "§§§")
 
     def __init__(
         self,
@@ -101,10 +103,12 @@ class LLM:
             process_text_output = {}
             if extract_json:
                 response_text = response.text
-                start = response_text.find("###")
+                start = response_text.find(self.JSON_SELECTION_MARKER)
                 if start != -1:
-                    response_text = response_text[start + 3:].lstrip()
-                end = response_text.rfind("###")
+                    response_text = response_text[
+                        start + len(self.JSON_SELECTION_MARKER) :
+                    ].lstrip()
+                end = response_text.rfind(self.JSON_SELECTION_MARKER)
                 if end != -1:
                     response_text = response_text[:end].rstrip()
                 match = LLM.json_regex.search(response_text)
