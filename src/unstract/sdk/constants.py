@@ -40,6 +40,7 @@ class AdapterKeys:
 
 class PromptStudioKeys:
     PROMPT_REGISTRY_ID = "prompt_registry_id"
+    LLM_PROFILE_ID = "llm_profile_id"
 
 
 class ConnectorType:
@@ -133,6 +134,7 @@ class MetadataKey:
     ELAPSED_TIME = "elapsed_time"
     OUTPUT = "output"
     OUTPUT_TYPE = "output_type"
+    LLM_PROFILE_ID = "llm_profile_id"
 
 
 class ToolSettingsKey:

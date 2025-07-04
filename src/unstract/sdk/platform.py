@@ -182,3 +182,22 @@ class PlatformHelper(PlatformBase):
             headers=None,
             method="GET",
         )
+
+    def get_llm_profile(self, llm_profile_id: str) -> dict[str, Any]:
+        """Get llm profile by the help of unstract DB tool.
+
+        Args:
+            llm_profile_id (str): ID of the llm_profile_id
+        Required env variables:
+            PLATFORM_HOST: Host of platform service
+            PLATFORM_PORT: Port of platform service
+        """
+        query_params = {PromptStudioKeys.LLM_PROFILE_ID: llm_profile_id}
+        return self._call_service(
+            url_path="llm_profile_instance",
+            payload=None,
+            params=query_params,
+            headers=None,
+            method="GET",
+        )
+        
