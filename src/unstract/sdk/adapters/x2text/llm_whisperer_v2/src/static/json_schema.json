@@ -33,7 +33,8 @@
         "native_text",
         "low_cost",
         "high_quality",
-        "form"
+        "form",
+        "table"
       ],
       "default": "form",
       "description": "Processing mode to use, described in the [LLMWhisperer documentation](https://docs.unstract.com/llmwhisperer/llm_whisperer/apis/llm_whisperer_text_extraction_api/#modes)."
