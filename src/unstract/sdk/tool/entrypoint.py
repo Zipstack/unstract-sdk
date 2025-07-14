@@ -1,5 +1,6 @@
 import logging
 import signal
+from typing import Any
 
 from unstract.sdk.tool.base import BaseTool
 from unstract.sdk.tool.executor import ToolExecutor
@@ -13,9 +14,9 @@ class ToolEntrypoint:
     @staticmethod
     def _signal_handler(signum: int, frame: Any) -> None:
         """Handle SIGTERM and SIGINT signals."""
-        signal_name = "SIGTERM" if signum == signal.SIGTERM else "SIGINT"
-        logger.info(f"Received {signal_name} signal")
-        # Don't exit - let K8s send SIGKILL if tool doesn't finish
+        sig = signal.Signals(signum)
+        signal_name = sig.name
+        logger.info("Received %s signal", signal_name)
 
     @staticmethod
     def launch(tool: BaseTool, args: list[str]) -> None:
