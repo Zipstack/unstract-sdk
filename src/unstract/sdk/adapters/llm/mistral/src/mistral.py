@@ -5,7 +5,6 @@ from llama_index.core.llms import LLM
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.mistralai.base import DEFAULT_MISTRALAI_MAX_TOKENS
 from mistralai.models import SDKError as MistralError
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -52,7 +51,7 @@ class MistralLLM(LLMAdapter):
             self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
         )
         max_tokens = int(
-            self.config.get(Constants.MAX_RETRIES, DEFAULT_MISTRALAI_MAX_TOKENS)
+            self.config.get(Constants.MAX_TOKENS, DEFAULT_MISTRALAI_MAX_TOKENS)
         )
         try:
             llm: LLM = MistralAI(
