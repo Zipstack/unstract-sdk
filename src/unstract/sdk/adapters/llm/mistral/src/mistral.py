@@ -52,7 +52,7 @@ class MistralLLM(LLMAdapter):
             self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
         )
         max_tokens = int(
-            self.config.get(Constants.MAX_RETRIES, DEFAULT_MISTRALAI_MAX_TOKENS)
+            self.config.get(Constants.MAX_TOKENS, DEFAULT_MISTRALAI_MAX_TOKENS)
         )
         try:
             llm: LLM = MistralAI(
