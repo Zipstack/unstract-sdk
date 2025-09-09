@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any
 
 import requests
@@ -9,6 +10,9 @@ from unstract.sdk.exceptions import SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.retry_utils import retry_on_connection_error
+
+logger = logging.getLogger(__name__)
 
 
 class ToolAdapter(PlatformBase):
@@ -38,13 +42,16 @@ class ToolAdapter(PlatformBase):
             tool=tool, platform_host=platform_host, platform_port=platform_port
         )
 
+    @retry_on_connection_error
     def _get_adapter_configuration(
         self,
         adapter_instance_id: str,
     ) -> dict[str, Any]:
-        """Get Adapter
-            1. Get the adapter config from platform service
-            using the adapter_instance_id
+        """Get Adapter.
+
+        Get the adapter config from platform service
+        using the adapter_instance_id. This method automatically
+        retries on connection errors with exponential backoff.
 
         Args:
             adapter_instance_id (str): Adapter instance ID
@@ -70,10 +77,11 @@ class ToolAdapter(PlatformBase):
                 f"'{adapter_type}', provider: '{provider}', name: '{adapter_name}'",
                 level=LogLevel.DEBUG,
             )
-        except ConnectionError:
+        except ConnectionError as e:
+            # Re-raise with context for better debugging
             raise SdkError(
                 "Unable to connect to platform service, please contact the admin."
-            )
+            ) from e
         except HTTPError as e:
             default_err = (
                 "Error while calling the platform service, please contact the admin."
@@ -81,7 +89,7 @@ class ToolAdapter(PlatformBase):
             msg = AdapterUtils.get_msg_from_request_exc(
                 err=e, message_key="error", default_err=default_err
             )
-            raise SdkError(f"Error retrieving adapter. {msg}")
+            raise SdkError(f"Error retrieving adapter. {msg}") from e
         return adapter_data
 
     @staticmethod
