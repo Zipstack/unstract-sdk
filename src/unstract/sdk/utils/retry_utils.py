@@ -35,12 +35,19 @@ class RetryConfig:
             backoff_factor: Multiplier for exponential backoff
             jitter: Whether to add random jitter to delays
         """
+        if max_retries < 0:
+            raise ValueError("max_retries must be >= 0")
+        if initial_delay <= 0:
+            raise ValueError("initial_delay must be > 0")
+        if max_delay <= 0:
+            raise ValueError("max_delay must be > 0")
+        if backoff_factor <= 0:
+            raise ValueError("backoff_factor must be > 0")
         self.max_retries = max_retries
         self.initial_delay = initial_delay
         self.max_delay = max_delay
         self.backoff_factor = backoff_factor
         self.jitter = jitter
-
     @classmethod
     def from_env(cls, prefix: str = "PLATFORM_SERVICE") -> "RetryConfig":
         """Create configuration from environment variables.
@@ -60,6 +67,8 @@ class RetryConfig:
         )
 
 
+from requests.exceptions import ConnectionError, HTTPError, Timeout
+
 def is_retryable_error(error: Exception) -> bool:
     """Check if an error is retryable.
 
@@ -69,12 +78,8 @@ def is_retryable_error(error: Exception) -> bool:
     Returns:
         True if the error should trigger a retry
     """
-    # ConnectionError and its subclasses
-    if isinstance(error, ConnectionError):
-        return True
-
-    # Check for errno 111 (Connection refused)
-    if hasattr(error, "errno") and error.errno == errno.ECONNREFUSED:
+    # Requests connection and timeout errors
+    if isinstance(error, (ConnectionError, Timeout)):
         return True
 
     # HTTP errors with specific status codes
@@ -85,13 +90,17 @@ def is_retryable_error(error: Exception) -> bool:
             if status_code in [502, 503, 504]:
                 return True
 
-    # Check for OSError with errno 111
-    if isinstance(error, OSError):
-        if error.errno == errno.ECONNREFUSED:
-            return True
+    # OS-level connection failures
+    if isinstance(error, OSError) and error.errno in {
+        errno.ECONNREFUSED,
+        getattr(errno, "ECONNRESET", 104),
+        getattr(errno, "ETIMEDOUT", 110),
+        getattr(errno, "EHOSTUNREACH", 113),
+        getattr(errno, "ENETUNREACH", 101),
+    }:
+        return True
 
     return False
-
 
 def calculate_delay(attempt: int, config: RetryConfig) -> float:
     """Calculate delay for the next retry attempt.
@@ -103,19 +112,16 @@ def calculate_delay(attempt: int, config: RetryConfig) -> float:
     Returns:
         Delay in seconds before the next retry
     """
-    # Exponential backoff
-    delay = config.initial_delay * (config.backoff_factor**attempt)
+    # Exponential backoff base calculation
+    base = config.initial_delay * (config.backoff_factor ** attempt)
+    delay = base
 
-    # Cap at max delay
-    delay = min(delay, config.max_delay)
-
-    # Add jitter if enabled
+    # Add jitter if enabled (0–25% positive jitter)
     if config.jitter:
-        # Add random jitter between 0% and 25% of the delay
-        jitter_amount = delay * random.uniform(0, 0.25)
-        delay += jitter_amount
+        delay = base + (base * random.uniform(0.0, 0.25))
 
-    return delay
+    # Enforce the upper bound after jitter
+    return min(delay, config.max_delay)
 
 
 def retry_with_exponential_backoff(
