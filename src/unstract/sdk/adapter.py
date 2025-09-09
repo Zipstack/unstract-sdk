@@ -77,11 +77,6 @@ class ToolAdapter(PlatformBase):
                 f"'{adapter_type}', provider: '{provider}', name: '{adapter_name}'",
                 level=LogLevel.DEBUG,
             )
-        except ConnectionError as e:
-            # Re-raise with context for better debugging
-            raise SdkError(
-                "Unable to connect to platform service, please contact the admin."
-            ) from e
         except HTTPError as e:
             default_err = (
                 "Error while calling the platform service, please contact the admin."
@@ -129,4 +124,10 @@ class ToolAdapter(PlatformBase):
             platform_host=platform_host,
             platform_port=platform_port,
         )
-        return tool_adapter._get_adapter_configuration(adapter_instance_id)
+
+        try:
+            return tool_adapter._get_adapter_configuration(adapter_instance_id)
+        except ConnectionError as e:
+            raise SdkError(
+                "Unable to connect to platform service, please contact the admin."
+            ) from e
