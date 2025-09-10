@@ -19,6 +19,9 @@ class Ollama(EmbeddingAdapter):
         super().__init__("Ollama")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -40,6 +43,11 @@ class Ollama(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/ollama.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        base_url = self.config.get("base_url")
+        return [base_url] if base_url else []
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

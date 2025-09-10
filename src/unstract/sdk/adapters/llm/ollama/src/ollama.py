@@ -6,7 +6,6 @@ from typing import Any
 from httpx import ConnectError, HTTPStatusError
 from llama_index.core.llms import LLM
 from llama_index.llms.ollama import Ollama
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -29,6 +28,9 @@ class OllamaLLM(LLMAdapter):
         super().__init__("Ollama")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -50,6 +52,11 @@ class OllamaLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/ollama.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        base_url = self.config.get(Constants.BASE_URL)
+        return [base_url] if base_url else []
 
     def get_llm_instance(self) -> LLM:
         try:
@@ -77,6 +84,9 @@ class OllamaLLM(LLMAdapter):
             raise AdapterError(str(exc))
 
     def test_connection(self) -> bool:
+        # Validate URLs first
+        super().test_connection()
+
         try:
             llm = self.get_llm_instance()
             if not llm:

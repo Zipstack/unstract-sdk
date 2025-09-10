@@ -55,6 +55,11 @@ class LLMWhisperer(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhisperer.png"
 
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self.config.get(WhispererConfig.URL)
+        return [url] if url else []
+
     def _get_request_headers(self) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLMWhisperer.
 
@@ -200,6 +205,9 @@ class LLMWhisperer(X2TextAdapter):
         return params
 
     def test_connection(self) -> bool:
+        # Validate URLs first
+        super().test_connection()
+
         self._make_request(
             request_method=HTTPMethod.GET,
             request_endpoint=WhispererEndpoint.TEST_CONNECTION,

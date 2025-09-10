@@ -24,6 +24,9 @@ class LLMWhispererV2(X2TextAdapter):
         super().__init__("LLMWhispererV2")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -41,6 +44,11 @@ class LLMWhispererV2(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/LLMWhispererV2.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self.config.get("url")
+        return [url] if url else []
 
     def test_connection(self) -> bool:
         LLMWhispererHelper.test_connection_request(

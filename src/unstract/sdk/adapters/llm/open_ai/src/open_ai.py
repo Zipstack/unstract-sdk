@@ -29,6 +29,9 @@ class OpenAILLM(LLMAdapter):
         super().__init__("OpenAI")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -50,6 +53,11 @@ class OpenAILLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/OpenAI.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        api_base = self.config.get("api_base")
+        return [api_base] if api_base else []
 
     def get_llm_instance(self) -> LLM:
         try:

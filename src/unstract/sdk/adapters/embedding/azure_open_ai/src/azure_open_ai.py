@@ -26,6 +26,9 @@ class AzureOpenAI(EmbeddingAdapter):
         super().__init__("AzureOpenAIEmbedding")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -47,6 +50,11 @@ class AzureOpenAI(EmbeddingAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/AzureopenAI.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        endpoint = self.config.get("azure_endpoint")
+        return [endpoint] if endpoint else []
 
     def get_embedding_instance(self) -> BaseEmbedding:
         try:

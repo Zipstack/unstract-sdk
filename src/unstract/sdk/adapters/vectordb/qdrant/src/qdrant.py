@@ -24,6 +24,10 @@ class Qdrant(VectorDBAdapter):
         self._config = settings
         self._client: QdrantClient | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
+
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Qdrant", self._vector_db_instance)
 
@@ -44,6 +48,11 @@ class Qdrant(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/qdrant.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self._config.get(Constants.URL)
+        return [url] if url else []
 
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance
@@ -71,6 +80,9 @@ class Qdrant(VectorDBAdapter):
             raise self.parse_vector_db_err(e) from e
 
     def test_connection(self) -> bool:
+        # Validate URLs first
+        super().test_connection()
+
         try:
             vector_db = self.get_vector_db_instance()
             test_result: bool = VectorDBHelper.test_vector_db_instance(

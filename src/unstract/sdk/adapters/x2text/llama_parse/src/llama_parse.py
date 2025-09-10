@@ -19,6 +19,9 @@ class LlamaParseAdapter(X2TextAdapter):
         super().__init__("LlamaParse")
         self.config = settings
 
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
     @staticmethod
@@ -36,6 +39,11 @@ class LlamaParseAdapter(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self.config.get("url")
+        return [url] if url else []
 
     def _call_parser(
         self,

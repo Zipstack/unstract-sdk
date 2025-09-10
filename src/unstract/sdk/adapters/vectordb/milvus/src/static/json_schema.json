@@ -16,7 +16,7 @@
       "type": "string",
       "title": "URI",
       "format": "uri",
-      "default": "localhost:19530",
+      "default": "http://localhost:19530",
       "description": "Provide the URI of the Milvus server. Example: `https://<instance-id>.api.gcp-us-west1.zillizcloud.com`"
     },
     "token": {

@@ -21,6 +21,10 @@ class Milvus(VectorDBAdapter):
         self._config = settings
         self._client: MilvusClient | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
+
+        # Validate URLs BEFORE any network operations
+        self._validate_urls()
+
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Milvus", self._vector_db_instance)
 
@@ -41,6 +45,11 @@ class Milvus(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Milvus.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        uri = self._config.get(Constants.URI)
+        return [uri] if uri else []
 
     def get_vector_db_instance(self) -> VectorStore:
         return self._vector_db_instance
@@ -68,6 +77,9 @@ class Milvus(VectorDBAdapter):
             raise AdapterError(str(e))
 
     def test_connection(self) -> bool:
+        # Validate URLs first
+        super().test_connection()
+
         vector_db = self.get_vector_db_instance()
         test_result: bool = VectorDBHelper.test_vector_db_instance(vector_store=vector_db)
         # Delete the collection that was created for testing
