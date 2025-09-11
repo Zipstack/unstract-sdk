@@ -5,9 +5,12 @@ from typing import Any
 
 from httpx import ConnectError
 from llama_parse import LlamaParse
+
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
-from unstract.sdk.adapters.x2text.llama_parse.src.constants import LlamaParseConfig
+from unstract.sdk.adapters.x2text.llama_parse.src.constants import (
+    LlamaParseConfig,
+)
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
@@ -40,13 +43,13 @@ class LlamaParseAdapter(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
 
-     def get_configured_urls(self) -> list[str]:
-         """Return all URLs this adapter will connect to."""
--        url = self.config.get("url")
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
         base_url = self.config.get(LlamaParseConfig.BASE_URL)
         if isinstance(base_url, str):
             base_url = base_url.strip()
         return [base_url] if base_url else []
+
     def _call_parser(
         self,
         input_file_path: str,
@@ -91,7 +94,8 @@ class LlamaParseAdapter(X2TextAdapter):
         except ConnectError as connec_err:
             logger.error(f"Invalid Base URL given. : {connec_err}")
             raise AdapterError(
-                "Unable to connect to llama-parse`s service, " "please check the Base URL"
+                "Unable to connect to llama-parse`s service, "
+                "please check the Base URL"
             )
         except Exception as exe:
             logger.error(
@@ -109,7 +113,9 @@ class LlamaParseAdapter(X2TextAdapter):
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-        response_text = self._call_parser(input_file_path=input_file_path, fs=fs)
+        response_text = self._call_parser(
+            input_file_path=input_file_path, fs=fs
+        )
         if output_file_path:
             fs.write(
                 path=output_file_path,
