@@ -40,11 +40,13 @@ class LlamaParseAdapter(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
 
-    def get_configured_urls(self) -> list[str]:
-        """Return all URLs this adapter will connect to."""
-        url = self.config.get("url")
-        return [url] if url else []
-
+     def get_configured_urls(self) -> list[str]:
+         """Return all URLs this adapter will connect to."""
+-        url = self.config.get("url")
+        base_url = self.config.get(LlamaParseConfig.BASE_URL)
+        if isinstance(base_url, str):
+            base_url = base_url.strip()
+        return [base_url] if base_url else []
     def _call_parser(
         self,
         input_file_path: str,
