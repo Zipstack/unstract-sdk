@@ -68,7 +68,9 @@ class LLMWhisperer(X2TextAdapter):
         """
         return {
             "accept": MimeType.JSON,
-            WhispererHeader.UNSTRACT_KEY: self.config.get(WhispererConfig.UNSTRACT_KEY),
+            WhispererHeader.UNSTRACT_KEY: self.config.get(
+                WhispererConfig.UNSTRACT_KEY
+            ),
         }
 
     def _make_request(
@@ -114,7 +116,9 @@ class LLMWhisperer(X2TextAdapter):
                     data=data,
                 )
             else:
-                raise ExtractorError(f"Unsupported request method: {request_method}")
+                raise ExtractorError(
+                    f"Unsupported request method: {request_method}"
+                )
             response.raise_for_status()
         except ConnectionError as e:
             logger.error(f"Adapter error: {e}")
@@ -134,7 +138,9 @@ class LLMWhisperer(X2TextAdapter):
             raise ExtractorError(msg)
         return response
 
-    def _get_whisper_params(self, enable_highlight: bool = False) -> dict[str, Any]:
+    def _get_whisper_params(
+        self, enable_highlight: bool = False
+    ) -> dict[str, Any]:
         """Gets query params meant for /whisper endpoint.
 
         The params is filled based on the configuration passed.
@@ -200,13 +206,13 @@ class LLMWhisperer(X2TextAdapter):
 
         if enable_highlight:
             params.update(
-                {WhispererConfig.STORE_METADATA_FOR_HIGHLIGHTING: enable_highlight}
+                {
+                    WhispererConfig.STORE_METADATA_FOR_HIGHLIGHTING: enable_highlight
+                }
             )
         return params
 
     def test_connection(self) -> bool:
-        # Validate URLs first
-        super().test_connection()
 
         self._make_request(
             request_method=HTTPMethod.GET,
@@ -251,7 +257,9 @@ class LLMWhisperer(X2TextAdapter):
             )
             if status_response.status_code == 200:
                 status_data = status_response.json()
-                status = status_data.get(WhisperStatus.STATUS, WhisperStatus.UNKNOWN)
+                status = status_data.get(
+                    WhisperStatus.STATUS, WhisperStatus.UNKNOWN
+                )
                 logger.info(f"Whisper status for {whisper_hash}: {status}")
                 if status in [WhisperStatus.PROCESSED, WhisperStatus.DELIVERED]:
                     break
@@ -264,7 +272,8 @@ class LLMWhisperer(X2TextAdapter):
             # Exit with error if max poll count is reached
             if request_count >= MAX_POLLS:
                 raise ExtractorError(
-                    "Unable to extract text after attempting" f" {request_count} times"
+                    "Unable to extract text after attempting"
+                    f" {request_count} times"
                 )
             time.sleep(POLL_INTERVAL)
 
@@ -348,7 +357,9 @@ class LLMWhisperer(X2TextAdapter):
             raise ExtractorError("Couldn't extract text from file")
         if output_file_path:
             self._write_output_to_file(
-                output_json=output_json, output_file_path=Path(output_file_path), fs=fs
+                output_json=output_json,
+                output_file_path=Path(output_file_path),
+                fs=fs,
             )
         return output_json.get("text", "")
 
@@ -389,9 +400,13 @@ class LLMWhisperer(X2TextAdapter):
                 fs.mkdir(str(metadata_dir), create_parents=True)
                 # Remove the "text" key from the metadata
                 metadata = {
-                    key: value for key, value in output_json.items() if key != "text"
+                    key: value
+                    for key, value in output_json.items()
+                    if key != "text"
                 }
-                metadata_json = json.dumps(metadata, ensure_ascii=False, indent=4)
+                metadata_json = json.dumps(
+                    metadata, ensure_ascii=False, indent=4
+                )
                 logger.info(f"Writing metadata to {metadata_file_path}")
 
                 fs.write(
@@ -401,7 +416,9 @@ class LLMWhisperer(X2TextAdapter):
                     data=metadata_json,
                 )
             except Exception as e:
-                logger.error(f"Error while writing metadata to {metadata_file_path}: {e}")
+                logger.error(
+                    f"Error while writing metadata to {metadata_file_path}: {e}"
+                )
 
         except Exception as e:
             logger.error(f"Error while writing {output_file_path}: {e}")

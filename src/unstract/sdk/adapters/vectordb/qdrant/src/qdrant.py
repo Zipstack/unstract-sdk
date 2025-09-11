@@ -80,8 +80,6 @@ class Qdrant(VectorDBAdapter):
             raise self.parse_vector_db_err(e) from e
 
     def test_connection(self) -> bool:
-        # Validate URLs first
-        super().test_connection()
 
         try:
             vector_db = self.get_vector_db_instance()
@@ -118,4 +116,6 @@ class Qdrant(VectorDBAdapter):
                 status_code = 503
             elif "timeout" in str(e):
                 status_code = 504
-            return VectorDBError(message=str(e), actual_err=e, status_code=status_code)
+            return VectorDBError(
+                message=str(e), actual_err=e, status_code=status_code
+            )

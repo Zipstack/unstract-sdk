@@ -67,7 +67,9 @@ class OllamaLLM(LLMAdapter):
                     self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
                 ),
                 json_mode=False,
-                context_window=int(self.config.get(Constants.CONTEXT_WINDOW, 3900)),
+                context_window=int(
+                    self.config.get(Constants.CONTEXT_WINDOW, 3900)
+                ),
                 temperature=0.01,
             )
             return llm
@@ -84,8 +86,6 @@ class OllamaLLM(LLMAdapter):
             raise AdapterError(str(exc))
 
     def test_connection(self) -> bool:
-        # Validate URLs first
-        super().test_connection()
 
         try:
             llm = self.get_llm_instance()
