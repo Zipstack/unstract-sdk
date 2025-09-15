@@ -45,6 +45,7 @@ class Adapter(ABC):
     def get_adapter_type() -> AdapterTypes:
         return ""
 
+    @abstractmethod
     def get_configured_urls(self) -> list[str]:
         """Return all URLs that this adapter will connect to.
 
