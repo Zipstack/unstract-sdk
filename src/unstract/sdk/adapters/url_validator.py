@@ -20,10 +20,10 @@ class URLValidator:
     """Validates URLs to prevent SSRF attacks by blocking private IP addresses.
 
     URLs are validated to block private IP addresses unless explicitly
-    whitelisted via ALLOWED_ADAPTER_PRIVATE_ENDPOINTS.
+    whitelisted via WHITELISTED_ENDPOINTS.
     """
 
-    ENV_VAR = "ALLOWED_ADAPTER_PRIVATE_ENDPOINTS"
+    ENV_VAR = "WHITELISTED_ENDPOINTS"
 
     # Private IP ranges that are blocked by default (RFC 1918 + others)
     BLOCKED_PRIVATE_RANGES = [

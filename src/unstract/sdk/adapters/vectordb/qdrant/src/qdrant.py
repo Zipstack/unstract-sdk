@@ -20,13 +20,13 @@ class Constants:
 
 
 class Qdrant(VectorDBAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         self._config = settings
         self._client: QdrantClient | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
 
-        # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Qdrant", self._vector_db_instance)
@@ -80,7 +80,6 @@ class Qdrant(VectorDBAdapter):
             raise self.parse_vector_db_err(e) from e
 
     def test_connection(self) -> bool:
-
         try:
             vector_db = self.get_vector_db_instance()
             test_result: bool = VectorDBHelper.test_vector_db_instance(
@@ -116,6 +115,4 @@ class Qdrant(VectorDBAdapter):
                 status_code = 503
             elif "timeout" in str(e):
                 status_code = 504
-            return VectorDBError(
-                message=str(e), actual_err=e, status_code=status_code
-            )
+            return VectorDBError(message=str(e), actual_err=e, status_code=status_code)

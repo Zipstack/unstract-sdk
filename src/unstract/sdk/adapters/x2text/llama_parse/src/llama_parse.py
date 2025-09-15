@@ -5,7 +5,6 @@ from typing import Any
 
 from httpx import ConnectError
 from llama_parse import LlamaParse
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
 from unstract.sdk.adapters.x2text.llama_parse.src.constants import (
@@ -18,12 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 class LlamaParseAdapter(X2TextAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("LlamaParse")
         self.config = settings
 
         # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -94,8 +94,7 @@ class LlamaParseAdapter(X2TextAdapter):
         except ConnectError as connec_err:
             logger.error(f"Invalid Base URL given. : {connec_err}")
             raise AdapterError(
-                "Unable to connect to llama-parse`s service, "
-                "please check the Base URL"
+                "Unable to connect to llama-parse`s service, " "please check the Base URL"
             )
         except Exception as exe:
             logger.error(
@@ -113,9 +112,7 @@ class LlamaParseAdapter(X2TextAdapter):
         fs: FileStorage = FileStorage(provider=FileStorageProvider.LOCAL),
         **kwargs: dict[Any, Any],
     ) -> TextExtractionResult:
-        response_text = self._call_parser(
-            input_file_path=input_file_path, fs=fs
-        )
+        response_text = self._call_parser(input_file_path=input_file_path, fs=fs)
         if output_file_path:
             fs.write(
                 path=output_file_path,

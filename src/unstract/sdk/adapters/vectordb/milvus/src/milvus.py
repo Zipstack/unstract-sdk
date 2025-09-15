@@ -17,13 +17,13 @@ class Constants:
 
 
 class Milvus(VectorDBAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         self._config = settings
         self._client: MilvusClient | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
 
-        # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Milvus", self._vector_db_instance)
@@ -77,11 +77,8 @@ class Milvus(VectorDBAdapter):
             raise AdapterError(str(e))
 
     def test_connection(self) -> bool:
-
         vector_db = self.get_vector_db_instance()
-        test_result: bool = VectorDBHelper.test_vector_db_instance(
-            vector_store=vector_db
-        )
+        test_result: bool = VectorDBHelper.test_vector_db_instance(vector_store=vector_db)
         # Delete the collection that was created for testing
         if self._client is not None:
             self._client.drop_collection(self._collection_name)

@@ -24,12 +24,12 @@ class Constants:
 
 
 class OllamaLLM(LLMAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("Ollama")
         self.config = settings
 
-        # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -67,9 +67,7 @@ class OllamaLLM(LLMAdapter):
                     self.config.get(Constants.TIMEOUT, LLMKeys.DEFAULT_TIMEOUT)
                 ),
                 json_mode=False,
-                context_window=int(
-                    self.config.get(Constants.CONTEXT_WINDOW, 3900)
-                ),
+                context_window=int(self.config.get(Constants.CONTEXT_WINDOW, 3900)),
                 temperature=0.01,
             )
             return llm
@@ -86,7 +84,6 @@ class OllamaLLM(LLMAdapter):
             raise AdapterError(str(exc))
 
     def test_connection(self) -> bool:
-
         try:
             llm = self.get_llm_instance()
             if not llm:

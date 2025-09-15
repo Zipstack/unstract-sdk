@@ -23,14 +23,14 @@ class Constants:
 
 
 class Postgres(VectorDBAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         self._config = settings
         self._client: connection | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._schema_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
 
-        # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Postgres", self._vector_db_instance)
@@ -58,9 +58,7 @@ class Postgres(VectorDBAdapter):
 
     def _get_vector_db_instance(self) -> BasePydanticVectorStore:
         try:
-            encoded_password = quote_plus(
-                str(self._config.get(Constants.PASSWORD))
-            )
+            encoded_password = quote_plus(str(self._config.get(Constants.PASSWORD)))
             dimension = self._config.get(
                 VectorDbConstants.EMBEDDING_DIMENSION,
                 VectorDbConstants.DEFAULT_EMBEDDING_SIZE,
@@ -101,11 +99,8 @@ class Postgres(VectorDBAdapter):
             raise AdapterError(str(e))
 
     def test_connection(self) -> bool:
-
         vector_db = self.get_vector_db_instance()
-        test_result: bool = VectorDBHelper.test_vector_db_instance(
-            vector_store=vector_db
-        )
+        test_result: bool = VectorDBHelper.test_vector_db_instance(vector_store=vector_db)
 
         # Delete the collection that was created for testing
         if self._client is not None:

@@ -25,12 +25,13 @@ class Constants:
 
 
 class AzureOpenAILLM(LLMAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("AzureOpenAI")
         self.config = settings
 
         # Validate URLs BEFORE any network operations
-        self._validate_urls()
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
