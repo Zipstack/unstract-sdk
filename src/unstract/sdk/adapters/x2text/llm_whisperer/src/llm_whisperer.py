@@ -8,6 +8,7 @@ from typing import Any
 import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
+
 from unstract.sdk.adapters.exceptions import ExtractorError
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
@@ -57,8 +58,8 @@ class LLMWhisperer(X2TextAdapter):
 
     def get_configured_urls(self) -> list[str]:
         """Return all URLs this adapter will connect to."""
-        url = self.config.get(WhispererConfig.URL)
-        return [url] if url else []
+        url = str(self.config.get(WhispererConfig.URL) or "").strip()
+        return [url.rstrip("/")] if url else []
 
     def _get_request_headers(self) -> dict[str, Any]:
         """Obtains the request headers to authenticate with LLMWhisperer.
