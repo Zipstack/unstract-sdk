@@ -11,9 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class UnstructuredCommunity(X2TextAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("UnstructuredIOCommunity")
         self.config = settings
+
+        # Validate URLs BEFORE any network operations
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -32,6 +36,11 @@ class UnstructuredCommunity(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/UnstructuredIO.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self.config.get("url")
+        return [url] if url else []
 
     def process(
         self,

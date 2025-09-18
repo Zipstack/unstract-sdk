@@ -4,7 +4,6 @@ from typing import Any
 from llama_index.core.constants import DEFAULT_NUM_OUTPUTS
 from llama_index.core.llms import LLM
 from llama_index.llms.anyscale import Anyscale
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -20,9 +19,13 @@ class Constants:
 
 
 class AnyScaleLLM(LLMAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("AnyScale")
         self.config = settings
+
+        # Validate URLs BEFORE any network operations
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -45,6 +48,11 @@ class AnyScaleLLM(LLMAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/anyscale.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        api_base = self.config.get(Constants.API_BASE)
+        return [api_base] if api_base else []
 
     def get_llm_instance(self) -> LLM:
         try:

@@ -5,6 +5,7 @@ import requests
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, Timeout
 from unstract.sdk.adapters.exceptions import AdapterError
+from unstract.sdk.adapters.url_validator import URLValidator
 from unstract.sdk.adapters.utils import AdapterUtils
 from unstract.sdk.adapters.x2text.constants import X2TextConstants
 from unstract.sdk.constants import MimeType
@@ -100,6 +101,13 @@ class UnstructuredHelper:
         **kwargs: dict[Any, Any],
     ) -> Response:
         unstructured_url = unstructured_adapter_config.get(UnstructuredHelper.URL)
+
+        # Validate the unstructured URL for security
+        if unstructured_url:
+            is_valid, error_message = URLValidator.validate_url(unstructured_url)
+            if not is_valid:
+                logger.error(f"Unstructured URL validation failed: {error_message}")
+                raise AdapterError(f"URL validation failed: {error_message}")
 
         x2text_service_url = unstructured_adapter_config.get(X2TextConstants.X2TEXT_HOST)
         x2text_service_port = unstructured_adapter_config.get(X2TextConstants.X2TEXT_PORT)

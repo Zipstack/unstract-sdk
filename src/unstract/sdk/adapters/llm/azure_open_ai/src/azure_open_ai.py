@@ -4,7 +4,6 @@ from typing import Any
 from llama_index.core.llms import LLM
 from llama_index.llms.azure_openai import AzureOpenAI
 from llama_index.llms.openai.utils import O1_MODELS
-
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.llm.constants import LLMKeys
 from unstract.sdk.adapters.llm.llm_adapter import LLMAdapter
@@ -26,9 +25,13 @@ class Constants:
 
 
 class AzureOpenAILLM(LLMAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("AzureOpenAI")
         self.config = settings
+
+        # Validate URLs BEFORE any network operations
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -52,6 +55,11 @@ class AzureOpenAILLM(LLMAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/AzureopenAI.png"
 
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        endpoint = self.config.get("azure_endpoint")
+        return [endpoint] if endpoint else []
+
     def get_llm_instance(self) -> LLM:
         max_retries = int(
             self.config.get(Constants.MAX_RETRIES, LLMKeys.DEFAULT_MAX_RETRIES)
@@ -74,9 +82,7 @@ class AzureOpenAILLM(LLMAdapter):
         }
 
         if enable_reasoning:
-            llm_kwargs["reasoning_effort"] = self.config.get(
-                    Constants.REASONING_EFFORT
-                )
+            llm_kwargs["reasoning_effort"] = self.config.get(Constants.REASONING_EFFORT)
 
         if model not in O1_MODELS:
             llm_kwargs["max_completion_tokens"] = max_tokens

@@ -21,10 +21,14 @@ class Constants:
 
 
 class Weaviate(VectorDBAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         self._config = settings
         self._client: weaviate.Client | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
+
+        if validate_urls:
+            self._validate_urls()
+
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Weaviate", self._vector_db_instance)
 
@@ -45,6 +49,11 @@ class Weaviate(VectorDBAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/Weaviate.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self._config.get(Constants.URL)
+        return [url] if url else []
 
     def get_vector_db_instance(self) -> BasePydanticVectorStore:
         return self._vector_db_instance

@@ -23,11 +23,15 @@ class Constants:
 
 
 class Postgres(VectorDBAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         self._config = settings
         self._client: connection | None = None
         self._collection_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
         self._schema_name: str = VectorDbConstants.DEFAULT_VECTOR_DB_NAME
+
+        if validate_urls:
+            self._validate_urls()
+
         self._vector_db_instance = self._get_vector_db_instance()
         super().__init__("Postgres", self._vector_db_instance)
 
@@ -107,6 +111,20 @@ class Postgres(VectorDBAdapter):
             self._client.commit()
 
         return test_result
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        host = self._config.get(Constants.HOST)
+        port = self._config.get(Constants.PORT)
+
+        if host:
+            # Construct the database URL for validation
+            if port:
+                url = f"postgresql://{host}:{port}"
+            else:
+                url = f"postgresql://{host}"
+            return [url]
+        return []
 
     def close(self, **kwargs: Any) -> None:
         if self._client:

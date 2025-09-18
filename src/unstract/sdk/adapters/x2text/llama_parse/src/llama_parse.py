@@ -7,7 +7,9 @@ from httpx import ConnectError
 from llama_parse import LlamaParse
 from unstract.sdk.adapters.exceptions import AdapterError
 from unstract.sdk.adapters.x2text.dto import TextExtractionResult
-from unstract.sdk.adapters.x2text.llama_parse.src.constants import LlamaParseConfig
+from unstract.sdk.adapters.x2text.llama_parse.src.constants import (
+    LlamaParseConfig,
+)
 from unstract.sdk.adapters.x2text.x2text_adapter import X2TextAdapter
 from unstract.sdk.file_storage import FileStorage, FileStorageProvider
 
@@ -15,9 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 class LlamaParseAdapter(X2TextAdapter):
-    def __init__(self, settings: dict[str, Any]):
+    def __init__(self, settings: dict[str, Any], validate_urls: bool = False):
         super().__init__("LlamaParse")
         self.config = settings
+
+        # Validate URLs BEFORE any network operations
+        if validate_urls:
+            self._validate_urls()
 
     SCHEMA_PATH = f"{os.path.dirname(__file__)}/static/json_schema.json"
 
@@ -36,6 +42,13 @@ class LlamaParseAdapter(X2TextAdapter):
     @staticmethod
     def get_icon() -> str:
         return "/icons/adapter-icons/llama-parse.png"
+
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        base_url = self.config.get(LlamaParseConfig.BASE_URL)
+        if isinstance(base_url, str):
+            base_url = base_url.strip()
+        return [base_url] if base_url else []
 
     def _call_parser(
         self,

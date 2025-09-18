@@ -33,6 +33,11 @@ class UnstructuredEnterprise(X2TextAdapter):
     def get_icon() -> str:
         return "/icons/adapter-icons/UnstructuredIO.png"
 
+    def get_configured_urls(self) -> list[str]:
+        """Return all URLs this adapter will connect to."""
+        url = self.config.get("url")
+        return [url] if url else []
+
     def process(
         self,
         input_file_path: str,
