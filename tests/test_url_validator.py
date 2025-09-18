@@ -20,7 +20,8 @@ class TestURLValidator(unittest.TestCase):
         if URLValidator.ENV_VAR in os.environ:
             del os.environ[URLValidator.ENV_VAR]
 
-    def test_public_urls_allowed(self):
+    @patch("socket.gethostbyname", return_value="1.1.1.1")
+    def test_public_urls_allowed(self, _):
         """Test that public URLs are allowed by default."""
         test_cases = [
             "https://api.openai.com/v1/chat/completions",
@@ -35,7 +36,6 @@ class TestURLValidator(unittest.TestCase):
                 self.assertTrue(
                     is_valid, f"Public URL should be valid: {url}, Error: {error}"
                 )
-
     @patch("socket.gethostbyname")
     def test_private_ips_blocked_by_default(self, mock_gethostbyname):
         """Test that private IPs are blocked when not whitelisted."""
