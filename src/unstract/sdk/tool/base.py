@@ -94,6 +94,7 @@ class BaseTool(ABC, StreamMixin):
             tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME, "")
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
             tool.llm_profile_id = tool._exec_metadata.get(MetadataKey.LLM_PROFILE_ID)
+            tool.user_data = tool._exec_metadata.get(MetadataKey.USER_DATA, {})
         return tool
 
     def elapsed_time(self) -> float:
@@ -132,7 +133,9 @@ class BaseTool(ABC, StreamMixin):
         base_path = self.execution_dir
         file_path = base_path / file_to_get
         if raise_err and not self.workflow_filestorage.exists(path=file_path):
-            self.stream_error_and_exit(f"{file_to_get} is missing in EXECUTION_DATA_DIR")
+            self.stream_error_and_exit(
+                f"{file_to_get} is missing in EXECUTION_DATA_DIR"
+            )
 
         return str(file_path)
 
