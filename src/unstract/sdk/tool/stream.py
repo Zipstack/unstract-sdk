@@ -115,18 +115,19 @@ class StreamMixin:
         }
         print(json.dumps(record))
 
-    def stream_error_and_exit(self, message: str, err: Exception | None = None) -> None:
+    def stream_error_and_exit(self, message: str, err: Exception | None = None, status_code: int | None = None) -> None:
         """Stream error log and exit.
 
         Args:
             message (str): Error message
             err (Exception): Actual exception that occurred
+            status_code (int): HTTP status code to preserve
         """
         self.stream_log(message, level=LogLevel.ERROR)
         if self._exec_by_tool:
             exit(1)
         else:
-            raise SdkError(message, actual_err=err)
+            raise SdkError(message, status_code=status_code, actual_err=err)
 
     def get_env_or_die(self, env_key: str) -> str:
         """Returns the value of an env variable.

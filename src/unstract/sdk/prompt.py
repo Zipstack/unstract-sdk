@@ -6,11 +6,8 @@ from typing import Any, ParamSpec, TypeVar
 import requests
 from deprecated import deprecated
 from requests import ConnectionError, RequestException, Response
-from unstract.sdk.constants import (
-    MimeType,
-    RequestHeader,
-    ToolEnv,
-)
+
+from unstract.sdk.constants import MimeType, RequestHeader, ToolEnv
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformHelper
 from unstract.sdk.tool.base import BaseTool
@@ -22,7 +19,9 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def handle_service_exceptions(context: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+def handle_service_exceptions(
+    context: str,
+) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Decorator to handle exceptions in PromptTool service calls.
 
     Args:
@@ -39,20 +38,23 @@ def handle_service_exceptions(context: str) -> Callable[[Callable[P, R]], Callab
             except ConnectionError as e:
                 msg = f"Error while {context}. Unable to connect to prompt service."
                 logger.error(f"{msg}\n{e}")
-                args[0].tool.stream_error_and_exit(msg, e)
+                args[0].tool.stream_error_and_exit(msg, e, None)
             except RequestException as e:
                 error_message = str(e)
+                status_code = None
                 response = getattr(e, "response", None)
                 if response is not None:
+                    status_code = response.status_code
                     if (
-                        MimeType.JSON in response.headers.get("Content-Type", "").lower()
+                        MimeType.JSON
+                        in response.headers.get("Content-Type", "").lower()
                         and "error" in response.json()
                     ):
                         error_message = response.json()["error"]
                     elif response.text:
                         error_message = response.text
                 msg = f"Error while {context}. {error_message}"
-                args[0].tool.stream_error_and_exit(msg, e)
+                args[0].tool.stream_error_and_exit(msg, e, status_code)
 
         return wrapper
 
@@ -79,7 +81,9 @@ class PromptTool:
             is_public_call (bool): Whether the call is public. Defaults to False
         """
         self.tool = tool
-        self.base_url = SdkHelper.get_platform_base_url(prompt_host, prompt_port)
+        self.base_url = SdkHelper.get_platform_base_url(
+            prompt_host, prompt_port
+        )
         self.is_public_call = is_public_call
         self.request_id = request_id
         if not is_public_call:
@@ -168,7 +172,9 @@ class PromptTool:
             headers=headers,
         )
 
-    def _get_headers(self, headers: dict[str, str] | None = None) -> dict[str, str]:
+    def _get_headers(
+        self, headers: dict[str, str] | None = None
+    ) -> dict[str, str]:
         """Get default headers for requests.
 
         Returns:
@@ -218,13 +224,13 @@ class PromptTool:
             response = requests.get(url=url, params=params, headers=req_headers)
         else:
             raise ValueError(f"Unsupported HTTP method: {method}")
-
         response.raise_for_status()
         return response.json()
 
     @staticmethod
     @deprecated(
-        version="v0.71.0", reason="Use `PlatformHelper.get_prompt_studio_tool` instead"
+        version="v0.71.0",
+        reason="Use `PlatformHelper.get_prompt_studio_tool` instead",
     )
     def get_exported_tool(
         tool: BaseTool, prompt_registry_id: str
