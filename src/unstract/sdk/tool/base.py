@@ -94,7 +94,7 @@ class BaseTool(ABC, StreamMixin):
             tool.source_file_name = tool._exec_metadata.get(MetadataKey.SOURCE_NAME, "")
             tool.org_id = tool._exec_metadata.get(MetadataKey.ORG_ID)
             tool.llm_profile_id = tool._exec_metadata.get(MetadataKey.LLM_PROFILE_ID)
-            tool.user_data = tool._exec_metadata.get(MetadataKey.USER_DATA, {})
+            tool.custom_data = tool._exec_metadata.get(MetadataKey.CUSTOM_DATA, {})
         return tool
 
     def elapsed_time(self) -> float:
