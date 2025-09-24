@@ -135,7 +135,7 @@ class MetadataKey:
     OUTPUT = "output"
     OUTPUT_TYPE = "output_type"
     LLM_PROFILE_ID = "llm_profile_id"
-
+    CUSTOM_DATA = "custom_data"
 
 class ToolSettingsKey:
     """A class representing the keys used in the tool settings.
