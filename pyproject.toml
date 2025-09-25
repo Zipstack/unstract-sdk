@@ -25,6 +25,8 @@ dependencies = [
     "jsonschema>=4.18.6,<5.0",
     "python-magic~=0.4.27",
     "python-dotenv==1.0.1",
+    # Retry mechanism
+    "backoff>=2.2.1",
     # Adapter changes
     "llama-index==0.13.2",
     "tiktoken~=0.9.0",

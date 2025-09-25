@@ -1,76 +1,24 @@
-"""Retry utilities for handling transient failures in platform service
-calls."""
+"""Generic retry utilities using backoff library with configurable prefixes."""
 
 import errno
 import logging
 import os
-import random
-import time
 from collections.abc import Callable
-from functools import wraps
 from typing import Any
 
-from requests.exceptions import ConnectionError, HTTPError
+import backoff
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 logger = logging.getLogger(__name__)
 
 
-class RetryConfig:
-    """Configuration for retry behavior."""
-
-    def __init__(
-        self,
-        max_retries: int = 3,
-        initial_delay: float = 1.0,
-        max_delay: float = 60.0,
-        backoff_factor: float = 2.0,
-        jitter: bool = True,
-    ) -> None:
-        """Initialize retry configuration.
-
-        Args:
-            max_retries: Maximum number of retry attempts
-            initial_delay: Initial delay between retries in seconds
-            max_delay: Maximum delay between retries in seconds
-            backoff_factor: Multiplier for exponential backoff
-            jitter: Whether to add random jitter to delays
-        """
-        if max_retries < 0:
-            raise ValueError("max_retries must be >= 0")
-        if initial_delay <= 0:
-            raise ValueError("initial_delay must be > 0")
-        if max_delay <= 0:
-            raise ValueError("max_delay must be > 0")
-        if backoff_factor <= 0:
-            raise ValueError("backoff_factor must be > 0")
-        self.max_retries = max_retries
-        self.initial_delay = initial_delay
-        self.max_delay = max_delay
-        self.backoff_factor = backoff_factor
-        self.jitter = jitter
-    @classmethod
-    def from_env(cls, prefix: str = "PLATFORM_SERVICE") -> "RetryConfig":
-        """Create configuration from environment variables.
-
-        Args:
-            prefix: Prefix for environment variable names
-
-        Returns:
-            RetryConfig instance with values from environment
-        """
-        return cls(
-            max_retries=int(os.getenv(f"{prefix}_MAX_RETRIES", "3")),
-            initial_delay=float(os.getenv(f"{prefix}_INITIAL_DELAY", "1.0")),
-            max_delay=float(os.getenv(f"{prefix}_MAX_DELAY", "60.0")),
-            backoff_factor=float(os.getenv(f"{prefix}_BACKOFF_FACTOR", "2.0")),
-            jitter=os.getenv(f"{prefix}_RETRY_JITTER", "true").lower() == "true",
-        )
-
-
-from requests.exceptions import ConnectionError, HTTPError, Timeout
-
 def is_retryable_error(error: Exception) -> bool:
-    """Check if an error is retryable.
+    """Check if an error is retryable (preserving existing logic).
+
+    Handles:
+    - ConnectionError and Timeout from requests
+    - HTTPError with status codes 502, 503, 504
+    - OSError with specific errno codes (ECONNREFUSED, ECONNRESET, etc.)
 
     Args:
         error: The exception to check
@@ -79,7 +27,7 @@ def is_retryable_error(error: Exception) -> bool:
         True if the error should trigger a retry
     """
     # Requests connection and timeout errors
-    if isinstance(error, (ConnectionError, Timeout)):
+    if isinstance(error, (ConnectionError | Timeout)):
         return True
 
     # HTTP errors with specific status codes
@@ -90,154 +38,107 @@ def is_retryable_error(error: Exception) -> bool:
             if status_code in [502, 503, 504]:
                 return True
 
-    # OS-level connection failures
+    # OS-level connection failures (preserving existing errno checks)
     if isinstance(error, OSError) and error.errno in {
-        errno.ECONNREFUSED,
-        getattr(errno, "ECONNRESET", 104),
-        getattr(errno, "ETIMEDOUT", 110),
-        getattr(errno, "EHOSTUNREACH", 113),
-        getattr(errno, "ENETUNREACH", 101),
+        errno.ECONNREFUSED,  # Connection refused
+        getattr(errno, "ECONNRESET", 104),  # Connection reset by peer
+        getattr(errno, "ETIMEDOUT", 110),  # Connection timed out
+        getattr(errno, "EHOSTUNREACH", 113),  # No route to host
+        getattr(errno, "ENETUNREACH", 101),  # Network is unreachable
     }:
         return True
 
     return False
 
-def calculate_delay(attempt: int, config: RetryConfig) -> float:
-    """Calculate delay for the next retry attempt.
 
-    Args:
-        attempt: Current attempt number (0-indexed)
-        config: Retry configuration
-
-    Returns:
-        Delay in seconds before the next retry
-    """
-    # Exponential backoff base calculation
-    base = config.initial_delay * (config.backoff_factor ** attempt)
-    delay = base
-
-    # Add jitter if enabled (0–25% positive jitter)
-    if config.jitter:
-        delay = base + (base * random.uniform(0.0, 0.25))
-
-    # Enforce the upper bound after jitter
-    return min(delay, config.max_delay)
-
-
-def retry_with_exponential_backoff(
-    config: RetryConfig | None = None,
-    retryable_exceptions: tuple[type[Exception], ...] | None = None,
+def create_retry_decorator(
+    prefix: str = "PLATFORM_SERVICE",
+    exceptions: tuple[type[Exception], ...] | None = None,
     logger_instance: logging.Logger | None = None,
 ) -> Callable:
-    """Decorator to retry functions with exponential backoff.
+    """Create a configured backoff decorator for a specific service.
 
     Args:
-        config: Retry configuration. If None, loads from environment
-        retryable_exceptions: Additional exceptions to retry on
-        logger_instance: Logger to use for retry messages
+        prefix: Environment variable prefix for configuration
+        logger_instance: Optional logger for retry events
+        exceptions: Tuple of exception types to retry on.
+                   Defaults to (ConnectionError, HTTPError, Timeout, OSError)
+
+    Environment variables (using prefix):
+        {prefix}_MAX_RETRIES: Maximum retry attempts (default: 3)
+        {prefix}_MAX_TIME: Maximum total time in seconds (default: 60)
+        {prefix}_BASE_DELAY: Initial delay in seconds (default: 1.0)
+        {prefix}_MULTIPLIER: Backoff multiplier (default: 2.0)
+        {prefix}_JITTER: Enable jitter true/false (default: true)
 
     Returns:
-        Decorated function with retry behavior
+        Configured backoff decorator
     """
-    if config is None:
-        config = RetryConfig.from_env()
+    # Set default exceptions if not provided
+    if exceptions is None:
+        exceptions = (ConnectionError, HTTPError, Timeout, OSError)
+
+    # Load configuration from environment
+    max_tries = int(os.getenv(f"{prefix}_MAX_RETRIES", "3")) + 1  # +1 for initial attempt
+    max_time = float(os.getenv(f"{prefix}_MAX_TIME", "60"))
+    base = float(os.getenv(f"{prefix}_BASE_DELAY", "1.0"))
+    factor = float(os.getenv(f"{prefix}_MULTIPLIER", "2.0"))
+    use_jitter = os.getenv(f"{prefix}_JITTER", "true").strip().lower() in {
+        "true",
+        "1",
+        "yes",
+        "on",
+    }
 
     if logger_instance is None:
         logger_instance = logger
 
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            last_exception = None
+    def on_backoff_handler(details: dict[str, Any]) -> None:
+        """Log retry attempts with useful context."""
+        exception = details["exception"]
+        tries = details["tries"]
+        wait = details.get("wait", 0)
 
-            for attempt in range(config.max_retries + 1):
-                try:
-                    # Try to execute the function
-                    result = func(*args, **kwargs)
+        logger_instance.warning(
+            "Retry %d/%d for %s: %s (waiting %.1fs)",
+            tries,
+            max_tries - 1,
+            prefix,
+            exception,
+            wait,
+        )
 
-                    # If successful and we had retried, log success
-                    if attempt > 0:
-                        logger_instance.info(
-                            f"Successfully completed '{func.__name__}' after "
-                            f"{attempt} retry attempt(s)"
-                        )
+    def on_giveup_handler(details: dict[str, Any]) -> None:
+        """Log when giving up after all retries."""
+        exception = details["exception"]
+        tries = details["tries"]
 
-                    return result
+        logger_instance.exception(
+            "Giving up after %d retries for %s: %s", tries, prefix, exception
+        )
 
-                except Exception as e:
-                    last_exception = e
-
-                    # Check if the error is retryable
-                    is_retryable = is_retryable_error(e)
-
-                    # Check additional retryable exceptions if provided
-                    if retryable_exceptions:
-                        is_retryable = is_retryable or isinstance(e, retryable_exceptions)
-
-                    # If not retryable or last attempt, raise the error
-                    if not is_retryable or attempt == config.max_retries:
-                        if attempt > 0:
-                            logger_instance.error(
-                                f"Failed '{func.__name__}' after {attempt + 1} attempt(s). "
-                                f"Error: {str(e)}"
-                            )
-                        raise
-
-                    # Calculate delay for next retry
-                    delay = calculate_delay(attempt, config)
-
-                    # Log retry attempt
-                    max_attempts = config.max_retries + 1
-                    logger_instance.warning(
-                        f"Retryable error in '{func.__name__}' "
-                        f"(attempt {attempt + 1}/{max_attempts}). "
-                        f"Error: {str(e)}. Retrying in {delay:.2f} seconds..."
-                    )
-
-                    # Wait before retrying
-                    time.sleep(delay)
-
-            # This should never be reached, but just in case
-            if last_exception:
-                raise last_exception
-
-        return wrapper
-
-    return decorator
-
-
-def retry_on_connection_error(
-    func: Callable | None = None,
-    *,
-    retry_config: RetryConfig | None = None,
-) -> Callable | Any:
-    """Simplified decorator specifically for connection errors.
-
-    Can be used with or without arguments:
-        @retry_on_connection_error
-        def my_function(): ...
-
-        @retry_on_connection_error(retry_config=RetryConfig())
-        def my_function(): ...
-
-    Args:
-        func: Function to decorate (when used without arguments)
-        retry_config: Retry configuration to use
-
-    Returns:
-        Decorated function or decorator
-    """
-    if retry_config is None:
-        retry_config = RetryConfig.from_env()
-
-    # Create the decorator
-    decorator = retry_with_exponential_backoff(
-        config=retry_config,
-        retryable_exceptions=(ConnectionError, OSError),
+    # Create the decorator with backoff
+    return backoff.on_exception(
+        backoff.expo,
+        exceptions,  # Use the configurable exceptions
+        max_tries=max_tries,
+        max_time=max_time,
+        base=base,
+        factor=factor,
+        jitter=backoff.full_jitter if use_jitter else None,
+        giveup=lambda e: not (
+            is_retryable_error(e)
+            or (isinstance(exceptions, tuple) and isinstance(e, exceptions))
+        ),
+        on_backoff=on_backoff_handler,
+        on_giveup=on_giveup_handler,
     )
 
-    # Handle both @retry_on_connection_error and @retry_on_connection_error()
-    if func is None:
-        return decorator
-    else:
-        return decorator(func)
+
+# Retry configured through below envs.
+# - PLATFORM_SERVICE_MAX_RETRIES (default: 3)
+# - PLATFORM_SERVICE_MAX_TIME (default: 60s)
+# - PLATFORM_SERVICE_BASE_DELAY (default: 1.0s)
+# - PLATFORM_SERVICE_MULTIPLIER (default: 2.0)
+# - PLATFORM_SERVICE_JITTER (default: true)
+retry_platform_service_call = create_retry_decorator("PLATFORM_SERVICE")

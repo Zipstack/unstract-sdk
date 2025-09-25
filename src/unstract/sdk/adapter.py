@@ -10,7 +10,7 @@ from unstract.sdk.exceptions import SdkError
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.platform import PlatformBase
 from unstract.sdk.tool.base import BaseTool
-from unstract.sdk.utils.retry_utils import retry_on_connection_error
+from unstract.sdk.utils.retry_utils import retry_platform_service_call
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,12 @@ class ToolAdapter(PlatformBase):
         platform_host: str,
         platform_port: str,
     ) -> None:
-        """Args:
+        """Constructor for ToolAdapter.
+
+        Args:
             tool (AbstractTool): Instance of AbstractTool
             platform_host (str): Host of platform service
-            platform_port (str): Port of platform service
+            platform_port (str): Port of platform service.
 
         Notes:
             - PLATFORM_SERVICE_API_KEY environment variable is required.
@@ -42,17 +44,19 @@ class ToolAdapter(PlatformBase):
             tool=tool, platform_host=platform_host, platform_port=platform_port
         )
 
-    @retry_on_connection_error
+    @retry_platform_service_call
     def _get_adapter_configuration(
         self,
         adapter_instance_id: str,
     ) -> dict[str, Any]:
         """Get Adapter.
 
-        Get the adapter config from platform service
-        using the adapter_instance_id. This method automatically
-        retries on connection errors with exponential backoff.
+               Get the adapter config from platform service
+               using the adapter_instance_id. This method automatically
+               retries on connection errors with exponential backoff.
 
+               Retry behavior is configurable via environment variables:
+        Check decorator for details
         Args:
             adapter_instance_id (str): Adapter instance ID
 
