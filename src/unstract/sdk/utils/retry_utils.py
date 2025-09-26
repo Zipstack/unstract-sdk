@@ -126,10 +126,7 @@ def create_retry_decorator(
         base=base,
         factor=factor,
         jitter=backoff.full_jitter if use_jitter else None,
-        giveup=lambda e: not (
-            is_retryable_error(e)
-            or (isinstance(exceptions, tuple) and isinstance(e, exceptions))
-        ),
+        giveup=lambda e: not is_retryable_error(e),
         on_backoff=on_backoff_handler,
         on_giveup=on_giveup_handler,
     )
