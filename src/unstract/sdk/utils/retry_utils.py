@@ -27,7 +27,7 @@ def is_retryable_error(error: Exception) -> bool:
         True if the error should trigger a retry
     """
     # Requests connection and timeout errors
-    if isinstance(error, (ConnectionError | Timeout)):
+    if isinstance(error, (ConnectionError, Timeout)):
         return True
 
     # HTTP errors with specific status codes
