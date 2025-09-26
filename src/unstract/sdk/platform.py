@@ -140,7 +140,7 @@ class PlatformHelper(PlatformBase):
 
             response.raise_for_status()
         except ConnectionError as connect_err:
-            logger.exception("Connection error to platform service: %s", connect_err)
+            logger.exception("Connection error to platform service")
             msg = (
                 "Unable to connect to platform service. Will retry with backoff, "
                 "please contact admin if retries ultimately fail."
