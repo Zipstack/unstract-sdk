@@ -212,7 +212,7 @@ def retry_with_exponential_backoff(
 
 
 def create_retry_decorator(
-    prefix: str = "PLATFORM_SERVICE",
+    prefix: str,
     exceptions: tuple[type[Exception], ...] | None = None,
     retry_predicate: Callable[[Exception], bool] | None = None,
     logger_instance: logging.Logger | None = None,
