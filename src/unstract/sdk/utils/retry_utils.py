@@ -264,6 +264,15 @@ def create_retry_decorator(
         "on",
     }
 
+    if max_retries < 0:
+        raise ValueError(f"{prefix}_MAX_RETRIES must be >= 0")
+    if max_time <= 0:
+        raise ValueError(f"{prefix}_MAX_TIME must be > 0")
+    if base_delay <= 0:
+        raise ValueError(f"{prefix}_BASE_DELAY must be > 0")
+    if multiplier <= 0:
+        raise ValueError(f"{prefix}_MULTIPLIER must be > 0")
+
     if logger_instance is None:
         logger_instance = logger
 
