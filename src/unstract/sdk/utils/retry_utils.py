@@ -176,7 +176,7 @@ def retry_with_exponential_backoff(
                     # Ensure we don't exceed max_time with the delay
                     remaining_time = max_time - elapsed_time
                     if delay >= remaining_time:
-                        logger_instance.error(
+                        logger_instance.exception(
                             "Giving up '%s' - next delay %.1fs would exceed max time %.1fs",
                             func.__name__,
                             delay,
