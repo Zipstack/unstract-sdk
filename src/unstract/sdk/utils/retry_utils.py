@@ -159,11 +159,10 @@ def retry_with_exponential_backoff(
                     if not should_retry or attempt == max_retries:
                         if attempt > 0:
                             logger_instance.exception(
-                                "Giving up '%s' after %d attempt(s) for %s: %s",
+                                "Giving up '%s' after %d attempt(s) for %s",
                                 func.__name__,
                                 attempt + 1,
                                 prefix,
-                                e,
                             )
                         raise
 
