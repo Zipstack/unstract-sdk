@@ -147,7 +147,7 @@ def retry_with_exponential_backoff(
                     # Check if we've exceeded max time
                     elapsed_time = time.time() - start_time
                     if elapsed_time >= max_time:
-                        logger_instance.error(
+                        logger_instance.exception(
                             "Giving up '%s' after %.1fs (max time exceeded): %s",
                             func.__name__,
                             elapsed_time,
