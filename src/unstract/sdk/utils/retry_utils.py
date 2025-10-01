@@ -73,17 +73,16 @@ def calculate_delay(
         Delay in seconds before the next retry
     """
     # Calculate exponential backoff
-    delay = base_delay * (multiplier**attempt)
-
-    # Cap at max delay
-    delay = min(delay, max_delay)
-
-    # Add jitter if enabled (0-25% of delay)
+    base = base_delay * (multiplier**attempt)
+    
+    # Add jitter if enabled (0-25% of base)
     if jitter:
-        jitter_amount = delay * random.uniform(0, 0.25)
-        delay += jitter_amount
-
-    return delay
+        delay = base + (base * random.uniform(0, 0.25))
+    else:
+        delay = base
+    
+    # Enforce cap after jitter
+    return min(delay, max_delay)
 
 
 def retry_with_exponential_backoff(
