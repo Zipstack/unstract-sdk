@@ -1,8 +1,10 @@
+import logging
 from typing import Any
 
 import requests
 from requests import ConnectionError, RequestException, Response
 from unstract.sdk.constants import (
+    LogLevel,
     MimeType,
     PromptStudioKeys,
     RequestHeader,
@@ -10,6 +12,9 @@ from unstract.sdk.constants import (
 )
 from unstract.sdk.helper import SdkHelper
 from unstract.sdk.tool.base import BaseTool
+from unstract.sdk.utils.retry_utils import retry_platform_service_call
+
+logger = logging.getLogger(__name__)
 
 
 class PlatformBase:
@@ -86,6 +91,7 @@ class PlatformHelper(PlatformBase):
             request_headers.update(headers)
         return request_headers
 
+    @retry_platform_service_call
     def _call_service(
         self,
         url_path: str,
@@ -97,6 +103,10 @@ class PlatformHelper(PlatformBase):
         """Talks to platform-service to make GET / POST calls.
 
         Only GET calls are made to platform-service though functionality exists.
+        This method automatically retries on connection errors with exponential backoff.
+
+        Retry behavior is configurable via environment variables.
+        Check decorator for details
 
         Args:
             url_path (str): URL path to the service endpoint
@@ -130,9 +140,13 @@ class PlatformHelper(PlatformBase):
 
             response.raise_for_status()
         except ConnectionError as connect_err:
-            msg = "Unable to connect to platform service. Please contact admin."
-            msg += " \n" + str(connect_err)
-            self.tool.stream_error_and_exit(msg)
+            logger.exception("Connection error to platform service")
+            msg = (
+                "Unable to connect to platform service. Will retry with backoff, "
+                "please contact admin if retries ultimately fail."
+            )
+            self.tool.stream_log(msg, level=LogLevel.ERROR)
+            raise ConnectionError(msg) from connect_err
         except RequestException as e:
             # Extract error information from the response if available
             error_message = str(e)
@@ -200,4 +214,3 @@ class PlatformHelper(PlatformBase):
             headers=None,
             method="GET",
         )
-        
