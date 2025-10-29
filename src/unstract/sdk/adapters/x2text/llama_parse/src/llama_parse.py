@@ -89,7 +89,7 @@ class LlamaParseAdapter(X2TextAdapter):
             )
             raise AdapterError(str(exe))
 
-        response_text = "\n\n".join([doc.text for doc in documents])
+        response_text = "\n\n".join([doc.text for doc in documents if doc.text])
         return response_text  # type:ignore
 
     def process(
