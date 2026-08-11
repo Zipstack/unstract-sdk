@@ -20,6 +20,7 @@ from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.constants import (
     WhispererConfig,
     WhispererDefaults,
     WhispererHeader,
+    WhispererParam,
     WhisperStatus,
 )
 from unstract.sdk.adapters.x2text.llm_whisperer_v2.src.dto import WhispererRequestParams
@@ -196,7 +197,7 @@ class LLMWhispererHelper:
                 WhispererConfig.MARK_HORIZONTAL_LINES,
                 WhispererDefaults.MARK_HORIZONTAL_LINES,
             ),
-            WhispererConfig.PAGE_SEPARATOR: config.get(
+            WhispererParam.PAGE_SEPARATOR: config.get(
                 WhispererConfig.PAGE_SEPARATOR,
                 WhispererDefaults.PAGE_SEPARATOR,
             ),
